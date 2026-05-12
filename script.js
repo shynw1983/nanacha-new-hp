@@ -43,6 +43,7 @@ const getSelectedOrder = () => {
   const drinkName = String(data.get("drink") || "");
   const drink = orderData.drinks.find((item) => item.name === drinkName);
   const size = findById(orderData.sizes, String(data.get("size") || ""));
+  const temperature = String(data.get("temperature") || "");
   const selectedOption = findById(orderData.options, String(data.get("option") || ""));
   const toppingIds = data.getAll("toppings").map(String);
   const availableToppings = getAvailableToppings(drink?.category || "");
@@ -57,6 +58,7 @@ const getSelectedOrder = () => {
     drink: drinkName,
     category: String(data.get("category") || ""),
     size: String(data.get("size") || ""),
+    temperature,
     sweetness: String(data.get("sweetness") || ""),
     ice: String(data.get("ice") || ""),
     option: String(data.get("option") || ""),
@@ -66,6 +68,7 @@ const getSelectedOrder = () => {
     labels: {
       drink: drink?.name || drinkName,
       size: size?.label || "",
+      temperature,
       option: selectedOption?.label || "",
       toppings: toppings.map((item) => item.label),
     },
@@ -92,6 +95,7 @@ if (form && note && orderData) {
   const categorySelect = form.querySelector("[data-category-select]");
   const drinkSelect = form.querySelector("[data-drink-select]");
   const sizeSelect = form.querySelector("[data-size-select]");
+  const temperatureSelect = form.querySelector("[data-temperature-select]");
   const sweetnessSelect = form.querySelector("[data-sweetness-select]");
   const iceSelect = form.querySelector("[data-ice-select]");
   const optionSelect = form.querySelector("[data-option-select]");
@@ -113,6 +117,16 @@ if (form && note && orderData) {
       .join("");
   };
 
+  const syncIce = () => {
+    const isHot = temperatureSelect.value === "HOT";
+    const iceOptions = isHot ? [orderData.hotIce] : orderData.ice;
+
+    fillSelect(
+      iceSelect,
+      iceOptions.map((item) => ({ value: item, label: item })),
+    );
+  };
+
   const syncDrinks = () => {
     const category = categorySelect.value;
     const drinks = orderData.drinks.filter((drink) => drink.category === category);
@@ -125,7 +139,19 @@ if (form && note && orderData) {
       })),
     );
     syncToppings();
+    syncTemperatures();
     updateOrderTotal();
+  };
+
+  const syncTemperatures = () => {
+    const drink = orderData.drinks.find((item) => item.name === drinkSelect.value);
+    const temperatures = drink?.temperatures || ["ICE"];
+
+    fillSelect(
+      temperatureSelect,
+      temperatures.map((temperature) => ({ value: temperature, label: temperature })),
+    );
+    syncIce();
   };
 
   fillSelect(
@@ -144,10 +170,6 @@ if (form && note && orderData) {
     orderData.sweetness.map((item) => ({ value: item, label: item })),
   );
   fillSelect(
-    iceSelect,
-    orderData.ice.map((item) => ({ value: item, label: item })),
-  );
-  fillSelect(
     optionSelect,
     orderData.options.map((option) => ({
       value: option.id,
@@ -163,6 +185,14 @@ if (form && note && orderData) {
       return;
     }
 
+    if (event.target === drinkSelect) {
+      syncTemperatures();
+    }
+
+    if (event.target === temperatureSelect) {
+      syncIce();
+    }
+
     updateOrderTotal();
   });
 
@@ -174,7 +204,7 @@ if (form && note && orderData) {
     event.preventDefault();
     const order = getSelectedOrder();
 
-    note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`;
+    note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.temperature}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`;
     submitButton.disabled = true;
     submitButton.textContent = "決済画面を作成中...";
 

@@ -55,6 +55,7 @@ module.exports = async (request, response) => {
   }
 
   const drink = String(body.drink || "");
+  const temperature = String(body.temperature || "");
   const sweetness = String(body.sweetness || "");
   const ice = String(body.ice || "");
   const sizeId = String(body.size || "");
@@ -70,8 +71,16 @@ module.exports = async (request, response) => {
     return json(response, 400, { error: "Unknown drink" });
   }
 
-  if (!size || !menu.sweetness.includes(sweetness) || !menu.ice.includes(ice) || !option) {
+  if (!size || !menu.sweetness.includes(sweetness) || !option) {
     return json(response, 400, { error: "Invalid customization" });
+  }
+
+  if (!menuDrink.temperatures.includes(temperature)) {
+    return json(response, 400, { error: "Invalid temperature" });
+  }
+
+  if (temperature === "HOT" ? ice !== menu.hotIce : !menu.ice.includes(ice)) {
+    return json(response, 400, { error: "Invalid ice amount" });
   }
 
   if (toppings.some((item) => !item)) {
@@ -105,7 +114,7 @@ module.exports = async (request, response) => {
   const baseUrl = getBaseUrl(request);
   const toppingLabel = toppings.length ? toppings.map((item) => item.label).join(", ") : "トッピングなし";
   const optionLabel = option.id === "none" ? "オプションなし" : option.label;
-  const orderName = `${drink} / ${size.label} / ${sweetness} / ${ice}`;
+  const orderName = `${drink} / ${size.label} / ${temperature} / ${sweetness} / ${ice}`;
   const orderDescription = [
     `nanacha pickup order: ${orderName}`,
     `option: ${optionLabel}`,

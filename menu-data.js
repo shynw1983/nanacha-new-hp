@@ -72,6 +72,25 @@
     ["カフェラテ", 490, "tea-coffee"],
   ].map(([name, price, category]) => ({ name, price, category }));
 
+  const hotCategories = ["tea", "coffee", "tea-coffee"];
+  const hotDrinkNames = [
+    "黒糖タピオカほうじ茶ラテ",
+    "黒糖タピオカ八女抹茶ラテ",
+    "アッサム紅茶タピオカミルクティー",
+    "ジャスミンタピオカミルクティー",
+    "グリーンタピオカミルクティー",
+    "タピオカカフェラテ",
+    "タピオカコーヒー",
+    "カフェラテ",
+  ];
+
+  drinks.forEach((drink) => {
+    drink.temperatures =
+      hotCategories.includes(drink.category) || hotDrinkNames.includes(drink.name)
+        ? ["ICE", "HOT"]
+        : ["ICE"];
+  });
+
   const sizes = [
     { id: "small", label: "S スモール 360ml", price: -50 },
     { id: "regular", label: "R レギュラー 500ml", price: 0 },
@@ -80,6 +99,7 @@
 
   const sweetness = ["ふつう", "多め", "少なめ", "ゼロ"];
   const ice = ["ふつう", "氷少なめ", "氷抜き"];
+  const hotIce = "HOTは氷なし";
 
   const options = [
     { id: "none", label: "なし", price: 0 },
@@ -101,5 +121,16 @@
   const tapiocaFreeCategories = ["smoothie", "special", "tea-coffee"];
   const whippedCategories = ["frappe"];
 
-  return { categories, drinks, sizes, sweetness, ice, options, toppings, tapiocaFreeCategories, whippedCategories };
+  return {
+    categories,
+    drinks,
+    sizes,
+    sweetness,
+    ice,
+    hotIce,
+    options,
+    toppings,
+    tapiocaFreeCategories,
+    whippedCategories,
+  };
 });
