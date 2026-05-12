@@ -99,6 +99,7 @@
   ];
 
   const tapiocaFreeCategories = ["smoothie", "special", "tea-coffee"];
+  const whippedCategories = ["frappe"];
 
-  return { categories, drinks, sizes, sweetness, ice, options, toppings, tapiocaFreeCategories };
+  return { categories, drinks, sizes, sweetness, ice, options, toppings, tapiocaFreeCategories, whippedCategories };
 });

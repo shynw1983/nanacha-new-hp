@@ -29,8 +29,14 @@ const findById = (items, id) => items.find((item) => item.id === id);
 
 const isTapiocaFreeCategory = (category) => orderData.tapiocaFreeCategories.includes(category);
 
+const hasWhipByDefault = (category) => orderData.whippedCategories.includes(category);
+
 const getAvailableToppings = (category) =>
-  orderData.toppings.filter((topping) => !(topping.id === "no-tapioca" && isTapiocaFreeCategory(category)));
+  orderData.toppings.filter(
+    (topping) =>
+      !(topping.id === "no-tapioca" && isTapiocaFreeCategory(category)) &&
+      !(topping.id === "no-whip" && !hasWhipByDefault(category)),
+  );
 
 const getSelectedOrder = () => {
   const data = new FormData(form);
