@@ -230,7 +230,7 @@ if (form && note && orderData) {
   if (params.get("checkout") === "complete") {
     const pickupCode = params.get("pickupCode");
     note.textContent = pickupCode
-      ? `お支払いありがとうございます。取餐番号は ${pickupCode} です。店頭でこの番号とSquareの決済画面をご提示ください。`
+      ? `お支払いありがとうございます。受け取り番号は ${pickupCode} です。店頭でこの番号とSquareの決済画面をご提示ください。`
       : "お支払いありがとうございます。店頭でお名前とSquareの決済画面をご提示ください。";
   }
 

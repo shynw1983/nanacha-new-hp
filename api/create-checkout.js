@@ -149,7 +149,7 @@ module.exports = async (request, response) => {
   const pickupCode = createPickupCode();
   const orderName = `${drink} / ${size.label} / ${temperature} / ${sweetness} / ${ice}`;
   const orderDescription = [
-    `pickup code: ${pickupCode}`,
+    `pickup number: ${pickupCode}`,
     `nanacha pickup order: ${orderName}`,
     `option: ${optionLabel}`,
     `topping: ${toppingLabel}`,
