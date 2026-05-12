@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "python3 -m http.server 8000",
     "start": "python3 -m http.server 8000",
-    "build": "node -e \"console.log('Static site: no build step required.')\""
+    "build": "node scripts/build.js"
   },
   "keywords": [
     "nanacha",
