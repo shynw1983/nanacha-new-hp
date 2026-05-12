@@ -1,0 +1,17 @@
+{
+  "name": "nanacha-kiyokawa-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static website for nanacha Fukuoka Kiyokawa.",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "start": "python3 -m http.server 8000",
+    "build": "node -e \"console.log('Static site: no build step required.')\""
+  },
+  "keywords": [
+    "nanacha",
+    "static-site",
+    "vercel"
+  ],
+  "license": "UNLICENSED"
+}
