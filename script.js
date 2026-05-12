@@ -203,6 +203,9 @@ if (form && note && orderData) {
   );
   categorySelect.value = "milk";
   syncPickupTime(true);
+  window.setInterval(() => {
+    syncPickupTime();
+  }, 30000);
   syncDrinks();
 
   form.addEventListener("change", (event) => {
