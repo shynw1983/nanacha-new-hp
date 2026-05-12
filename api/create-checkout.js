@@ -43,6 +43,8 @@ const toMinutes = (time) => {
   return hour * 60 + minute;
 };
 
+const createPickupCode = () => `N-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
 module.exports = async (request, response) => {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -144,8 +146,10 @@ module.exports = async (request, response) => {
   const baseUrl = getBaseUrl(request);
   const toppingLabel = toppings.length ? toppings.map((item) => item.label).join(", ") : "トッピングなし";
   const optionLabel = option.id === "none" ? "オプションなし" : option.label;
+  const pickupCode = createPickupCode();
   const orderName = `${drink} / ${size.label} / ${temperature} / ${sweetness} / ${ice}`;
   const orderDescription = [
+    `pickup code: ${pickupCode}`,
     `nanacha pickup order: ${orderName}`,
     `option: ${optionLabel}`,
     `topping: ${toppingLabel}`,
@@ -171,7 +175,7 @@ module.exports = async (request, response) => {
         location_id: locationId,
       },
       checkout_options: {
-        redirect_url: `${baseUrl}/?checkout=complete#reserve`,
+        redirect_url: `${baseUrl}/?checkout=complete&pickupCode=${encodeURIComponent(pickupCode)}#reserve`,
         ask_for_shipping_address: false,
       },
     }),
@@ -190,5 +194,6 @@ module.exports = async (request, response) => {
   return json(response, 200, {
     checkoutUrl: squareBody.payment_link?.url,
     orderId: squareBody.payment_link?.order_id,
+    pickupCode,
   });
 };
