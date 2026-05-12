@@ -98,5 +98,7 @@
     { id: "no-whip", label: "ホイップ抜き", price: 0 },
   ];
 
-  return { categories, drinks, sizes, sweetness, ice, options, toppings };
+  const tapiocaFreeCategories = ["smoothie", "special", "tea-coffee"];
+
+  return { categories, drinks, sizes, sweetness, ice, options, toppings, tapiocaFreeCategories };
 });

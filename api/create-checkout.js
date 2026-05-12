@@ -9,6 +9,8 @@ const cleanAccessToken = (value = "") => cleanEnv(value).replace(/^Bearer\s+/i, 
 
 const findById = (items, id) => items.find((item) => item.id === id);
 
+const isTapiocaFreeCategory = (category) => menu.tapiocaFreeCategories.includes(category);
+
 const json = (response, statusCode, body) => {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -72,6 +74,10 @@ module.exports = async (request, response) => {
 
   if (toppings.some((item) => !item)) {
     return json(response, 400, { error: "Invalid topping" });
+  }
+
+  if (isTapiocaFreeCategory(menuDrink.category) && toppingIds.includes("no-tapioca")) {
+    return json(response, 400, { error: "Invalid topping for tapioca-free category" });
   }
 
   if (!/^\d{2}:\d{2}$/.test(pickup)) {

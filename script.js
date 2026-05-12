@@ -27,6 +27,11 @@ const formatDelta = (price) => {
 
 const findById = (items, id) => items.find((item) => item.id === id);
 
+const isTapiocaFreeCategory = (category) => orderData.tapiocaFreeCategories.includes(category);
+
+const getAvailableToppings = (category) =>
+  orderData.toppings.filter((topping) => !(topping.id === "no-tapioca" && isTapiocaFreeCategory(category)));
+
 const getSelectedOrder = () => {
   const data = new FormData(form);
   const drinkName = String(data.get("drink") || "");
@@ -34,7 +39,8 @@ const getSelectedOrder = () => {
   const size = findById(orderData.sizes, String(data.get("size") || ""));
   const selectedOption = findById(orderData.options, String(data.get("option") || ""));
   const toppingIds = data.getAll("toppings").map(String);
-  const toppings = toppingIds.map((id) => findById(orderData.toppings, id)).filter(Boolean);
+  const availableToppings = getAvailableToppings(drink?.category || "");
+  const toppings = toppingIds.map((id) => findById(availableToppings, id)).filter(Boolean);
   const total =
     (drink?.price || 0) +
     (size?.price || 0) +
@@ -85,6 +91,22 @@ if (form && note && orderData) {
   const optionSelect = form.querySelector("[data-option-select]");
   const toppingList = form.querySelector("[data-topping-list]");
 
+  const syncToppings = () => {
+    const category = categorySelect.value;
+    const availableToppings = getAvailableToppings(category);
+
+    toppingList.innerHTML = availableToppings
+      .map(
+        (topping) => `
+          <label>
+            <input type="checkbox" name="toppings" value="${topping.id}" />
+            <span>${topping.label} (${formatDelta(topping.price)})</span>
+          </label>
+        `,
+      )
+      .join("");
+  };
+
   const syncDrinks = () => {
     const category = categorySelect.value;
     const drinks = orderData.drinks.filter((drink) => drink.category === category);
@@ -96,6 +118,7 @@ if (form && note && orderData) {
         label: `${drink.name} ${formatPrice(drink.price)}`,
       })),
     );
+    syncToppings();
     updateOrderTotal();
   };
 
@@ -125,16 +148,6 @@ if (form && note && orderData) {
       label: `${option.label} (${formatDelta(option.price)})`,
     })),
   );
-  toppingList.innerHTML = orderData.toppings
-    .map(
-      (topping) => `
-        <label>
-          <input type="checkbox" name="toppings" value="${topping.id}" />
-          <span>${topping.label} (${formatDelta(topping.price)})</span>
-        </label>
-      `,
-    )
-    .join("");
   categorySelect.value = "milk";
   syncDrinks();
 
