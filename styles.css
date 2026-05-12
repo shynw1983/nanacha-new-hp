@@ -177,6 +177,11 @@ h3 {
   color: var(--paper);
 }
 
+.reserve-form button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .ghost-button {
   border: 1px solid var(--line);
   background: var(--paper);

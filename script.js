@@ -15,10 +15,46 @@ if (header) {
 }
 
 if (form && note) {
-  form.addEventListener("submit", (event) => {
+  const submitButton = form.querySelector("button[type='submit']");
+
+  if (new URLSearchParams(window.location.search).get("checkout") === "complete") {
+    note.textContent = "お支払いありがとうございます。店頭でお名前とSquareの決済画面をご提示ください。";
+  }
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(form);
-    note.textContent = `${data.get("pickup")} 受け取り：${data.get("drink")}、${data.get("sweetness")}でご用意します。`;
+    const order = {
+      drink: data.get("drink"),
+      sweetness: data.get("sweetness"),
+      pickup: data.get("pickup"),
+    };
+
+    note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.sweetness}でSquare決済を作成しています。`;
+    submitButton.disabled = true;
+    submitButton.textContent = "決済画面を作成中...";
+
+    try {
+      const response = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.checkoutUrl) {
+        throw new Error(result.error || "Checkout failed");
+      }
+
+      window.location.href = result.checkoutUrl;
+    } catch (error) {
+      note.textContent =
+        "決済画面を作成できませんでした。時間をおいて再度お試しください。";
+      submitButton.disabled = false;
+      submitButton.textContent = "Squareで注文・支払い";
+    }
   });
 }
 
