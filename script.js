@@ -90,6 +90,21 @@ const fillSelect = (select, options) => {
   select.innerHTML = options.map((option) => `<option value="${option.value}">${option.label}</option>`).join("");
 };
 
+const formatTimeInput = (date) =>
+  `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+
+const getMinimumPickupTime = () => {
+  const now = new Date();
+  const date = new Date(now);
+  date.setMinutes(date.getMinutes() + 5);
+
+  if (date.getDate() !== now.getDate()) {
+    return "23:59";
+  }
+
+  return formatTimeInput(date);
+};
+
 if (form && note && orderData) {
   const submitButton = form.querySelector("button[type='submit']");
   const categorySelect = form.querySelector("[data-category-select]");
@@ -99,7 +114,17 @@ if (form && note && orderData) {
   const sweetnessSelect = form.querySelector("[data-sweetness-select]");
   const iceSelect = form.querySelector("[data-ice-select]");
   const optionSelect = form.querySelector("[data-option-select]");
+  const pickupInput = form.querySelector("input[name='pickup']");
   const toppingList = form.querySelector("[data-topping-list]");
+
+  const syncPickupTime = () => {
+    const minimumPickup = getMinimumPickupTime();
+    pickupInput.min = minimumPickup;
+
+    if (!pickupInput.value || pickupInput.value < minimumPickup) {
+      pickupInput.value = minimumPickup;
+    }
+  };
 
   const syncToppings = () => {
     const category = categorySelect.value;
@@ -177,6 +202,7 @@ if (form && note && orderData) {
     })),
   );
   categorySelect.value = "milk";
+  syncPickupTime();
   syncDrinks();
 
   form.addEventListener("change", (event) => {
@@ -202,6 +228,7 @@ if (form && note && orderData) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    syncPickupTime();
     const order = getSelectedOrder();
 
     note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.temperature}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`;

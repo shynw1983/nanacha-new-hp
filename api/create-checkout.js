@@ -25,6 +25,24 @@ const getBaseUrl = (request) => {
   return `${protocol}://${host}`;
 };
 
+const getTokyoMinutes = (date) => {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const hour = Number(parts.find((part) => part.type === "hour").value);
+  const minute = Number(parts.find((part) => part.type === "minute").value);
+
+  return hour * 60 + minute;
+};
+
+const toMinutes = (time) => {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+};
+
 module.exports = async (request, response) => {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -97,6 +115,18 @@ module.exports = async (request, response) => {
 
   if (!/^\d{2}:\d{2}$/.test(pickup)) {
     return json(response, 400, { error: "Invalid pickup time" });
+  }
+
+  const nowMinutes = getTokyoMinutes(new Date());
+  const minimumPickupMinutes = getTokyoMinutes(new Date(Date.now() + 5 * 60 * 1000));
+  const pickupMinutes = toMinutes(pickup);
+
+  if (minimumPickupMinutes < nowMinutes) {
+    return json(response, 400, { error: "Pickup date is required after midnight" });
+  }
+
+  if (pickupMinutes < minimumPickupMinutes) {
+    return json(response, 400, { error: "Pickup time must be at least 5 minutes from now" });
   }
 
   const amount =
