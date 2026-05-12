@@ -117,11 +117,11 @@ if (form && note && orderData) {
   const pickupInput = form.querySelector("input[name='pickup']");
   const toppingList = form.querySelector("[data-topping-list]");
 
-  const syncPickupTime = () => {
+  const syncPickupTime = (forceDefault = false) => {
     const minimumPickup = getMinimumPickupTime();
     pickupInput.min = minimumPickup;
 
-    if (!pickupInput.value || pickupInput.value < minimumPickup) {
+    if (forceDefault || !pickupInput.value || pickupInput.value < minimumPickup) {
       pickupInput.value = minimumPickup;
     }
   };
@@ -202,7 +202,7 @@ if (form && note && orderData) {
     })),
   );
   categorySelect.value = "milk";
-  syncPickupTime();
+  syncPickupTime(true);
   syncDrinks();
 
   form.addEventListener("change", (event) => {
