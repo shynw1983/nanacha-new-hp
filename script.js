@@ -3,6 +3,7 @@ const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
 const filterButtons = document.querySelectorAll("[data-menu-filter]");
 const menuCategories = document.querySelectorAll("[data-menu-category]");
+const orderData = window.NANACHA_MENU;
 
 const syncHeader = () => {
   header.style.boxShadow =
@@ -14,8 +15,137 @@ if (header) {
   syncHeader();
 }
 
-if (form && note) {
+const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
+
+const formatDelta = (price) => {
+  if (price === 0) {
+    return "¥0";
+  }
+
+  return `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`;
+};
+
+const findById = (items, id) => items.find((item) => item.id === id);
+
+const getSelectedOrder = () => {
+  const data = new FormData(form);
+  const drinkName = String(data.get("drink") || "");
+  const drink = orderData.drinks.find((item) => item.name === drinkName);
+  const size = findById(orderData.sizes, String(data.get("size") || ""));
+  const selectedOption = findById(orderData.options, String(data.get("option") || ""));
+  const toppingIds = data.getAll("toppings").map(String);
+  const toppings = toppingIds.map((id) => findById(orderData.toppings, id)).filter(Boolean);
+  const total =
+    (drink?.price || 0) +
+    (size?.price || 0) +
+    (selectedOption?.price || 0) +
+    toppings.reduce((sum, item) => sum + item.price, 0);
+
+  return {
+    drink: drinkName,
+    category: String(data.get("category") || ""),
+    size: String(data.get("size") || ""),
+    sweetness: String(data.get("sweetness") || ""),
+    ice: String(data.get("ice") || ""),
+    option: String(data.get("option") || ""),
+    toppings: toppingIds,
+    pickup: String(data.get("pickup") || ""),
+    total,
+    labels: {
+      drink: drink?.name || drinkName,
+      size: size?.label || "",
+      option: selectedOption?.label || "",
+      toppings: toppings.map((item) => item.label),
+    },
+  };
+};
+
+const updateOrderTotal = () => {
+  const total = document.querySelector("[data-order-total]");
+
+  if (!total || !orderData) {
+    return;
+  }
+
+  const order = getSelectedOrder();
+  total.textContent = `合計 ${formatPrice(order.total)}`;
+};
+
+const fillSelect = (select, options) => {
+  select.innerHTML = options.map((option) => `<option value="${option.value}">${option.label}</option>`).join("");
+};
+
+if (form && note && orderData) {
   const submitButton = form.querySelector("button[type='submit']");
+  const categorySelect = form.querySelector("[data-category-select]");
+  const drinkSelect = form.querySelector("[data-drink-select]");
+  const sizeSelect = form.querySelector("[data-size-select]");
+  const sweetnessSelect = form.querySelector("[data-sweetness-select]");
+  const iceSelect = form.querySelector("[data-ice-select]");
+  const optionSelect = form.querySelector("[data-option-select]");
+  const toppingList = form.querySelector("[data-topping-list]");
+
+  const syncDrinks = () => {
+    const category = categorySelect.value;
+    const drinks = orderData.drinks.filter((drink) => drink.category === category);
+
+    fillSelect(
+      drinkSelect,
+      drinks.map((drink) => ({
+        value: drink.name,
+        label: `${drink.name} ${formatPrice(drink.price)}`,
+      })),
+    );
+    updateOrderTotal();
+  };
+
+  fillSelect(
+    categorySelect,
+    orderData.categories.map((category) => ({ value: category.id, label: category.label })),
+  );
+  fillSelect(
+    sizeSelect,
+    orderData.sizes.map((size) => ({
+      value: size.id,
+      label: `${size.label} (${formatDelta(size.price)})`,
+    })),
+  );
+  fillSelect(
+    sweetnessSelect,
+    orderData.sweetness.map((item) => ({ value: item, label: item })),
+  );
+  fillSelect(
+    iceSelect,
+    orderData.ice.map((item) => ({ value: item, label: item })),
+  );
+  fillSelect(
+    optionSelect,
+    orderData.options.map((option) => ({
+      value: option.id,
+      label: `${option.label} (${formatDelta(option.price)})`,
+    })),
+  );
+  toppingList.innerHTML = orderData.toppings
+    .map(
+      (topping) => `
+        <label>
+          <input type="checkbox" name="toppings" value="${topping.id}" />
+          <span>${topping.label} (${formatDelta(topping.price)})</span>
+        </label>
+      `,
+    )
+    .join("");
+  categorySelect.value = "milk";
+  syncDrinks();
+
+  form.addEventListener("change", (event) => {
+    if (event.target === categorySelect) {
+      syncDrinks();
+      return;
+    }
+
+    updateOrderTotal();
+  });
 
   if (new URLSearchParams(window.location.search).get("checkout") === "complete") {
     note.textContent = "お支払いありがとうございます。店頭でお名前とSquareの決済画面をご提示ください。";
@@ -23,14 +153,9 @@ if (form && note) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = new FormData(form);
-    const order = {
-      drink: data.get("drink"),
-      sweetness: data.get("sweetness"),
-      pickup: data.get("pickup"),
-    };
+    const order = getSelectedOrder();
 
-    note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.sweetness}でSquare決済を作成しています。`;
+    note.textContent = `${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`;
     submitButton.disabled = true;
     submitButton.textContent = "決済画面を作成中...";
 

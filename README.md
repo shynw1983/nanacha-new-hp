@@ -45,7 +45,9 @@ Set these Vercel environment variables before using live checkout:
 - `SQUARE_LOCATION_ID`
 - `SQUARE_ENVIRONMENT`: `production` or `sandbox`
 
-The browser never receives the Square access token. Drink prices are validated in `api/create-checkout.js`.
+The browser never receives the Square access token. Drink prices and customization prices are validated on the server before Square checkout is created.
+
+Menu/order data is shared by the browser and Vercel API through `menu-data.js`. Update that file when adding products, size rules, options, or toppings.
 
 For local static preview, the page still loads through `python3 -m http.server`, but Square checkout needs the Vercel API function to run in a deployed Vercel environment.
 

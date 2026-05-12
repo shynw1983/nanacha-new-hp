@@ -573,7 +573,7 @@ h3 {
 
 .reserve-form {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -598,6 +598,57 @@ h3 {
   background: var(--paper);
   color: var(--ink);
   font: inherit;
+}
+
+.topping-field {
+  grid-column: 1 / -1;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.topping-field legend {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.topping-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.topping-grid label {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+}
+
+.topping-grid input {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  padding: 0;
+  accent-color: var(--ink);
+}
+
+.order-total {
+  align-self: center;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+}
+
+.reserve-form button {
+  grid-column: 2 / -1;
 }
 
 .form-note {
@@ -661,6 +712,10 @@ footer p {
     grid-template-columns: 1fr 1fr;
   }
 
+  .topping-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .product-list,
   .product-list.compact,
   .customize-grid {
@@ -668,6 +723,7 @@ footer p {
   }
 
   .reserve-form button,
+  .order-total,
   .form-note {
     grid-column: 1 / -1;
   }
@@ -692,6 +748,7 @@ footer p {
 
   .menu-grid,
   .reserve-form,
+  .topping-grid,
   .product-list,
   .product-list.compact,
   .customize-grid {

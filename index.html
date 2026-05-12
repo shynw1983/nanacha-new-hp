@@ -137,26 +137,38 @@
           <h2 id="reserve-title">受け取り予約</h2>
           <form class="reserve-form">
             <label>
+              <span>カテゴリー</span>
+              <select name="category" data-category-select></select>
+            </label>
+            <label>
               <span>ドリンク</span>
-              <select name="drink">
-                <option>黒糖タピオカミルク</option>
-                <option>オレオタピオカフラッペ</option>
-                <option>黒糖タピオカ八女抹茶ラテ</option>
-                <option>濃厚マンゴーヨーグルトスムージー</option>
-              </select>
+              <select name="drink" data-drink-select></select>
+            </label>
+            <label>
+              <span>サイズ</span>
+              <select name="size" data-size-select></select>
             </label>
             <label>
               <span>甘さ</span>
-              <select name="sweetness">
-                <option>35% 控えめ</option>
-                <option>50% ふつう</option>
-                <option>0% 無糖</option>
-              </select>
+              <select name="sweetness" data-sweetness-select></select>
+            </label>
+            <label>
+              <span>氷の量</span>
+              <select name="ice" data-ice-select></select>
+            </label>
+            <label>
+              <span>オプション</span>
+              <select name="option" data-option-select></select>
             </label>
             <label>
               <span>受け取り時間</span>
               <input type="time" name="pickup" value="18:00" />
             </label>
+            <fieldset class="topping-field">
+              <legend>トッピング</legend>
+              <div class="topping-grid" data-topping-list></div>
+            </fieldset>
+            <p class="order-total" data-order-total>合計 ¥0</p>
             <button type="submit">Squareで注文・支払い</button>
           </form>
           <p class="form-note" data-note>注文内容を確認して、Squareの決済画面へ進みます。</p>
@@ -169,6 +181,7 @@
       <p>福岡市中央区清川2-9-6 · online pickup</p>
     </footer>
 
+    <script src="menu-data.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
