@@ -9,6 +9,10 @@ const drinks = {
   "濃厚マンゴーヨーグルトスムージー": 1500,
 };
 
+const cleanEnv = (value = "") => String(value).trim().replace(/^["']|["']$/g, "");
+
+const cleanAccessToken = (value = "") => cleanEnv(value).replace(/^Bearer\s+/i, "");
+
 const json = (response, statusCode, body) => {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -27,9 +31,9 @@ module.exports = async (request, response) => {
     return json(response, 405, { error: "Method not allowed" });
   }
 
-  const accessToken = process.env.SQUARE_ACCESS_TOKEN;
-  const locationId = process.env.SQUARE_LOCATION_ID;
-  const environment = process.env.SQUARE_ENVIRONMENT || "production";
+  const accessToken = cleanAccessToken(process.env.SQUARE_ACCESS_TOKEN);
+  const locationId = cleanEnv(process.env.SQUARE_LOCATION_ID);
+  const environment = cleanEnv(process.env.SQUARE_ENVIRONMENT || "production").toLowerCase();
 
   if (!accessToken || !locationId) {
     return json(response, 500, {
