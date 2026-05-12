@@ -33,6 +33,7 @@ module.exports = async (request, response) => {
 
   if (!accessToken || !locationId) {
     return json(response, 500, {
+      code: "SQUARE_NOT_CONFIGURED",
       error: "Square is not configured. Set SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID.",
     });
   }
@@ -96,6 +97,7 @@ module.exports = async (request, response) => {
 
   if (!squareResponse.ok) {
     return json(response, squareResponse.status, {
+      code: "SQUARE_CHECKOUT_FAILED",
       error: "Square checkout could not be created",
       details: squareBody.errors || squareBody,
     });

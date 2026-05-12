@@ -45,13 +45,17 @@ if (form && note) {
       const result = await response.json();
 
       if (!response.ok || !result.checkoutUrl) {
-        throw new Error(result.error || "Checkout failed");
+        const error = new Error(result.error || "Checkout failed");
+        error.code = result.code;
+        throw error;
       }
 
       window.location.href = result.checkoutUrl;
     } catch (error) {
       note.textContent =
-        "決済画面を作成できませんでした。時間をおいて再度お試しください。";
+        error.code === "SQUARE_NOT_CONFIGURED"
+          ? "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。"
+          : "決済画面を作成できませんでした。時間をおいて再度お試しください。";
       submitButton.disabled = false;
       submitButton.textContent = "Squareで注文・支払い";
     }
