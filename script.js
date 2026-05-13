@@ -4,6 +4,7 @@ const note = document.querySelector("[data-note]");
 const filterButtons = document.querySelectorAll("[data-menu-filter]");
 const menuCategories = document.querySelectorAll("[data-menu-category]");
 const orderData = window.NANACHA_MENU;
+const menuCount = document.querySelector("[data-menu-count]");
 
 const syncHeader = () => {
   header.style.boxShadow =
@@ -13,6 +14,10 @@ const syncHeader = () => {
 if (header) {
   window.addEventListener("scroll", syncHeader, { passive: true });
   syncHeader();
+}
+
+if (menuCount && orderData) {
+  menuCount.textContent = orderData.drinks.length;
 }
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
