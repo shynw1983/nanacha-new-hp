@@ -202,6 +202,7 @@ if (form && note && orderData) {
     })),
   );
   categorySelect.value = "milk";
+  sizeSelect.value = "regular";
   syncPickupTime(true);
   window.setInterval(() => {
     syncPickupTime();
