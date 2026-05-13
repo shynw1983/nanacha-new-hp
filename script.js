@@ -3,7 +3,7 @@ const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
 const filterButtons = document.querySelectorAll("[data-menu-filter]");
 const menuCategories = document.querySelectorAll("[data-menu-category]");
-const orderData = window.NANACHA_MENU;
+let orderData = window.NANACHA_MENU;
 const menuCount = document.querySelector("[data-menu-count]");
 
 const syncHeader = () => {
@@ -14,10 +14,6 @@ const syncHeader = () => {
 if (header) {
   window.addEventListener("scroll", syncHeader, { passive: true });
   syncHeader();
-}
-
-if (menuCount && orderData) {
-  menuCount.textContent = orderData.drinks.length;
 }
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
@@ -110,7 +106,40 @@ const getMinimumPickupTime = () => {
   return formatTimeInput(date);
 };
 
-if (form && note && orderData) {
+const syncMenuCount = () => {
+  if (menuCount && orderData) {
+    menuCount.textContent = orderData.drinks.length;
+  }
+};
+
+const loadRemoteMenuData = async () => {
+  if (window.location.protocol === "file:") {
+    return null;
+  }
+
+  try {
+    const response = await fetch("/api/menu", {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const menu = await response.json();
+    return Array.isArray(menu.drinks) && menu.drinks.length ? menu : null;
+  } catch {
+    return null;
+  }
+};
+
+const initOrderForm = () => {
+  if (!form || !note || !orderData) {
+    return;
+  }
+
   const submitButton = form.querySelector("button[type='submit']");
   const categorySelect = form.querySelector("[data-category-select]");
   const drinkSelect = form.querySelector("[data-drink-select]");
@@ -275,7 +304,7 @@ if (form && note && orderData) {
       submitButton.textContent = "Squareで注文・支払い";
     }
   });
-}
+};
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -291,3 +320,16 @@ filterButtons.forEach((button) => {
     });
   });
 });
+
+const initMenuData = async () => {
+  const remoteMenu = await loadRemoteMenuData();
+
+  if (remoteMenu) {
+    orderData = remoteMenu;
+  }
+
+  syncMenuCount();
+  initOrderForm();
+};
+
+initMenuData();

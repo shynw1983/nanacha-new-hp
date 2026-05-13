@@ -1,5 +1,5 @@
 const { randomUUID } = require("crypto");
-const menu = require("../menu-data.js");
+const { getMenuData } = require("./menu-source");
 
 const SQUARE_VERSION = "2026-01-22";
 
@@ -9,9 +9,9 @@ const cleanAccessToken = (value = "") => cleanEnv(value).replace(/^Bearer\s+/i, 
 
 const findById = (items, id) => items.find((item) => item.id === id);
 
-const isTapiocaFreeCategory = (category) => menu.tapiocaFreeCategories.includes(category);
+const isTapiocaFreeCategory = (menu, category) => menu.tapiocaFreeCategories.includes(category);
 
-const hasWhipByDefault = (category) => menu.whippedCategories.includes(category);
+const hasWhipByDefault = (menu, category) => menu.whippedCategories.includes(category);
 
 const json = (response, statusCode, body) => {
   response.statusCode = statusCode;
@@ -82,6 +82,7 @@ module.exports = async (request, response) => {
   const optionId = String(body.option || "");
   const toppingIds = Array.isArray(body.toppings) ? body.toppings.map(String) : [];
   const pickup = String(body.pickup || "");
+  const menu = await getMenuData();
   const menuDrink = menu.drinks.find((item) => item.name === drink);
   const size = findById(menu.sizes, sizeId);
   const option = findById(menu.options, optionId);
@@ -107,11 +108,11 @@ module.exports = async (request, response) => {
     return json(response, 400, { error: "Invalid topping" });
   }
 
-  if (isTapiocaFreeCategory(menuDrink.category) && toppingIds.includes("no-tapioca")) {
+  if (isTapiocaFreeCategory(menu, menuDrink.category) && toppingIds.includes("no-tapioca")) {
     return json(response, 400, { error: "Invalid topping for tapioca-free category" });
   }
 
-  if (!hasWhipByDefault(menuDrink.category) && toppingIds.includes("no-whip")) {
+  if (!hasWhipByDefault(menu, menuDrink.category) && toppingIds.includes("no-whip")) {
     return json(response, 400, { error: "Invalid topping for non-whip category" });
   }
 
