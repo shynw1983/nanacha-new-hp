@@ -64,14 +64,10 @@ img {
   font-weight: 800;
 }
 
-.brand-mark {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: var(--paper);
+.brand-logo {
+  width: auto;
+  height: 46px;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -774,6 +770,10 @@ footer p {
 @media (max-width: 640px) {
   .site-header {
     padding: 14px 16px;
+  }
+
+  .brand-logo {
+    height: 40px;
   }
 
   .header-action {
