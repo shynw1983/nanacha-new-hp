@@ -8,6 +8,7 @@
   --tea: #9caf88;
   --oolong: #c5a06f;
   --berry: #d48b93;
+  --price: #7a6142;
   --shadow: 0 24px 80px rgba(24, 24, 24, 0.08);
 }
 
@@ -712,7 +713,7 @@ h3 {
 
 .product-item span {
   flex: 0 0 auto;
-  color: #c5162e;
+  color: var(--price);
   font-size: 22px;
   font-weight: 800;
 }
@@ -794,7 +795,7 @@ h3 {
 }
 
 .customize-grid dd {
-  color: #c5162e;
+  color: var(--price);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -898,9 +899,9 @@ h3 {
 }
 
 .form-note {
+  grid-column: 5 / -1;
   width: 100%;
-  max-width: 980px;
-  margin: 16px auto 0;
+  margin: -2px 0 0;
   color: var(--muted);
   text-align: center;
   text-wrap: balance;
