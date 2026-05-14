@@ -62,10 +62,70 @@ Set these Vercel environment variables after creating the Sanity project:
 - `SANITY_PROJECT_ID`
 - `SANITY_DATASET`
 - `SANITY_API_TOKEN`: optional for public datasets, recommended for private datasets
+- `SANITY_STUDIO_PROJECT_ID`: same value as `SANITY_PROJECT_ID`
+- `SANITY_STUDIO_DATASET`: same value as `SANITY_DATASET`
+
+Sanity Studio is built to `/admin` during the Vercel build. After deployment, open:
+
+```text
+https://your-domain/admin
+```
+
+In Sanity Manage, add the deployed site origin to CORS:
+
+```text
+https://your-domain
+```
+
+For local Studio development, also add:
+
+```text
+http://localhost:3333
+http://localhost:8000
+```
 
 Sanity schema files are in `sanity/schemaTypes/`.
 
 The current order form is wired to Sanity through `/api/menu`. The static full menu page remains SEO-friendly fallback content and can be made fully CMS-rendered in a later pass.
+
+### Local Studio
+
+After installing dependencies, run:
+
+```bash
+SANITY_STUDIO_PROJECT_ID=your_project_id \
+SANITY_STUDIO_DATASET=production \
+npm run sanity:dev
+```
+
+Then open the local Studio URL shown by Sanity.
+
+### Import Existing Menu
+
+Use a Sanity token with write permissions, then run:
+
+```bash
+SANITY_PROJECT_ID=your_project_id \
+SANITY_DATASET=production \
+SANITY_API_TOKEN=your_write_token \
+node scripts/import-sanity-menu.js
+```
+
+Or with npm:
+
+```bash
+SANITY_PROJECT_ID=your_project_id \
+SANITY_DATASET=production \
+SANITY_API_TOKEN=your_write_token \
+npm run sanity:import-menu
+```
+
+The import creates or replaces:
+
+- 8 `category` documents
+- All drinks from `menu-data.js`
+
+Drink document IDs are generated from category + drink name, so rerunning the import updates the same documents instead of creating duplicates.
 
 ## Routes
 

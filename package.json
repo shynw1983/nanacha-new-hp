@@ -6,12 +6,23 @@
   "scripts": {
     "dev": "python3 -m http.server 8000",
     "start": "python3 -m http.server 8000",
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js && sanity build public/admin",
+    "build:site": "node scripts/build.js",
+    "build:studio": "sanity build public/admin",
+    "sanity:dev": "sanity dev --host 0.0.0.0",
+    "sanity:import-menu": "node scripts/import-sanity-menu.js"
   },
   "keywords": [
     "nanacha",
     "static-site",
     "vercel"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@sanity/vision": "latest",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sanity": "latest",
+    "styled-components": "^6.1.19"
+  }
 }

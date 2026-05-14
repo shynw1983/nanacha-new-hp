@@ -1,4 +1,4 @@
-import category from "./category";
-import drink from "./drink";
+import category from "./category.js";
+import drink from "./drink.js";
 
 export const schemaTypes = [category, drink];
