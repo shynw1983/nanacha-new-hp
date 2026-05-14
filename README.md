@@ -157,7 +157,17 @@ http://localhost:8000
 
 Sanity schema files are in `sanity/schemaTypes/`.
 
-The current order form is wired to Sanity through `/api/menu`. The static full menu page remains SEO-friendly fallback content and can be made fully CMS-rendered in a later pass.
+Sanity is the source of truth for menu maintenance. The site reads menu data through `/api/menu` and uses it for:
+
+- full menu page rendering
+- homepage recommended drinks
+- pickup reservation form
+- Square checkout price validation
+- product names, prices, photos, descriptions, temperatures, categories, sizes, sweetness, ice, options, and toppings
+
+The static HTML menu remains only as a fallback for local/offline preview. When `/api/menu` is available, Sanity data replaces the visible menu in the browser.
+
+When changing menu text in Sanity, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
 
 ### Local Studio
 
@@ -195,6 +205,7 @@ The import creates or replaces:
 
 - 8 `category` documents
 - All drinks from `menu-data.js`
+- 1 `menuSettings` document for sizes, sweetness, ice, options, and toppings
 - Product images for drinks that have local files in `assets/menu/drink-01.png` through `assets/menu/drink-42.png`
 
 Drink document IDs are generated from category + drink name, so rerunning the import updates the same documents instead of creating duplicates.

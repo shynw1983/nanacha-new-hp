@@ -1,8 +1,6 @@
 const header = document.querySelector("[data-header]");
 const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
-const filterButtons = document.querySelectorAll("[data-menu-filter]");
-const menuCategories = document.querySelectorAll("[data-menu-category]");
 const languageSelect = document.querySelector("[data-language-select]");
 let orderData = window.NANACHA_MENU;
 const menuCount = document.querySelector("[data-menu-count]");
@@ -35,6 +33,14 @@ if (header) {
 }
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
+
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 const shouldTranslateText = (text) => {
   const trimmed = text.replace(/\s+/g, " ").trim();
@@ -302,6 +308,144 @@ const syncMenuCount = () => {
 const getDirectPriceElement = (card) =>
   Array.from(card.children).find((element) => element.tagName === "SPAN");
 
+const getCategory = (categoryId) =>
+  orderData?.categories.find((category) => category.id === categoryId);
+
+const getCategoryLabel = (categoryId) => getCategory(categoryId)?.label || categoryId;
+
+const getDrinkDescription = (drink) =>
+  drink.description || `${getCategoryLabel(drink.category)}の一杯です。`;
+
+const renderDrinkCard = (drink, index) => `
+  <article class="drink-card ${drink.isFeatured || index === 0 ? "featured" : ""}">
+    ${
+      drink.imageUrl
+        ? `<img class="drink-photo" src="${escapeHtml(drink.imageUrl)}" alt="${escapeHtml(drink.name)}" />`
+        : ""
+    }
+    <div>
+      <p class="drink-tag">${escapeHtml(getCategoryLabel(drink.category))}</p>
+      <h3>${escapeHtml(drink.name)}</h3>
+      <p>${escapeHtml(getDrinkDescription(drink))}</p>
+    </div>
+    <span>${formatPrice(drink.price)}</span>
+  </article>
+`;
+
+const renderHomepagePicks = () => {
+  const grid = document.querySelector(".menu-section .menu-grid");
+
+  if (!grid || !orderData) {
+    return;
+  }
+
+  const recommended = orderData.drinks.filter((drink) => drink.isRecommended);
+  const drinks = (recommended.length ? recommended : orderData.drinks).slice(0, 4);
+
+  if (!drinks.length) {
+    return;
+  }
+
+  grid.innerHTML = drinks.map(renderDrinkCard).join("");
+};
+
+const categoryDecor = (categoryId) =>
+  ({
+    frappe: "sparkle.png",
+    milk: "tapioca-three.png",
+    smoothie: "wave.png",
+    "cheese-tea": "heart-fill.png",
+    tea: "tail.png",
+    special: "dog-heart.png",
+    coffee: "tapioca-two.png",
+    "tea-coffee": "sunglasses.png",
+  })[categoryId] || "tapioca-one.png";
+
+const renderMenuControls = () => {
+  const controls = document.querySelector(".menu-controls");
+
+  if (!controls || !orderData) {
+    return;
+  }
+
+  controls.innerHTML = [
+    `<button type="button" class="is-active" data-menu-filter="all">all</button>`,
+    ...orderData.categories.map(
+      (category) =>
+        `<button type="button" data-menu-filter="${escapeHtml(category.id)}">${escapeHtml(category.label)}</button>`,
+    ),
+  ].join("");
+};
+
+const renderMenuProduct = (drink) => `
+  <div class="product-item ${drink.imageUrl ? "with-photo" : "simple"}">
+    ${
+      drink.imageUrl
+        ? `<img class="product-photo" src="${escapeHtml(drink.imageUrl)}" alt="${escapeHtml(drink.name)}" />`
+        : ""
+    }
+    <div>
+      <h3>${escapeHtml(drink.name)}</h3>
+      ${drink.description ? `<p>${escapeHtml(drink.description)}</p>` : ""}
+    </div>
+    <span>${formatPrice(drink.price)}</span>
+  </div>
+`;
+
+const renderFullMenu = () => {
+  const fullMenu = document.querySelector(".full-menu");
+
+  if (!fullMenu || !orderData) {
+    return;
+  }
+
+  fullMenu.innerHTML = orderData.categories
+    .map((category) => {
+      const drinks = orderData.drinks.filter((drink) => drink.category === category.id);
+
+      if (!drinks.length) {
+        return "";
+      }
+
+      return `
+        <article class="menu-category" data-menu-category="${escapeHtml(category.id)}">
+          <div class="category-heading">
+            <p class="eyebrow">${escapeHtml(category.id)}</p>
+            <h2 class="heading-with-decor">
+              ${escapeHtml(category.label)}
+              <img src="assets/decor/${categoryDecor(category.id)}" alt="" aria-hidden="true" />
+            </h2>
+            ${category.note ? `<p class="category-note">${escapeHtml(category.note)}</p>` : ""}
+          </div>
+          <div class="product-list ${drinks.length > 2 ? "compact" : ""}">
+            ${drinks.map(renderMenuProduct).join("")}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+};
+
+const initMenuFilters = () => {
+  const buttons = document.querySelectorAll("[data-menu-filter]");
+  const categories = document.querySelectorAll("[data-menu-category]");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.menuFilter;
+
+      buttons.forEach((item) => {
+        item.classList.toggle("is-active", item === button);
+      });
+
+      categories.forEach((category) => {
+        const isVisible = filter === "all" || category.dataset.menuCategory === filter;
+        category.classList.toggle("is-hidden", !isVisible);
+      });
+    });
+  });
+};
+
 const ensureProductImage = (card, drink) => {
   const currentImage = card.querySelector(".product-photo, .drink-photo");
 
@@ -489,7 +633,9 @@ const initOrderForm = () => {
       label: `${option.label} (${formatDelta(option.price)})`,
     })),
   );
-  categorySelect.value = "milk";
+  categorySelect.value = orderData.categories.some((category) => category.id === "milk")
+    ? "milk"
+    : orderData.categories[0]?.id || "";
   sizeSelect.value = "regular";
   syncPickupTime(true);
   window.setInterval(() => {
@@ -560,29 +706,21 @@ const initOrderForm = () => {
   });
 };
 
-filterButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const filter = button.dataset.menuFilter;
-
-    filterButtons.forEach((item) => {
-      item.classList.toggle("is-active", item === button);
-    });
-
-    menuCategories.forEach((category) => {
-      const isVisible = filter === "all" || category.dataset.menuCategory === filter;
-      category.classList.toggle("is-hidden", !isVisible);
-    });
-  });
-});
-
 const initMenuData = async () => {
   const remoteMenu = await loadRemoteMenuData();
+  const hasRemoteMenu = Boolean(remoteMenu);
 
   if (remoteMenu) {
     orderData = remoteMenu;
   }
 
   syncMenuCount();
+  if (hasRemoteMenu) {
+    renderHomepagePicks();
+    renderMenuControls();
+    renderFullMenu();
+  }
+  initMenuFilters();
   syncVisibleMenuCards();
   initOrderForm();
 };

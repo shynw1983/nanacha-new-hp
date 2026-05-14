@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { NANACHA_MENU } = { NANACHA_MENU: require("../menu-data.js") };
+const { getMenuData } = require("../api/menu-source.js");
 
 const root = path.resolve(__dirname, "..");
 const localeDir = path.join(root, "locales");
@@ -123,28 +123,35 @@ const collectHtmlTexts = () => {
   return texts;
 };
 
-const collectMenuTexts = () => {
+const collectMenuTexts = async () => {
   const texts = [];
   const push = (text) => {
     if (shouldTranslate(text)) {
       texts.push(normalize(text));
     }
   };
+  const menuData = await getMenuData();
 
-  NANACHA_MENU.categories.forEach((category) => push(category.label));
-  NANACHA_MENU.drinks.forEach((drink) => push(drink.name));
-  NANACHA_MENU.sizes.forEach((size) => push(size.label));
-  NANACHA_MENU.sweetness.forEach(push);
-  NANACHA_MENU.ice.forEach(push);
-  push(NANACHA_MENU.hotIce);
-  NANACHA_MENU.options.forEach((option) => push(option.label));
-  NANACHA_MENU.toppings.forEach((topping) => push(topping.label));
+  menuData.categories.forEach((category) => {
+    push(category.label);
+    push(category.note || "");
+  });
+  menuData.drinks.forEach((drink) => {
+    push(drink.name);
+    push(drink.description || "");
+  });
+  menuData.sizes.forEach((size) => push(size.label));
+  menuData.sweetness.forEach(push);
+  menuData.ice.forEach(push);
+  push(menuData.hotIce);
+  menuData.options.forEach((option) => push(option.label));
+  menuData.toppings.forEach((topping) => push(topping.label));
   extraTexts.forEach(push);
 
   return texts;
 };
 
-const getSourceTexts = () => Array.from(new Set([...collectHtmlTexts(), ...collectMenuTexts()])).sort();
+const getSourceTexts = async () => Array.from(new Set([...collectHtmlTexts(), ...(await collectMenuTexts())])).sort();
 
 const readJson = (file, fallback = {}) => {
   if (!fs.existsSync(file)) {
@@ -159,8 +166,8 @@ const writeJson = (file, data) => {
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 };
 
-const extract = () => {
-  const texts = getSourceTexts();
+const extract = async () => {
+  const texts = await getSourceTexts();
   const ja = Object.fromEntries(texts.map((text) => [text, text]));
 
   writeJson(path.join(localeDir, "ja.json"), ja);
@@ -262,7 +269,7 @@ const callOpenAi = async (languageName, entries) => {
 };
 
 const translateOpenAi = async () => {
-  extract();
+  await extract();
 
   if (!process.env.OPENAI_API_KEY) {
     console.log("OPENAI_API_KEY is not set. Locale files were updated, but no OpenAI translations were generated.");
@@ -313,7 +320,10 @@ const translateOpenAi = async () => {
 const command = process.argv[2] || "extract";
 
 if (command === "extract") {
-  extract();
+  extract().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 } else if (command === "translate:openai") {
   translateOpenAi().catch((error) => {
     console.error(error);

@@ -18,6 +18,24 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "note",
+      title: "説明",
+      type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "isTapiocaFree",
+      title: "タピオカなしカテゴリー",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "hasWhipByDefault",
+      title: "ホイップ標準カテゴリー",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
       name: "sortOrder",
       title: "表示順",
       type: "number",

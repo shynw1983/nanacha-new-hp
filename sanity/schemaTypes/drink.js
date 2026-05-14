@@ -65,6 +65,12 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "isFeatured",
+      title: "トップで大きく表示",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
       name: "sortOrder",
       title: "表示順",
       type: "number",

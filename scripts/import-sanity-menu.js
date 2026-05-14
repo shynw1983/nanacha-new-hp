@@ -16,6 +16,54 @@ const hashId = (value) => createHash("sha1").update(value).digest("hex").slice(0
 const categoryId = (id) => `category.${id}`;
 
 const drinkId = (drink) => `drink.${hashId(`${drink.category}:${drink.name}`)}`;
+const settingsId = "menuSettings.main";
+const recommendedDrinks = new Set([
+  "黒糖タピオカミルク",
+  "オレオタピオカフラッペ",
+  "黒糖タピオカ八女抹茶ラテ",
+  "濃厚マンゴーヨーグルトスムージー",
+]);
+const featuredDrink = "黒糖タピオカミルク";
+
+const menuHtml = existsSync(path.join(__dirname, "..", "menu.html"))
+  ? readFileSync(path.join(__dirname, "..", "menu.html"), "utf8")
+  : "";
+
+const stripTags = (value = "") => value.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+
+const parseDrinkDescriptions = () => {
+  const descriptions = new Map();
+  const pattern = /<h3>([^<]+)<\/h3><p>([^<]+)<\/p>/g;
+  let match;
+
+  while ((match = pattern.exec(menuHtml))) {
+    descriptions.set(stripTags(match[1]), stripTags(match[2]));
+  }
+
+  return descriptions;
+};
+
+const parseCategoryNotes = () => {
+  const notes = new Map();
+  const pattern = /<article class="menu-category" data-menu-category="([^"]+)">([\s\S]*?)<\/article>/g;
+  let match;
+
+  while ((match = pattern.exec(menuHtml))) {
+    const body = match[2];
+    const title = stripTags((body.match(/<h2[\s\S]*?<\/h2>/) || [""])[0]);
+    const note = stripTags((body.match(/<p class="category-note">([^<]+)<\/p>/) || ["", ""])[1]);
+    const category = match[1] === "tea" && title.includes("チーズ") ? "cheese-tea" : match[1];
+
+    if (note) {
+      notes.set(category, note);
+    }
+  }
+
+  return notes;
+};
+
+const drinkDescriptions = parseDrinkDescriptions();
+const categoryNotes = parseCategoryNotes();
 
 const drinkImagePath = (index) => {
   if (index >= 42) {
@@ -59,6 +107,9 @@ const createCategoryDocument = (category, index) => ({
   _type: "category",
   id: category.id,
   label: category.label,
+  note: categoryNotes.get(category.id) || "",
+  isTapiocaFree: menu.tapiocaFreeCategories.includes(category.id),
+  hasWhipByDefault: menu.whippedCategories.includes(category.id),
   sortOrder: (index + 1) * 10,
 });
 
@@ -72,9 +123,23 @@ const createDrinkDocument = (drink, index) => ({
     _ref: categoryId(drink.category),
   },
   temperatures: drink.temperatures || ["ICE"],
+  description: drinkDescriptions.get(drink.name) || "",
   isActive: true,
-  isRecommended: false,
+  isRecommended: recommendedDrinks.has(drink.name),
+  isFeatured: drink.name === featuredDrink,
   sortOrder: (index + 1) * 10,
+});
+
+const createMenuSettingsDocument = () => ({
+  _id: settingsId,
+  _type: "menuSettings",
+  title: "Menu Settings",
+  sizes: menu.sizes.map((item) => ({ _key: item.id, ...item })),
+  sweetness: menu.sweetness,
+  ice: menu.ice,
+  hotIce: menu.hotIce,
+  options: menu.options.map((item) => ({ _key: item.id, ...item })),
+  toppings: menu.toppings.map((item) => ({ _key: item.id, ...item })),
 });
 
 const uploadDrinkImage = async (drink, index) => {
@@ -114,7 +179,28 @@ const categoryMutations = (document) => [
       set: {
         id: document.id,
         label: document.label,
+        note: document.note,
+        isTapiocaFree: document.isTapiocaFree,
+        hasWhipByDefault: document.hasWhipByDefault,
         sortOrder: document.sortOrder,
+      },
+    },
+  },
+];
+
+const settingsMutations = (document) => [
+  { createIfNotExists: document },
+  {
+    patch: {
+      id: document._id,
+      set: {
+        title: document.title,
+        sizes: document.sizes,
+        sweetness: document.sweetness,
+        ice: document.ice,
+        hotIce: document.hotIce,
+        options: document.options,
+        toppings: document.toppings,
       },
     },
   },
@@ -178,6 +264,7 @@ const main = async () => {
 
   const mutations = [
     ...menu.categories.flatMap((category, index) => categoryMutations(createCategoryDocument(category, index))),
+    ...settingsMutations(createMenuSettingsDocument()),
     ...drinkDocuments.flatMap((document, index) => drinkMutations(document, imageAssetIds[index])),
   ];
   const url = `https://${projectId}.api.sanity.io/v${SANITY_API_VERSION}/data/mutate/${dataset}`;
