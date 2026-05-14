@@ -28,6 +28,7 @@ const normalizeSanityMenu = (documents = []) => {
         price: Number(item.price),
         category: String(item.category),
         temperatures: Array.isArray(item.temperatures) ? item.temperatures.map(String) : undefined,
+        imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
       }),
     )
     .sort((a, b) => {
@@ -63,7 +64,8 @@ const fetchSanityMenu = async () => {
     name,
     price,
     "category": category->id,
-    temperatures
+    temperatures,
+    "imageUrl": image.asset->url
   }`;
   const url = new URL(`https://${projectId}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${dataset}`);
   url.searchParams.set("query", query);

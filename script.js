@@ -112,6 +112,73 @@ const syncMenuCount = () => {
   }
 };
 
+const getDirectPriceElement = (card) =>
+  Array.from(card.children).find((element) => element.tagName === "SPAN");
+
+const ensureProductImage = (card, drink) => {
+  const currentImage = card.querySelector(".product-photo, .drink-photo");
+
+  if (!drink.imageUrl) {
+    return;
+  }
+
+  if (currentImage) {
+    currentImage.src = drink.imageUrl;
+    currentImage.alt = drink.name;
+    return;
+  }
+
+  if (!card.classList.contains("product-item")) {
+    return;
+  }
+
+  const heading = card.querySelector("h3");
+  const price = getDirectPriceElement(card);
+
+  if (!heading || !price) {
+    return;
+  }
+
+  const image = document.createElement("img");
+  image.className = "product-photo";
+  image.src = drink.imageUrl;
+  image.alt = drink.name;
+
+  const copy = document.createElement("div");
+  copy.append(heading);
+
+  card.insertBefore(image, price);
+  card.insertBefore(copy, price);
+  card.classList.remove("simple");
+  card.classList.add("with-photo");
+};
+
+const syncVisibleMenuCards = () => {
+  if (!orderData) {
+    return;
+  }
+
+  const drinksByName = new Map(orderData.drinks.map((drink) => [drink.name, drink]));
+  const cards = document.querySelectorAll(".drink-card, .product-item");
+
+  cards.forEach((card) => {
+    const heading = card.querySelector("h3");
+    const drink = heading ? drinksByName.get(heading.textContent.trim()) : null;
+
+    if (!drink) {
+      return;
+    }
+
+    const price = getDirectPriceElement(card);
+
+    if (price) {
+      price.textContent = formatPrice(drink.price);
+    }
+
+    ensureProductImage(card, drink);
+  });
+};
+
 const loadRemoteMenuData = async () => {
   if (window.location.protocol === "file:") {
     return null;
@@ -329,6 +396,7 @@ const initMenuData = async () => {
   }
 
   syncMenuCount();
+  syncVisibleMenuCards();
   initOrderForm();
 };
 

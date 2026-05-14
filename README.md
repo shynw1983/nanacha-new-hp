@@ -50,6 +50,7 @@ The browser never receives the Square access token. Drink prices and customizati
 Menu/order data is loaded through `/api/menu`. When Sanity is configured, `/api/menu` reads active drink items from Sanity. If Sanity is not configured or temporarily unavailable, it falls back to `menu-data.js`.
 
 The browser and Square checkout validation both use the same menu source, so visible drink prices and checkout prices stay aligned.
+When Sanity returns a product image URL, the homepage picks and static menu cards update their images in the browser by matching the drink name.
 
 For local static preview, the page still loads through `python3 -m http.server`, but Square checkout needs the Vercel API function to run in a deployed Vercel environment.
 
@@ -126,8 +127,10 @@ The import creates or replaces:
 
 - 8 `category` documents
 - All drinks from `menu-data.js`
+- Product images for drinks that have local files in `assets/menu/drink-01.png` through `assets/menu/drink-42.png`
 
 Drink document IDs are generated from category + drink name, so rerunning the import updates the same documents instead of creating duplicates.
+Existing product images in Sanity are left untouched, so photos changed manually in Studio are not overwritten by the importer.
 
 ## Routes
 
