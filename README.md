@@ -65,6 +65,8 @@ Set these Vercel environment variables after creating the Sanity project:
 - `SANITY_STUDIO_PROJECT_ID`: same value as `SANITY_PROJECT_ID`
 - `SANITY_STUDIO_DATASET`: same value as `SANITY_DATASET`
 
+`SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` must be available during the Vercel build. If either is missing, the `/admin` Studio build fails instead of deploying a blank page.
+
 Sanity Studio is built to `/admin` during the Vercel build. After deployment, open:
 
 ```text
