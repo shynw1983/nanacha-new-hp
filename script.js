@@ -321,6 +321,23 @@ const syncMenuCount = () => {
 const getDirectPriceElement = (card) =>
   Array.from(card.children).find((element) => element.tagName === "SPAN");
 
+const getStaticDrinkDescriptions = () => {
+  const descriptions = new Map();
+
+  document.querySelectorAll(".product-item, .drink-card").forEach((card) => {
+    const heading = card.querySelector("h3");
+    const description = card.querySelector("h3 + p");
+
+    if (heading && description) {
+      descriptions.set(heading.textContent.trim(), description.textContent.trim());
+    }
+  });
+
+  return descriptions;
+};
+
+const staticDrinkDescriptions = getStaticDrinkDescriptions();
+
 const getCategory = (categoryId) =>
   orderData?.categories.find((category) => category.id === categoryId);
 
@@ -336,7 +353,11 @@ const renderDrinkCard = (drink, index) => `
     <div>
       <p class="drink-tag">${escapeHtml(getCategoryLabel(drink.category))}</p>
       <h3>${escapeHtml(drink.name)}</h3>
-      ${drink.description ? `<p>${escapeHtml(drink.description)}</p>` : ""}
+      ${
+        drink.description || staticDrinkDescriptions.get(drink.name)
+          ? `<p>${escapeHtml(drink.description || staticDrinkDescriptions.get(drink.name))}</p>`
+          : ""
+      }
     </div>
     <span>${formatPrice(drink.price)}</span>
   </article>

@@ -5,6 +5,42 @@ const menu = require("../menu-data.js");
 
 const SANITY_API_VERSION = "2025-02-19";
 
+const loadLocalEnv = () => {
+  const envFile = path.join(__dirname, "..", ".env.local");
+
+  if (!existsSync(envFile)) {
+    return;
+  }
+
+  readFileSync(envFile, "utf8")
+    .split(/\r?\n/)
+    .forEach((line) => {
+      const trimmed = line.trim();
+
+      if (!trimmed || trimmed.startsWith("#")) {
+        return;
+      }
+
+      const separator = trimmed.indexOf("=");
+
+      if (separator === -1) {
+        return;
+      }
+
+      const key = trimmed.slice(0, separator).trim();
+      const value = trimmed
+        .slice(separator + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
+
+      if (key && !process.env[key]) {
+        process.env[key] = value;
+      }
+    });
+};
+
+loadLocalEnv();
+
 const cleanEnv = (value = "") => String(value).trim().replace(/^["']|["']$/g, "");
 
 const projectId = cleanEnv(process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);

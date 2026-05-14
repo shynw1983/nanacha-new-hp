@@ -1,3 +1,5 @@
+const { existsSync, readFileSync } = require("fs");
+const path = require("path");
 const localMenu = require("../menu-data.js");
 
 const SANITY_API_VERSION = "2025-02-19";
@@ -5,6 +7,32 @@ const SANITY_API_VERSION = "2025-02-19";
 const cleanEnv = (value = "") => String(value).trim().replace(/^["']|["']$/g, "");
 
 const categoryOrder = new Map(localMenu.categories.map((category, index) => [category.id, index]));
+const menuHtmlPath = path.join(__dirname, "..", "menu.html");
+const menuHtml = existsSync(menuHtmlPath) ? readFileSync(menuHtmlPath, "utf8") : "";
+
+const stripTags = (value = "") => value.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+
+const parseLocalDrinkDescriptions = () => {
+  const descriptions = new Map();
+  const pattern = /<h3>([^<]+)<\/h3><p>([^<]+)<\/p>/g;
+  let match;
+
+  while ((match = pattern.exec(menuHtml))) {
+    descriptions.set(stripTags(match[1]), stripTags(match[2]));
+  }
+
+  return descriptions;
+};
+
+const localDrinkDescriptions = parseLocalDrinkDescriptions();
+const withLocalDescriptions = (menu) => ({
+  ...menu,
+  drinks: menu.drinks.map((drink) => ({
+    ...drink,
+    description: drink.description || localDrinkDescriptions.get(drink.name) || "",
+  })),
+});
+const fallbackMenu = withLocalDescriptions(localMenu);
 
 const normalizePricedItems = (items, fallback) => {
   if (!Array.isArray(items) || !items.length) {
@@ -77,7 +105,7 @@ const normalizeSanityMenu = ({ drinks: drinkDocuments = [], categories: category
         name: String(item.name),
         price: Number(item.price),
         category: String(item.category),
-        description: item.description ? String(item.description) : "",
+        description: item.description ? String(item.description) : localDrinkDescriptions.get(String(item.name)) || "",
         temperatures: Array.isArray(item.temperatures) ? item.temperatures.map(String) : undefined,
         imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
         isRecommended: Boolean(item.isRecommended),
@@ -95,21 +123,21 @@ const normalizeSanityMenu = ({ drinks: drinkDocuments = [], categories: category
     });
 
   if (!drinks.length) {
-    return localMenu;
+    return fallbackMenu;
   }
 
   return {
-    ...localMenu,
+    ...fallbackMenu,
     categories,
     drinks,
-    sizes: normalizePricedItems(settings?.sizes, localMenu.sizes),
-    sweetness: normalizeStrings(settings?.sweetness, localMenu.sweetness),
-    ice: normalizeStrings(settings?.ice, localMenu.ice),
-    hotIce: settings?.hotIce ? String(settings.hotIce) : localMenu.hotIce,
-    options: normalizePricedItems(settings?.options, localMenu.options),
-    toppings: normalizePricedItems(settings?.toppings, localMenu.toppings),
-    tapiocaFreeCategories: tapiocaFreeCategories.length ? tapiocaFreeCategories : localMenu.tapiocaFreeCategories,
-    whippedCategories: whippedCategories.length ? whippedCategories : localMenu.whippedCategories,
+    sizes: normalizePricedItems(settings?.sizes, fallbackMenu.sizes),
+    sweetness: normalizeStrings(settings?.sweetness, fallbackMenu.sweetness),
+    ice: normalizeStrings(settings?.ice, fallbackMenu.ice),
+    hotIce: settings?.hotIce ? String(settings.hotIce) : fallbackMenu.hotIce,
+    options: normalizePricedItems(settings?.options, fallbackMenu.options),
+    toppings: normalizePricedItems(settings?.toppings, fallbackMenu.toppings),
+    tapiocaFreeCategories: tapiocaFreeCategories.length ? tapiocaFreeCategories : fallbackMenu.tapiocaFreeCategories,
+    whippedCategories: whippedCategories.length ? whippedCategories : fallbackMenu.whippedCategories,
   };
 };
 
@@ -167,10 +195,10 @@ const fetchSanityMenu = async () => {
 
 const getMenuData = async () => {
   try {
-    return (await fetchSanityMenu()) || localMenu;
+    return (await fetchSanityMenu()) || fallbackMenu;
   } catch (error) {
     console.error(error);
-    return localMenu;
+    return fallbackMenu;
   }
 };
 
