@@ -326,9 +326,6 @@ const getCategory = (categoryId) =>
 
 const getCategoryLabel = (categoryId) => getCategory(categoryId)?.label || categoryId;
 
-const getDrinkDescription = (drink) =>
-  drink.description || `${getCategoryLabel(drink.category)}の一杯です。`;
-
 const renderDrinkCard = (drink, index) => `
   <article class="drink-card ${drink.isFeatured || index === 0 ? "featured" : ""}">
     ${
@@ -339,7 +336,7 @@ const renderDrinkCard = (drink, index) => `
     <div>
       <p class="drink-tag">${escapeHtml(getCategoryLabel(drink.category))}</p>
       <h3>${escapeHtml(drink.name)}</h3>
-      <p>${escapeHtml(getDrinkDescription(drink))}</p>
+      ${drink.description ? `<p>${escapeHtml(drink.description)}</p>` : ""}
     </div>
     <span>${formatPrice(drink.price)}</span>
   </article>
