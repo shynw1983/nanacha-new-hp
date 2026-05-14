@@ -122,18 +122,31 @@ const loadDictionary = async (language) => {
   return dictionary;
 };
 
+const translateTextWithDictionary = (original, dictionary) => {
+  const key = original.replace(/\s+/g, " ").trim();
+  const exact = dictionary[key];
+
+  if (exact) {
+    return exact;
+  }
+
+  let translated = key;
+  const entries = Object.entries(dictionary)
+    .filter(([source, value]) => source.length > 3 && value && translated.includes(source))
+    .sort((a, b) => b[0].length - a[0].length);
+
+  entries.forEach(([source, value]) => {
+    translated = translated.split(source).join(value);
+  });
+
+  return translated === key ? original : translated;
+};
+
 const applyDictionary = (dictionary) => {
   translationState.isApplying = true;
   collectTranslatableNodes().forEach((node) => {
     const original = getOriginalText(node);
-    const key = original.replace(/\s+/g, " ").trim();
-    const translated = dictionary[key];
-
-    if (translated) {
-      node.nodeValue = original.replace(key, translated);
-    } else {
-      node.nodeValue = original;
-    }
+    node.nodeValue = translateTextWithDictionary(original, dictionary);
   });
   translationState.isApplying = false;
 };
