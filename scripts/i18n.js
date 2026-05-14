@@ -197,6 +197,18 @@ const chunk = (items, size) => {
   return chunks;
 };
 
+const getOpenAiOutputText = (payload) => {
+  if (typeof payload.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text;
+  }
+
+  return (payload.output || [])
+    .flatMap((item) => item.content || [])
+    .map((content) => content.text || "")
+    .filter(Boolean)
+    .join("\n");
+};
+
 const callOpenAi = async (languageName, entries) => {
   const response = await fetch(openAiEndpoint, {
     method: "POST",
@@ -260,12 +272,24 @@ const callOpenAi = async (languageName, entries) => {
     throw new Error(payload.error?.message || `OpenAI translation failed: ${response.status}`);
   }
 
-  const parsed = JSON.parse(payload.output_text || "{}");
-  return Object.fromEntries(
+  const outputText = getOpenAiOutputText(payload);
+
+  if (!outputText) {
+    throw new Error("OpenAI response did not include output text.");
+  }
+
+  const parsed = JSON.parse(outputText);
+  const translations = Object.fromEntries(
     (parsed.translations || [])
       .filter((item) => item && typeof item.id === "string" && typeof item.text === "string")
       .map((item) => [item.id, normalize(item.text)]),
   );
+
+  if (!Object.keys(translations).length) {
+    throw new Error("OpenAI response included no translations.");
+  }
+
+  return translations;
 };
 
 const translateOpenAi = async () => {
