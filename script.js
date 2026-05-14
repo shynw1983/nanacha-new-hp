@@ -323,6 +323,12 @@ const getDirectPriceElement = (card) =>
 
 const getStaticDrinkDescriptions = () => {
   const descriptions = new Map();
+  const homepageDescriptions = {
+    黒糖タピオカミルク: "国産新鮮牛乳と黒糖タピオカの相性を楽しめる、不動の人気 no.1。",
+    オレオタピオカフラッペ: "砕いたオレオともっちりタピオカを合わせた人気フラッペ。",
+    黒糖タピオカ八女抹茶ラテ: "福岡県八女産抹茶を使った、抹茶感のあるミルクティー。",
+    濃厚マンゴーヨーグルトスムージー: "マンゴーをたっぷり使用し、ヨーグルトと合わせた濃厚スムージー。",
+  };
 
   document.querySelectorAll(".product-item, .drink-card").forEach((card) => {
     const heading = card.querySelector("h3");
@@ -330,6 +336,12 @@ const getStaticDrinkDescriptions = () => {
 
     if (heading && description) {
       descriptions.set(heading.textContent.trim(), description.textContent.trim());
+    }
+  });
+
+  Object.entries(homepageDescriptions).forEach(([name, description]) => {
+    if (!descriptions.has(name)) {
+      descriptions.set(name, description);
     }
   });
 
@@ -343,6 +355,9 @@ const getCategory = (categoryId) =>
 
 const getCategoryLabel = (categoryId) => getCategory(categoryId)?.label || categoryId;
 
+const getDrinkDescription = (drink) =>
+  drink.description || staticDrinkDescriptions.get(drink.name) || "";
+
 const renderDrinkCard = (drink, index) => `
   <article class="drink-card ${drink.isFeatured || index === 0 ? "featured" : ""}">
     ${
@@ -353,11 +368,7 @@ const renderDrinkCard = (drink, index) => `
     <div>
       <p class="drink-tag">${escapeHtml(getCategoryLabel(drink.category))}</p>
       <h3>${escapeHtml(drink.name)}</h3>
-      ${
-        drink.description || staticDrinkDescriptions.get(drink.name)
-          ? `<p>${escapeHtml(drink.description || staticDrinkDescriptions.get(drink.name))}</p>`
-          : ""
-      }
+      ${getDrinkDescription(drink) ? `<p>${escapeHtml(getDrinkDescription(drink))}</p>` : ""}
     </div>
     <span>${formatPrice(drink.price)}</span>
   </article>
