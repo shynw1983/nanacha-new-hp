@@ -95,6 +95,49 @@ img {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
+.header-tools {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.language-picker span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.language-picker select {
+  max-width: 116px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.language-picker select:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+body.is-translating {
+  cursor: progress;
+}
+
 .hero {
   min-height: calc(100svh - 72px);
   display: grid;
@@ -930,6 +973,10 @@ footer p {
     display: none;
   }
 
+  .header-tools {
+    gap: 8px;
+  }
+
   .hero,
   .season-section,
   .access-section,
@@ -1006,6 +1053,24 @@ footer p {
 
   .header-action {
     padding: 10px 13px;
+  }
+
+  .header-tools {
+    align-items: end;
+    flex-direction: column;
+  }
+
+  .language-picker {
+    padding: 7px 9px;
+  }
+
+  .language-picker span {
+    display: none;
+  }
+
+  .language-picker select {
+    max-width: 92px;
+    font-size: 12px;
   }
 
   h1 {

@@ -3,8 +3,26 @@ const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
 const filterButtons = document.querySelectorAll("[data-menu-filter]");
 const menuCategories = document.querySelectorAll("[data-menu-category]");
+const languageSelect = document.querySelector("[data-language-select]");
 let orderData = window.NANACHA_MENU;
 const menuCount = document.querySelector("[data-menu-count]");
+const translationState = {
+  language: localStorage.getItem("nanacha-language") || "ja",
+  isApplying: false,
+  originals: new WeakMap(),
+  dictionaries: { ja: {} },
+  observer: null,
+  pendingTimer: null,
+};
+const TRANSLATABLE_SELECTOR = "header, main, footer";
+const EXCLUDED_TRANSLATION_SELECTOR =
+  "script, style, iframe, svg, canvas, img, [data-no-translate]";
+const LANGUAGE_META = {
+  ja: { htmlLang: "ja" },
+  en: { htmlLang: "en" },
+  zh: { htmlLang: "zh-Hans" },
+  ko: { htmlLang: "ko" },
+};
 
 const syncHeader = () => {
   header.style.boxShadow =
@@ -17,6 +35,175 @@ if (header) {
 }
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
+
+const shouldTranslateText = (text) => {
+  const trimmed = text.replace(/\s+/g, " ").trim();
+
+  if (!trimmed || trimmed.length < 2) {
+    return false;
+  }
+
+  if (/^[\d\s:.,+¥%()/-]+$/.test(trimmed)) {
+    return false;
+  }
+
+  return /[A-Za-z\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(trimmed);
+};
+
+const getTranslationRoots = () =>
+  Array.from(document.querySelectorAll(TRANSLATABLE_SELECTOR)).filter(
+    (root) => !root.closest(EXCLUDED_TRANSLATION_SELECTOR),
+  );
+
+const getOriginalText = (node) => {
+  if (!translationState.originals.has(node)) {
+    translationState.originals.set(node, node.nodeValue);
+  }
+
+  return translationState.originals.get(node);
+};
+
+const collectTranslatableNodes = () => {
+  const nodes = [];
+
+  getTranslationRoots().forEach((root) => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+
+        if (!parent || parent.closest(EXCLUDED_TRANSLATION_SELECTOR)) {
+          return NodeFilter.FILTER_REJECT;
+        }
+
+        const original = getOriginalText(node);
+        return shouldTranslateText(original) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+  });
+
+  return nodes;
+};
+
+const restoreOriginalLanguage = () => {
+  translationState.isApplying = true;
+  collectTranslatableNodes().forEach((node) => {
+    node.nodeValue = getOriginalText(node);
+  });
+  translationState.isApplying = false;
+};
+
+const loadDictionary = async (language) => {
+  if (translationState.dictionaries[language]) {
+    return translationState.dictionaries[language];
+  }
+
+  const response = await fetch(`locales/${language}.json`, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Missing locale file: ${language}`);
+  }
+
+  const dictionary = await response.json();
+  translationState.dictionaries[language] = dictionary;
+  return dictionary;
+};
+
+const applyDictionary = (dictionary) => {
+  translationState.isApplying = true;
+  collectTranslatableNodes().forEach((node) => {
+    const original = getOriginalText(node);
+    const key = original.replace(/\s+/g, " ").trim();
+    const translated = dictionary[key];
+
+    if (translated) {
+      node.nodeValue = original.replace(key, translated);
+    } else {
+      node.nodeValue = original;
+    }
+  });
+  translationState.isApplying = false;
+};
+
+const translatePage = async (language, { isRefresh = false } = {}) => {
+  if (!LANGUAGE_META[language]) {
+    return;
+  }
+
+  translationState.language = language;
+  localStorage.setItem("nanacha-language", language);
+  document.documentElement.lang = LANGUAGE_META[language].htmlLang;
+
+  if (languageSelect) {
+    languageSelect.value = language;
+  }
+
+  if (language === "ja") {
+    restoreOriginalLanguage();
+    return;
+  }
+
+  document.body.classList.add("is-translating");
+
+  if (languageSelect) {
+    languageSelect.disabled = true;
+  }
+
+  try {
+    const dictionary = await loadDictionary(language);
+    applyDictionary(dictionary);
+  } catch (error) {
+    if (!isRefresh) {
+      console.warn(error);
+      restoreOriginalLanguage();
+      translationState.language = "ja";
+      localStorage.setItem("nanacha-language", "ja");
+
+      if (languageSelect) {
+        languageSelect.value = "ja";
+      }
+    }
+  } finally {
+    document.body.classList.remove("is-translating");
+
+    if (languageSelect) {
+      languageSelect.disabled = false;
+    }
+  }
+};
+
+const scheduleTranslationRefresh = () => {
+  if (translationState.isApplying || translationState.language === "ja") {
+    return;
+  }
+
+  window.clearTimeout(translationState.pendingTimer);
+  translationState.pendingTimer = window.setTimeout(() => {
+    translatePage(translationState.language, { isRefresh: true });
+  }, 300);
+};
+
+const initTranslation = () => {
+  if (languageSelect) {
+    languageSelect.value = translationState.language;
+    languageSelect.addEventListener("change", () => {
+      translatePage(languageSelect.value);
+    });
+  }
+
+  translationState.observer = new MutationObserver(scheduleTranslationRefresh);
+  translationState.observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+};
 
 const formatDelta = (price) => {
   if (price === 0) {
@@ -400,4 +587,13 @@ const initMenuData = async () => {
   initOrderForm();
 };
 
-initMenuData();
+const initPage = async () => {
+  await initMenuData();
+  initTranslation();
+
+  if (translationState.language !== "ja") {
+    translatePage(translationState.language, { isRefresh: true });
+  }
+};
+
+initPage();

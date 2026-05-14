@@ -8,6 +8,12 @@
     "start": "python3 -m http.server 8000",
     "build": "node scripts/build.js && sanity build public/admin",
     "build:site": "node scripts/build.js",
+    "i18n": "node scripts/i18n.js",
+    "i18n:extract": "node scripts/i18n.js extract",
+    "i18n:translate": "node scripts/i18n.js translate:openai",
+    "i18n:translate:openai": "node scripts/i18n.js translate:openai",
+    "i18n:update": "node scripts/i18n.js extract && node scripts/i18n.js translate:openai",
+    "i18n:update:en": "node scripts/i18n.js extract && OPENAI_TRANSLATION_LANGUAGES=en node scripts/i18n.js translate:openai",
     "build:studio": "sanity build public/admin",
     "sanity:dev": "sanity dev --host 0.0.0.0",
     "sanity:import-menu": "node scripts/import-sanity-menu.js"

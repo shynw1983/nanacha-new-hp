@@ -54,6 +54,74 @@ When Sanity returns a product image URL, the homepage picks and static menu card
 
 For local static preview, the page still loads through `python3 -m http.server`, but Square checkout needs the Vercel API function to run in a deployed Vercel environment.
 
+## Translation Updates
+
+The website shows Japanese by default. English, Chinese, and Korean are loaded from static files in `locales/`.
+
+- `locales/ja.json`: Japanese source text
+- `locales/en.json`: English translations
+- `locales/zh.json`: Chinese translations
+- `locales/ko.json`: Korean translations
+
+The live website does not call OpenAI. OpenAI is used only when we update the translation files.
+
+### One-time setup
+
+Create a local file named `.env.local` in the project root:
+
+```bash
+OPENAI_API_KEY=your_openai_key
+```
+
+Do not upload this file. It is already ignored by `.gitignore`.
+
+### Normal update flow
+
+After changing website text in `index.html`, `menu.html`, or `menu-data.js`, run:
+
+```bash
+npm run i18n:update
+```
+
+This command finds new website text and asks OpenAI to fill only the missing translations.
+
+The script does not overwrite existing translations. It only translates empty values.
+
+After that, check these files:
+
+```text
+locales/en.json
+locales/zh.json
+locales/ko.json
+```
+
+If the translations look good, build and deploy the site.
+
+### If npm is not available
+
+Run the same steps with Node:
+
+```bash
+node scripts/i18n.js extract
+node scripts/i18n.js translate:openai
+```
+
+### Cost control
+
+To test with only English first:
+
+```bash
+npm run i18n:update:en
+```
+
+To change the OpenAI model or batch size:
+
+```bash
+OPENAI_TRANSLATION_MODEL=gpt-4.1-mini \
+OPENAI_TRANSLATION_BATCH_SIZE=50 \
+npm run i18n:update
+```
+
 ## Sanity CMS
 
 Sanity is the recommended CMS for menu maintenance.
