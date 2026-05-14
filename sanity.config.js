@@ -19,7 +19,6 @@ export default defineConfig({
   title: "nanacha menu",
   projectId,
   dataset,
-  basePath: "/admin",
   plugins: [structureTool(), visionTool()],
   schema: {
     types: schemaTypes,

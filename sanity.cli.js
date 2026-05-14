@@ -12,6 +12,9 @@ if (!dataset) {
 }
 
 export default defineCliConfig({
+  project: {
+    basePath: "/admin",
+  },
   api: {
     projectId,
     dataset,
