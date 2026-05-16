@@ -181,7 +181,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         category: textValue(fields.category),
         price: Number(fields.price),
         description: textValue(fields.description) || localDrinkDescriptions.get(textValue(fields.name)) || "",
-        imageUrl: textValue(fields.imageUrl),
+        imageUrl: textValue(fields.imageUrl) || textValue(fields.imageFile),
         temperatures: arrayValue(fields.temperatures),
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
