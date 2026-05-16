@@ -208,6 +208,11 @@ h3 {
   flex-wrap: wrap;
 }
 
+.title-with-decor {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
 .title-decor {
   width: auto;
   height: clamp(42px, 5.4vw, 72px);
@@ -620,7 +625,7 @@ h3 {
 }
 
 .menu-hero h1 {
-  max-width: 760px;
+  max-width: none;
   margin-bottom: 26px;
   font-size: clamp(44px, 7.2vw, 96px);
   line-height: 0.98;
