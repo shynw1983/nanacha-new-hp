@@ -73,7 +73,10 @@ module.exports = async (request, response) => {
 
     response.statusCode = 200;
     response.setHeader("Content-Type", contentType);
-    response.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=86400");
+    response.setHeader(
+      "Cache-Control",
+      "public, max-age=31536000, s-maxage=31536000, immutable",
+    );
     response.end(imageBuffer);
   } catch (error) {
     console.error(error);
