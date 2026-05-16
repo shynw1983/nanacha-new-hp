@@ -163,7 +163,7 @@ The `Drinks` table can use:
 - `imageUrl` for a public image URL
 - `imageFile` for an existing site asset path such as `assets/menu/drink-01.png`
 
-The site reads images in this order: `image`, then `imageUrl`, then `imageFile`.
+The site reads images in this order: `image`, then `imageUrl`, then `imageFile`. Images uploaded to the Lark `image` attachment field are served through `/api/menu-image` so the browser can display files that require Lark API authorization.
 
 When changing menu text in Lark, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
 

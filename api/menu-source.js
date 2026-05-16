@@ -34,6 +34,25 @@ const imageValue = (value) => {
     return "";
   }
 
+  if (value.file_token && value.url) {
+    try {
+      const sourceUrl = new URL(value.url);
+      const extra = JSON.parse(sourceUrl.searchParams.get("extra") || "{}");
+      const tableId = extra.bitablePerm?.tableId;
+      const rev = extra.bitablePerm?.rev;
+
+      if (tableId && rev != null) {
+        const proxyUrl = new URL("/api/menu-image", "https://example.com");
+        proxyUrl.searchParams.set("file_token", value.file_token);
+        proxyUrl.searchParams.set("table_id", tableId);
+        proxyUrl.searchParams.set("rev", String(rev));
+        return `${proxyUrl.pathname}${proxyUrl.search}`;
+      }
+    } catch {
+      // Fall through to other supported image sources.
+    }
+  }
+
   return value.url || value.tmp_url || value.link || "";
 };
 
