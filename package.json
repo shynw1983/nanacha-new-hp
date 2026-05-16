@@ -14,7 +14,8 @@
     "i18n:translate:openai": "node scripts/i18n.js translate:openai",
     "i18n:update": "node scripts/i18n.js extract && node scripts/i18n.js translate:openai",
     "i18n:update:en": "node scripts/i18n.js extract && OPENAI_TRANSLATION_LANGUAGES=en node scripts/i18n.js translate:openai",
-    "lark:export-menu": "node scripts/export-lark-menu.js"
+    "lark:export-menu": "node scripts/export-lark-menu.js",
+    "lark:sync-images": "node scripts/sync-lark-images.js"
   },
   "keywords": [
     "nanacha",

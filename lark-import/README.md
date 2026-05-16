@@ -39,6 +39,14 @@ The website reads product images in this order:
 2. `imageUrl`
 3. `imageFile`
 
+After replacing product photos in Lark, run:
+
+```bash
+npm run lark:sync-images
+```
+
+The command downloads each row's `image` attachment into `assets/menu/` using the product name as the filename, then writes that path back to `imageFile`.
+
 ## Menu Settings
 
 - `type`: text

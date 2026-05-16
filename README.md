@@ -165,6 +165,14 @@ The `Drinks` table can use:
 
 The site reads images in this order: `image`, then `imageUrl`, then `imageFile`. Images uploaded to the Lark `image` attachment field are served through `/api/menu-image` so the browser can display files that require Lark API authorization. Because attachment image URLs include Lark's revision value, `/api/menu-image` can be cached for a long time and naturally refreshes when the attachment changes.
 
+To copy uploaded Lark product photos into the site's own static assets, run:
+
+```bash
+npm run lark:sync-images
+```
+
+The sync command downloads each drink's `image` attachment into `assets/menu/` using the product name as the filename, then writes that path back to the row's `imageFile` field. After syncing and deploying, the website can serve those photos directly as static files.
+
 When changing menu text in Lark, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
 
 ## Routes
