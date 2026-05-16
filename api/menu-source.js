@@ -2,11 +2,30 @@ const { existsSync, readFileSync } = require("fs");
 const path = require("path");
 const localMenu = require("../menu-data.js");
 
-const SANITY_API_VERSION = "2025-02-19";
-
 const cleanEnv = (value = "") => String(value).trim().replace(/^["']|["']$/g, "");
+const textValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map(textValue).filter(Boolean).join(", ");
+  }
 
-const categoryOrder = new Map(localMenu.categories.map((category, index) => [category.id, index]));
+  if (value && typeof value === "object") {
+    return value.text || value.name || value.link || value.url || "";
+  }
+
+  return value == null ? "" : String(value);
+};
+const booleanValue = (value) => value === true || value === "true" || value === "TRUE" || value === 1;
+const arrayValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map(textValue).filter(Boolean);
+  }
+
+  return textValue(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
 const menuHtmlPath = path.join(__dirname, "..", "menu.html");
 const menuHtml = existsSync(menuHtmlPath) ? readFileSync(menuHtmlPath, "utf8") : "";
 
@@ -72,57 +91,131 @@ const withTemperatures = (drink) => {
   };
 };
 
-const normalizeSanityCategories = (documents = []) => {
-  const categories = documents
-    .filter((item) => item && item.id && item.label)
-    .map((item) => ({
-      id: String(item.id),
-      label: String(item.label),
-      note: item.note ? String(item.note) : "",
-      isTapiocaFree: Boolean(item.isTapiocaFree),
-      hasWhipByDefault: Boolean(item.hasWhipByDefault),
-      sortOrder: Number.isFinite(Number(item.sortOrder)) ? Number(item.sortOrder) : 9999,
+const getTenantAccessToken = async () => {
+  const appId = cleanEnv(process.env.LARK_APP_ID);
+  const appSecret = cleanEnv(process.env.LARK_APP_SECRET);
+
+  if (!appId || !appSecret) {
+    return null;
+  }
+
+  const response = await fetch("https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      app_id: appId,
+      app_secret: appSecret,
+    }),
+  });
+  const body = await response.json();
+
+  if (!response.ok || body.code !== 0 || !body.tenant_access_token) {
+    throw new Error(`Lark auth failed: ${body.msg || response.status}`);
+  }
+
+  return body.tenant_access_token;
+};
+
+const fetchAllRecords = async (token, tableId) => {
+  const appToken = cleanEnv(process.env.LARK_BASE_APP_TOKEN);
+
+  if (!appToken || !tableId) {
+    return [];
+  }
+
+  const records = [];
+  let pageToken = "";
+
+  do {
+    const url = new URL(
+      `https://open.larksuite.com/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records`,
+    );
+    url.searchParams.set("page_size", "500");
+
+    if (pageToken) {
+      url.searchParams.set("page_token", pageToken);
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json();
+
+    if (!response.ok || body.code !== 0) {
+      throw new Error(`Lark records request failed: ${body.msg || response.status}`);
+    }
+
+    records.push(...(body.data?.items || []));
+    pageToken = body.data?.page_token || "";
+  } while (pageToken);
+
+  return records;
+};
+
+const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRecords = [] } = {}) => {
+  const categories = categoryRecords
+    .map((record) => record.fields || {})
+    .filter((fields) => fields.id && fields.label)
+    .map((fields) => ({
+      id: textValue(fields.id),
+      label: textValue(fields.label),
+      note: textValue(fields.note),
+      isTapiocaFree: booleanValue(fields.isTapiocaFree),
+      hasWhipByDefault: booleanValue(fields.hasWhipByDefault),
+      sortOrder: Number(fields.sortOrder) || 9999,
     }))
     .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label, "ja"))
     .map(({ sortOrder, ...category }) => category);
 
-  return categories.length ? categories : localMenu.categories;
-};
-
-const normalizeSanityMenu = ({ drinks: drinkDocuments = [], categories: categoryDocuments = [], settings } = {}) => {
-  const categories = normalizeSanityCategories(categoryDocuments);
-  const sanityCategoryOrder = new Map(categories.map((category, index) => [category.id, index]));
-  const tapiocaFreeCategories = categories
-    .filter((category) => category.isTapiocaFree)
-    .map((category) => category.id);
-  const whippedCategories = categories
-    .filter((category) => category.hasWhipByDefault)
-    .map((category) => category.id);
-  const drinks = drinkDocuments
-    .filter((item) => item && item.name && item.category && Number.isFinite(Number(item.price)))
-    .map((item) =>
+  const categoryOrder = new Map(categories.map((category, index) => [category.id, index]));
+  const drinks = drinkRecords
+    .map((record) => record.fields || {})
+    .filter((fields) => fields.name && fields.category && Number.isFinite(Number(fields.price)))
+    .map((fields) =>
       withTemperatures({
-        name: String(item.name),
-        price: Number(item.price),
-        category: String(item.category),
-        description: item.description ? String(item.description) : localDrinkDescriptions.get(String(item.name)) || "",
-        temperatures: Array.isArray(item.temperatures) ? item.temperatures.map(String) : undefined,
-        imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
-        isRecommended: Boolean(item.isRecommended),
-        isFeatured: Boolean(item.isFeatured),
+        name: textValue(fields.name),
+        category: textValue(fields.category),
+        price: Number(fields.price),
+        description: textValue(fields.description) || localDrinkDescriptions.get(textValue(fields.name)) || "",
+        imageUrl: textValue(fields.imageUrl),
+        temperatures: arrayValue(fields.temperatures),
+        isRecommended: booleanValue(fields.isRecommended),
+        isFeatured: booleanValue(fields.isFeatured),
+        isActive: fields.isActive == null ? true : booleanValue(fields.isActive),
+        sortOrder: Number(fields.sortOrder) || 9999,
       }),
     )
+    .filter((drink) => drink.isActive)
     .sort((a, b) => {
-      const categoryDiff = (sanityCategoryOrder.get(a.category) ?? 999) - (sanityCategoryOrder.get(b.category) ?? 999);
+      const categoryDiff = (categoryOrder.get(a.category) ?? 999) - (categoryOrder.get(b.category) ?? 999);
 
       if (categoryDiff !== 0) {
         return categoryDiff;
       }
 
-      return a.name.localeCompare(b.name, "ja");
-    });
+      return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "ja");
+    })
+    .map(({ sortOrder, isActive, ...drink }) => drink);
 
-  if (!drinks.length) {
+  const settingsRows = settingsRecords.map((record) => record.fields || {});
+  const getSettingsByType = (type) =>
+    settingsRows
+      .filter((fields) => textValue(fields.type) === type)
+      .map((fields) => ({
+        id: textValue(fields.id),
+        label: textValue(fields.label),
+        price: Number(fields.price) || 0,
+        values: textValue(fields.values),
+      }));
+  const singleValue = (type) => getSettingsByType(type)[0]?.values || "";
+  const tapiocaFreeCategories = categories.filter((category) => category.isTapiocaFree).map((category) => category.id);
+  const whippedCategories = categories.filter((category) => category.hasWhipByDefault).map((category) => category.id);
+
+  if (!categories.length || !drinks.length) {
     return fallbackMenu;
   }
 
@@ -130,72 +223,40 @@ const normalizeSanityMenu = ({ drinks: drinkDocuments = [], categories: category
     ...fallbackMenu,
     categories,
     drinks,
-    sizes: normalizePricedItems(settings?.sizes, fallbackMenu.sizes),
-    sweetness: normalizeStrings(settings?.sweetness, fallbackMenu.sweetness),
-    ice: normalizeStrings(settings?.ice, fallbackMenu.ice),
-    hotIce: settings?.hotIce ? String(settings.hotIce) : fallbackMenu.hotIce,
-    options: normalizePricedItems(settings?.options, fallbackMenu.options),
-    toppings: normalizePricedItems(settings?.toppings, fallbackMenu.toppings),
+    sizes: normalizePricedItems(getSettingsByType("size"), fallbackMenu.sizes),
+    sweetness: normalizeStrings(arrayValue(singleValue("sweetness")), fallbackMenu.sweetness),
+    ice: normalizeStrings(arrayValue(singleValue("ice")), fallbackMenu.ice),
+    hotIce: singleValue("hotIce") || fallbackMenu.hotIce,
+    options: normalizePricedItems(getSettingsByType("option"), fallbackMenu.options),
+    toppings: normalizePricedItems(getSettingsByType("topping"), fallbackMenu.toppings),
     tapiocaFreeCategories: tapiocaFreeCategories.length ? tapiocaFreeCategories : fallbackMenu.tapiocaFreeCategories,
     whippedCategories: whippedCategories.length ? whippedCategories : fallbackMenu.whippedCategories,
   };
 };
 
-const fetchSanityMenu = async () => {
-  const projectId = cleanEnv(process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
-  const dataset = cleanEnv(process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET || "production");
-  const token = cleanEnv(process.env.SANITY_API_TOKEN);
+const fetchLarkMenu = async () => {
+  const token = await getTenantAccessToken();
 
-  if (!projectId || !dataset) {
+  if (!token) {
     return null;
   }
 
-  const query = `{
-    "categories": *[_type == "category"] | order(coalesce(sortOrder, 9999) asc, label asc) {
-      id,
-      label,
-      note,
-      isTapiocaFree,
-      hasWhipByDefault,
-      sortOrder
-    },
-    "drinks": *[_type == "drink" && coalesce(isActive, true) == true] | order(coalesce(sortOrder, 9999) asc, name asc) {
-      name,
-      price,
-      description,
-      "category": category->id,
-      temperatures,
-      isRecommended,
-      isFeatured,
-      "imageUrl": image.asset->url
-    },
-    "settings": *[_type == "menuSettings"][0] {
-      sizes,
-      sweetness,
-      ice,
-      hotIce,
-      options,
-      toppings
-    }
-  }`;
-  const url = new URL(`https://${projectId}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${dataset}`);
-  url.searchParams.set("query", query);
+  const [categoryRecords, drinkRecords, settingsRecords] = await Promise.all([
+    fetchAllRecords(token, cleanEnv(process.env.LARK_CATEGORIES_TABLE_ID)),
+    fetchAllRecords(token, cleanEnv(process.env.LARK_DRINKS_TABLE_ID)),
+    fetchAllRecords(token, cleanEnv(process.env.LARK_MENU_SETTINGS_TABLE_ID)),
+  ]);
 
-  const response = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  return normalizeLarkMenu({
+    categoryRecords,
+    drinkRecords,
+    settingsRecords,
   });
-
-  if (!response.ok) {
-    throw new Error(`Sanity menu request failed: ${response.status}`);
-  }
-
-  const body = await response.json();
-  return normalizeSanityMenu(body.result);
 };
 
 const getMenuData = async () => {
   try {
-    return (await fetchSanityMenu()) || fallbackMenu;
+    return (await fetchLarkMenu()) || fallbackMenu;
   } catch (error) {
     console.error(error);
     return fallbackMenu;

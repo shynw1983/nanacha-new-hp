@@ -47,10 +47,10 @@ Set these Vercel environment variables before using live checkout:
 
 The browser never receives the Square access token. Drink prices and customization prices are validated on the server before Square checkout is created.
 
-Menu/order data is loaded through `/api/menu`. When Sanity is configured, `/api/menu` reads active drink items from Sanity. If Sanity is not configured or temporarily unavailable, it falls back to `menu-data.js`.
+Menu/order data is loaded through `/api/menu`. When Lark is configured, `/api/menu` reads menu records from Lark Base. If Lark is not configured or temporarily unavailable, it falls back to `menu-data.js`.
 
 The browser and Square checkout validation both use the same menu source, so visible drink prices and checkout prices stay aligned.
-When Sanity returns a product image URL, the homepage picks and static menu cards update their images in the browser by matching the drink name.
+When Lark returns a product image URL, the homepage picks and static menu cards update their images in the browser by matching the drink name.
 
 For local static preview, the page still loads through `python3 -m http.server`, but Square checkout needs the Vercel API function to run in a deployed Vercel environment.
 
@@ -122,42 +122,9 @@ OPENAI_TRANSLATION_BATCH_SIZE=50 \
 npm run i18n:update
 ```
 
-## Sanity CMS
+## Lark Base Menu CMS
 
-Sanity is the recommended CMS for menu maintenance.
-
-Set these Vercel environment variables after creating the Sanity project:
-
-- `SANITY_PROJECT_ID`
-- `SANITY_DATASET`
-- `SANITY_API_TOKEN`: optional for public datasets, recommended for private datasets
-- `SANITY_STUDIO_PROJECT_ID`: same value as `SANITY_PROJECT_ID`
-- `SANITY_STUDIO_DATASET`: same value as `SANITY_DATASET`
-
-`SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` must be available during the Vercel build. If either is missing, the `/admin` Studio build fails instead of deploying a blank page.
-
-Sanity Studio is built to `/admin` during the Vercel build. After deployment, open:
-
-```text
-https://your-domain/admin
-```
-
-In Sanity Manage, add the deployed site origin to CORS:
-
-```text
-https://your-domain
-```
-
-For local Studio development, also add:
-
-```text
-http://localhost:3333
-http://localhost:8000
-```
-
-Sanity schema files are in `sanity/schemaTypes/`.
-
-Sanity is the source of truth for menu maintenance. The site reads menu data through `/api/menu` and uses it for:
+Lark Base is the source of truth for menu maintenance. The site reads menu data through `/api/menu` and uses it for:
 
 - full menu page rendering
 - homepage recommended drinks
@@ -165,51 +132,34 @@ Sanity is the source of truth for menu maintenance. The site reads menu data thr
 - Square checkout price validation
 - product names, prices, photos, descriptions, temperatures, categories, sizes, sweetness, ice, options, and toppings
 
-The static HTML menu remains only as a fallback for local/offline preview. When `/api/menu` is available, Sanity data replaces the visible menu in the browser.
+The static HTML menu remains only as a fallback for local/offline preview. When Lark is configured, Lark data replaces the visible menu in the browser.
 
-When changing menu text in Sanity, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
+Create three Lark Base tables using the CSV files in `lark-import/`:
 
-### Local Studio
+- `Categories`
+- `Drinks`
+- `Menu Settings`
 
-After installing dependencies, run:
-
-```bash
-SANITY_STUDIO_PROJECT_ID=your_project_id \
-SANITY_STUDIO_DATASET=production \
-npm run sanity:dev
-```
-
-Then open the local Studio URL shown by Sanity.
-
-### Import Existing Menu
-
-Use a Sanity token with write permissions, then run:
+Generate the CSV files again whenever needed:
 
 ```bash
-SANITY_PROJECT_ID=your_project_id \
-SANITY_DATASET=production \
-SANITY_API_TOKEN=your_write_token \
-node scripts/import-sanity-menu.js
+npm run lark:export-menu
 ```
 
-Or with npm:
+Set these environment variables in Vercel and in local `.env.local` when needed:
 
-```bash
-SANITY_PROJECT_ID=your_project_id \
-SANITY_DATASET=production \
-SANITY_API_TOKEN=your_write_token \
-npm run sanity:import-menu
+```text
+LARK_APP_ID
+LARK_APP_SECRET
+LARK_BASE_APP_TOKEN
+LARK_CATEGORIES_TABLE_ID
+LARK_DRINKS_TABLE_ID
+LARK_MENU_SETTINGS_TABLE_ID
 ```
 
-The import creates or replaces:
+The `Drinks` table should include an `imageUrl` text field containing a public image URL that the website can render.
 
-- 8 `category` documents
-- All drinks from `menu-data.js`
-- 1 `menuSettings` document for sizes, sweetness, ice, options, and toppings
-- Product images for drinks that have local files in `assets/menu/drink-01.png` through `assets/menu/drink-42.png`
-
-Drink document IDs are generated from category + drink name, so rerunning the import updates the same documents instead of creating duplicates.
-Existing product images in Sanity are left untouched, so photos changed manually in Studio are not overwritten by the importer.
+When changing menu text in Lark, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
 
 ## Routes
 
