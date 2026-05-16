@@ -28,11 +28,16 @@ Recommended field types:
 - `isFeatured`: checkbox
 - `isActive`: checkbox
 - `sortOrder`: number
+- `image`: attachment field for the product photo you maintain in Lark
 - `imageFile`: text helper showing the current local image path
-- `imageUrl`: text field used by the website for the public product-image URL
+- `imageUrl`: optional text field for a public product-image URL
 
-After importing `Drinks`, upload the product photos into an attachment field such as `image`.
-For the current website integration, also fill `imageUrl` with a public image URL for each product.
+After importing `Drinks`, create an attachment field named `image`.
+The website reads product images in this order:
+
+1. `image` attachment
+2. `imageUrl`
+3. `imageFile`
 
 ## Menu Settings
 

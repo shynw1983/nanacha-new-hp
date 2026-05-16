@@ -159,10 +159,11 @@ LARK_MENU_SETTINGS_TABLE_ID
 
 The `Drinks` table can use:
 
+- `image` for a Lark attachment field containing the product photo
 - `imageUrl` for a public image URL
 - `imageFile` for an existing site asset path such as `assets/menu/drink-01.png`
 
-If `imageUrl` is empty, the site falls back to `imageFile`.
+The site reads images in this order: `image`, then `imageUrl`, then `imageFile`.
 
 When changing menu text in Lark, run the translation update flow again so `locales/en.json`, `locales/zh.json`, and `locales/ko.json` can pick up new product names and descriptions.
 

@@ -25,6 +25,17 @@ const arrayValue = (value) => {
     .map((item) => item.trim())
     .filter(Boolean);
 };
+const imageValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map(imageValue).find(Boolean) || "";
+  }
+
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+
+  return value.url || value.tmp_url || value.link || "";
+};
 
 const menuHtmlPath = path.join(__dirname, "..", "menu.html");
 const menuHtml = existsSync(menuHtmlPath) ? readFileSync(menuHtmlPath, "utf8") : "";
@@ -181,7 +192,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         category: textValue(fields.category),
         price: Number(fields.price),
         description: textValue(fields.description) || localDrinkDescriptions.get(textValue(fields.name)) || "",
-        imageUrl: textValue(fields.imageUrl) || textValue(fields.imageFile),
+        imageUrl: imageValue(fields.image) || textValue(fields.imageUrl) || textValue(fields.imageFile),
         temperatures: arrayValue(fields.temperatures),
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
