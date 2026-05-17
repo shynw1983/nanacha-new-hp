@@ -128,25 +128,6 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="season-section" aria-labelledby="season-title" data-reveal>
-        <div className="season-copy">
-          <p className="eyebrow">{settings.seasonEyebrow}</p>
-          <h2 id="season-title" className="heading-with-decor">
-            {settings.seasonTitle}
-            <img src="/assets/decor/sparkle.png" alt="" aria-hidden="true" />
-          </h2>
-          <p>{settings.seasonIntro}</p>
-        </div>
-        <div className="season-list reveal-group">
-          {cardsBySection(localizedHomepage, "seasonalPicks").map((card) => (
-            <article key={card.id}>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="story-section" aria-labelledby="story-title" data-reveal>
         <div className="section-heading">
           <div>
