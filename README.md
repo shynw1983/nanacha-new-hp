@@ -207,7 +207,7 @@ The `Drinks` table can use:
 - `imageUrl` for a public image URL
 - `imageFile` for an existing site asset path such as `assets/menu/drink-01.png`
 
-The site reads images in this order: `image`, then `imageUrl`, then `imageFile`. Images uploaded to the Lark `image` attachment field are served through `/api/menu-image` so the browser can display files that require Lark API authorization. Because attachment image URLs include Lark's revision value, `/api/menu-image` can be cached for a long time and naturally refreshes when the attachment changes.
+The site reads images in this order: `image`, then `imageUrl`, then `imageFile`. Images uploaded to the Lark `image` attachment field are served through `/api/menu-image` or `/api/lark-image` so the browser can display files that require Lark API authorization. Because attachment image URLs include Lark's revision value when available, the image routes can be cached for a long time and naturally refresh when the attachment changes.
 
 Homepage content is loaded through `/api/homepage`. When the homepage Base is configured, Lark becomes the source of truth for:
 

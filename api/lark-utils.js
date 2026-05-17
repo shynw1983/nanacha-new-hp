@@ -37,6 +37,10 @@ const imageValue = (value) => {
     } catch {
       // Fall through to other supported image sources.
     }
+
+    const proxyUrl = new URL("/api/lark-image", "https://example.com");
+    proxyUrl.searchParams.set("file_token", value.file_token);
+    return `${proxyUrl.pathname}${proxyUrl.search}`;
   }
 
   return value.url || value.tmp_url || value.link || "";
