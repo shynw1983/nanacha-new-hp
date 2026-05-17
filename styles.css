@@ -293,6 +293,9 @@ h3 {
 }
 
 .hero-metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
