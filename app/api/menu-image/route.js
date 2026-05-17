@@ -1,4 +1,4 @@
-const legacyHandler = require("../../../api/menu-image");
+const legacyHandler = require("../../../server/menu-image");
 
 const adaptImageRequest = (request) => {
   const url = new URL(request.url);

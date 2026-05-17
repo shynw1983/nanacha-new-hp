@@ -1,4 +1,4 @@
-const { getHomepageData } = require("../../../api/homepage-source");
+const { getHomepageData } = require("../../../server/homepage-source");
 
 export async function GET() {
   return Response.json(await getHomepageData(), {

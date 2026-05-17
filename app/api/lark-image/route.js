@@ -1,4 +1,4 @@
-const legacyHandler = require("../../../api/lark-image");
+const legacyHandler = require("../../../server/lark-image");
 
 const adaptImageRequest = (request) => {
   const url = new URL(request.url);

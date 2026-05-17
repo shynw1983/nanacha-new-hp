@@ -1,4 +1,4 @@
-const { getMenuData } = require("../../../api/menu-source");
+const { getMenuData } = require("../../../server/menu-source");
 
 export async function GET(request) {
   const store = new URL(request.url).searchParams.get("store") || "";

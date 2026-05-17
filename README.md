@@ -38,7 +38,7 @@ http://localhost:3000
 ```text
 app/                  Next.js routes and route handlers
 components/           React UI components
-api/                  Shared server-side data/business modules
+server/               Shared server-side data/business modules
 data/                 Local fallback descriptions and category notes
 public/assets/        Static images
 public/locales/       Translation dictionaries

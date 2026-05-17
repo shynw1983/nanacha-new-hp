@@ -1,4 +1,4 @@
-const { getMenuData } = require("../../api/menu-source");
+const { getMenuData } = require("../../server/menu-source");
 import { MenuBrowser } from "../../components/menu-browser";
 import { MenuInfo, MenuIntro } from "../../components/menu-static-content";
 import { SiteFooter } from "../../components/site-footer";

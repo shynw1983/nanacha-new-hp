@@ -8,7 +8,7 @@
 
 - Next.js App Router：`app/`
 - React 组件：`components/`
-- 服务端数据与业务逻辑：`api/`
+- 服务端数据与业务逻辑：`server/`
 - 样式：`app/globals.css`
 - 静态资源：`public/assets/`
 - 多语言词典：`public/locales/`
@@ -30,7 +30,7 @@
 │   ├── reservation-form.js
 │   ├── site-header.js
 │   └── site-footer.js
-├── api/
+├── server/
 ├── data/
 ├── public/assets/
 ├── public/locales/

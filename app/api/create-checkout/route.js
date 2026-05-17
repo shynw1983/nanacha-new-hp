@@ -1,4 +1,4 @@
-const legacyHandler = require("../../../api/create-checkout");
+const legacyHandler = require("../../../server/create-checkout");
 
 const toNodeRequest = async (request) => {
   const body = request.body ? Buffer.from(await request.arrayBuffer()) : Buffer.alloc(0);

@@ -1,5 +1,5 @@
-const { getMenuData } = require("../api/menu-source");
-const { getHomepageData } = require("../api/homepage-source");
+const { getMenuData } = require("../server/menu-source");
+const { getHomepageData } = require("../server/homepage-source");
 import { HomeContent } from "../components/home-content";
 import { ReservationForm } from "../components/reservation-form";
 import { SiteFooter } from "../components/site-footer";
