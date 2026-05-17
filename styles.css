@@ -1250,6 +1250,56 @@ footer p {
 
   .hero {
     min-height: auto;
+    gap: 22px;
+    padding: 34px 16px 20px;
+  }
+
+  .hero-visual {
+    border-radius: 24px;
+  }
+
+  .hero-carousel .hero-slides {
+    height: clamp(380px, 58svh, 480px);
+  }
+
+  .hero-carousel .hero-slide img {
+    object-position: center center;
+  }
+
+  .hero-slide figcaption {
+    right: 16px;
+    bottom: 76px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    gap: 6px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .hero-slide figcaption span {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  .hero-carousel-controls {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    justify-content: center;
+  }
+
+  .hero-carousel-controls > button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .hero-carousel-dots {
+    min-height: 42px;
+    padding-inline: 14px;
   }
 
   .menu-hero {
