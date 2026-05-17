@@ -2,6 +2,7 @@
 
 import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
+import { RevealOnScroll } from "./reveal-on-scroll";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
@@ -20,8 +21,9 @@ export function HomeContent({ homepage, menu }) {
 
   return (
     <>
+      <RevealOnScroll />
       <section className="hero" aria-labelledby="hero-title" data-react-homepage>
-        <div className="hero-copy">
+        <div className="hero-copy" data-reveal>
           <p className="eyebrow eyebrow-with-decor">
             <img src="/assets/decor/tapioca-three.png" alt="" aria-hidden="true" />
             {settings.heroEyebrow}
@@ -54,7 +56,7 @@ export function HomeContent({ homepage, menu }) {
         <HeroCarousel slides={localizedHomepage.slides} />
       </section>
 
-      <section className="menu-section" id="menu" aria-labelledby="menu-title">
+      <section className="menu-section" id="menu" aria-labelledby="menu-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">real menu picks</p>
@@ -82,7 +84,7 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="order-section" id="order" aria-labelledby="order-title">
+      <section className="order-section" id="order" aria-labelledby="order-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">how to order</p>
@@ -103,7 +105,7 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="recommend-section" id="recommend" aria-labelledby="recommend-title">
+      <section className="recommend-section" id="recommend" aria-labelledby="recommend-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">drink guide</p>
@@ -126,7 +128,7 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="season-section" aria-labelledby="season-title">
+      <section className="season-section" aria-labelledby="season-title" data-reveal>
         <div className="season-copy">
           <p className="eyebrow">{settings.seasonEyebrow}</p>
           <h2 id="season-title" className="heading-with-decor">
@@ -145,7 +147,7 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="story-section" aria-labelledby="story-title">
+      <section className="story-section" aria-labelledby="story-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">our tea stand</p>
@@ -165,7 +167,7 @@ export function HomeContent({ homepage, menu }) {
         </div>
       </section>
 
-      <section className="stores-section" aria-labelledby="stores-title">
+      <section className="stores-section" aria-labelledby="stores-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">our shops</p>
@@ -192,7 +194,7 @@ export function HomeContent({ homepage, menu }) {
       </section>
 
       {primaryStore ? (
-        <section className="access-section" id="access" aria-labelledby="access-title">
+        <section className="access-section" id="access" aria-labelledby="access-title" data-reveal>
           <div className="access-copy">
             <p className="eyebrow">shop map</p>
             <h2 id="access-title" className="heading-with-decor">
@@ -255,7 +257,7 @@ export function HomeContent({ homepage, menu }) {
         </section>
       ) : null}
 
-      <section className="faq-section" id="faq" aria-labelledby="faq-title">
+      <section className="faq-section" id="faq" aria-labelledby="faq-title" data-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">faq</p>
