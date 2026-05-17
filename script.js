@@ -7,8 +7,17 @@ let homepageData = window.NANACHA_HOMEPAGE;
 let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
 const heroCarousel = document.querySelector("[data-hero-carousel]");
+const LANGUAGE_STORAGE_KEY = "nanacha-language";
+const getStoredLanguage = () => {
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) || "ja";
+  } catch (error) {
+    return "ja";
+  }
+};
+const getDictionaryStorageKey = (language) => `nanacha-dictionary-${language}`;
 const translationState = {
-  language: localStorage.getItem("nanacha-language") || "ja",
+  language: getStoredLanguage(),
   isApplying: false,
   originals: new WeakMap(),
   dictionaries: { ja: {} },
@@ -181,9 +190,24 @@ const restoreOriginalLanguage = () => {
   refreshLocalizedOrderLabels();
 };
 
+const revealInitialLanguage = () => {
+  document.documentElement.classList.remove("is-language-pending");
+};
+
 const loadDictionary = async (language) => {
   if (translationState.dictionaries[language]) {
     return translationState.dictionaries[language];
+  }
+
+  try {
+    const cachedDictionary = localStorage.getItem(getDictionaryStorageKey(language));
+    if (cachedDictionary) {
+      const dictionary = JSON.parse(cachedDictionary);
+      translationState.dictionaries[language] = dictionary;
+      return dictionary;
+    }
+  } catch (error) {
+    // Ignore malformed or unavailable cache and fetch a fresh dictionary.
   }
 
   const response = await fetch(`locales/${language}.json`, {
@@ -198,6 +222,13 @@ const loadDictionary = async (language) => {
 
   const dictionary = await response.json();
   translationState.dictionaries[language] = dictionary;
+
+  try {
+    localStorage.setItem(getDictionaryStorageKey(language), JSON.stringify(dictionary));
+  } catch (error) {
+    // Translation should still work when storage is unavailable.
+  }
+
   return dictionary;
 };
 
@@ -231,13 +262,17 @@ const applyDictionary = (dictionary) => {
   refreshLocalizedOrderLabels();
 };
 
-const translatePage = async (language, { isRefresh = false } = {}) => {
+const translatePage = async (language, { isRefresh = false, isInitialLoad = false } = {}) => {
   if (!LANGUAGE_META[language]) {
     return;
   }
 
   translationState.language = language;
-  localStorage.setItem("nanacha-language", language);
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  } catch (error) {
+    // Translation can still work without persisted preference.
+  }
   document.documentElement.lang = LANGUAGE_META[language].htmlLang;
 
   if (languageSelect) {
@@ -246,6 +281,9 @@ const translatePage = async (language, { isRefresh = false } = {}) => {
 
   if (language === "ja") {
     restoreOriginalLanguage();
+    if (isInitialLoad) {
+      revealInitialLanguage();
+    }
     return;
   }
 
@@ -263,7 +301,11 @@ const translatePage = async (language, { isRefresh = false } = {}) => {
       console.warn(error);
       restoreOriginalLanguage();
       translationState.language = "ja";
-      localStorage.setItem("nanacha-language", "ja");
+      try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, "ja");
+      } catch (storageError) {
+        // Ignore storage failures while falling back to Japanese.
+      }
 
       if (languageSelect) {
         languageSelect.value = "ja";
@@ -271,6 +313,10 @@ const translatePage = async (language, { isRefresh = false } = {}) => {
     }
   } finally {
     document.body.classList.remove("is-translating");
+
+    if (isInitialLoad) {
+      revealInitialLanguage();
+    }
 
     if (languageSelect) {
       languageSelect.disabled = false;
@@ -1106,15 +1152,18 @@ const initMenuData = async (store = "") => {
 };
 
 const initPage = async () => {
+  initTranslation();
+
+  const initialTranslation =
+    translationState.language !== "ja"
+      ? translatePage(translationState.language, { isRefresh: true, isInitialLoad: true })
+      : Promise.resolve().then(revealInitialLanguage);
+
   homepageData = (await loadRemoteHomepageData()) || homepageData;
   renderHomepageSections();
   await initMenuData();
   initHeroCarousel();
-  initTranslation();
-
-  if (translationState.language !== "ja") {
-    translatePage(translationState.language, { isRefresh: true });
-  }
+  await initialTranslation;
 };
 
 initPage();

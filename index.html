@@ -8,6 +8,18 @@
       content="nanacha は、黒糖タピオカミルク、フルーツティー、スムージー、八女抹茶ラテを楽しめるティースタンド。福岡清川店から、気軽に楽しめる一杯をお届けします。"
     />
     <title>nanacha｜タピオカ・ミルクティー・フルーツティー</title>
+    <script>
+      (() => {
+        try {
+          const language = localStorage.getItem("nanacha-language");
+          if (language && language !== "ja") {
+            document.documentElement.classList.add("is-language-pending");
+          }
+        } catch (error) {
+          // Ignore storage access failures and fall back to Japanese.
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

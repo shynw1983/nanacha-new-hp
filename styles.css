@@ -138,6 +138,14 @@ body.is-translating {
   cursor: progress;
 }
 
+body {
+  transition: opacity 140ms ease;
+}
+
+html.is-language-pending body {
+  opacity: 0;
+}
+
 .hero {
   min-height: calc(100svh - 72px);
   display: grid;

@@ -8,6 +8,18 @@
       content="nanacha 福岡清川店のメニュー。黒糖タピオカミルク、タピオカフラッペ、チーズティー、スムージー、八女抹茶ラテ、ティー、コーヒーの価格とカスタマイズ。"
     />
     <title>メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー</title>
+    <script>
+      (() => {
+        try {
+          const language = localStorage.getItem("nanacha-language");
+          if (language && language !== "ja") {
+            document.documentElement.classList.add("is-language-pending");
+          }
+        } catch (error) {
+          // Ignore storage access failures and fall back to Japanese.
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
