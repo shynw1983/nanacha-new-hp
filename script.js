@@ -321,6 +321,23 @@ const fillSelect = (select, options) => {
   select.innerHTML = options.map((option) => `<option value="${option.value}">${option.label}</option>`).join("");
 };
 
+const fillSelectIfChanged = (select, options) => {
+  const currentOptions = Array.from(select.options).map((option) => ({
+    value: option.value,
+    label: option.textContent,
+  }));
+  const isUnchanged =
+    currentOptions.length === options.length &&
+    currentOptions.every(
+      (option, index) =>
+        option.value === options[index].value && option.label === options[index].label,
+    );
+
+  if (!isUnchanged) {
+    fillSelect(select, options);
+  }
+};
+
 const formatTimeInput = (date) =>
   `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
@@ -659,7 +676,7 @@ const initOrderForm = () => {
     const isHot = temperatureSelect.value === "HOT";
     const iceOptions = isHot ? [orderData.hotIce] : orderData.ice;
 
-    fillSelect(
+    fillSelectIfChanged(
       iceSelect,
       iceOptions.map((item) => ({ value: item, label: getLocalizedFormValue("ice", item) })),
     );
@@ -687,7 +704,7 @@ const initOrderForm = () => {
     const currentSweetness = sweetnessSelect.value;
     const currentIce = iceSelect.value;
 
-    fillSelect(
+    fillSelectIfChanged(
       sweetnessSelect,
       orderData.sweetness.map((item) => ({
         value: item,
