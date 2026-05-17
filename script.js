@@ -262,6 +262,7 @@ const getSelectedOrder = () => {
     toppings.reduce((sum, item) => sum + item.price, 0);
 
   return {
+    store: String(data.get("store") || ""),
     drink: drinkName,
     category: String(data.get("category") || ""),
     size: String(data.get("size") || ""),
@@ -558,7 +559,15 @@ const loadRemoteMenuData = async () => {
   }
 
   try {
-    const response = await fetch("/api/menu", {
+    const storeSelect = form?.querySelector("[data-store-select]");
+    const store = storeSelect?.value || "";
+    const url = new URL("/api/menu", window.location.origin);
+
+    if (store) {
+      url.searchParams.set("store", store);
+    }
+
+    const response = await fetch(url, {
       headers: {
         Accept: "application/json",
       },
@@ -581,6 +590,7 @@ const initOrderForm = () => {
   }
 
   const submitButton = form.querySelector("button[type='submit']");
+  const storeSelect = form.querySelector("[data-store-select]");
   const categorySelect = form.querySelector("[data-category-select]");
   const drinkSelect = form.querySelector("[data-drink-select]");
   const sizeSelect = form.querySelector("[data-size-select]");
@@ -590,6 +600,14 @@ const initOrderForm = () => {
   const optionSelect = form.querySelector("[data-option-select]");
   const pickupInput = form.querySelector("input[name='pickup']");
   const toppingList = form.querySelector("[data-topping-list]");
+  const syncStores = () => {
+    const stores = orderData.stores?.length ? orderData.stores : [{ id: "kiyokawa", label: "福岡清川店" }];
+
+    fillSelect(
+      storeSelect,
+      stores.map((store) => ({ value: store.id, label: store.label })),
+    );
+  };
 
   const syncPickupTime = (forceDefault = false) => {
     const minimumPickup = getMinimumPickupTime();
@@ -653,6 +671,7 @@ const initOrderForm = () => {
     syncIce();
   };
 
+  syncStores();
   fillSelect(
     categorySelect,
     orderData.categories.map((category) => ({ value: category.id, label: category.label })),
@@ -686,6 +705,10 @@ const initOrderForm = () => {
   syncDrinks();
 
   form.addEventListener("change", (event) => {
+    if (event.target === storeSelect) {
+      initMenuData();
+      return;
+    }
     if (event.target === categorySelect) {
       syncDrinks();
       return;

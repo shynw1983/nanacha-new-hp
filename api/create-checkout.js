@@ -74,6 +74,7 @@ module.exports = async (request, response) => {
     return json(response, 400, { error: "Invalid request body" });
   }
 
+  const storeId = String(body.store || "");
   const drink = String(body.drink || "");
   const temperature = String(body.temperature || "");
   const sweetness = String(body.sweetness || "");
@@ -82,8 +83,8 @@ module.exports = async (request, response) => {
   const optionId = String(body.option || "");
   const toppingIds = Array.isArray(body.toppings) ? body.toppings.map(String) : [];
   const pickup = String(body.pickup || "");
-  const menu = await getMenuData();
-  const menuDrink = menu.drinks.find((item) => item.name === drink);
+  const menu = await getMenuData(storeId);
+  const menuDrink = menu.drinks.find((item) => item.name === drink && item.websiteEnabled !== false);
   const size = findById(menu.sizes, sizeId);
   const option = findById(menu.options, optionId);
   const toppings = toppingIds.map((id) => findById(menu.toppings, id));

@@ -134,11 +134,17 @@ Lark Base is the source of truth for menu maintenance. The site reads menu data 
 
 The static HTML menu remains only as a fallback for local/offline preview. When Lark is configured, Lark data replaces the visible menu in the browser.
 
-Create three Lark Base tables using the CSV files in `lark-import/`:
+Use one shared brand Base for product information:
 
 - `Categories`
 - `Drinks`
 - `Menu Settings`
+
+For multiple shops, create one separate shop Base per location. Each shop Base contains:
+
+- `Store Drinks`
+
+The shop Base stores shop-specific availability, per-channel selling flags, optional per-channel price overrides, and internal notes. It also keeps copied `drinkName` and `category` columns so shop staff do not need to work from IDs alone. Product names, descriptions, photos, categories, and default prices still stay canonical in the shared brand Base.
 
 Generate the CSV files again whenever needed:
 
@@ -156,6 +162,29 @@ LARK_CATEGORIES_TABLE_ID
 LARK_DRINKS_TABLE_ID
 LARK_MENU_SETTINGS_TABLE_ID
 ```
+
+For shop-specific availability, set `LARK_STORES_JSON` in Vercel and local `.env.local`:
+
+```json
+[
+  {
+    "id": "kiyokawa",
+    "label": "福岡清川店",
+    "appToken": "shop_base_app_token",
+    "storeDrinksTableId": "shop_store_drinks_table_id"
+  }
+]
+```
+
+The reservation form reads shop availability from the selected shop Base. A drink only appears for website reservation when that shop has a matching `drinkId` row with both `isAvailable = true` and `websiteEnabled = true`. Website checkout uses `websitePriceOverride` when present, otherwise the shared brand price.
+
+After changing a product name or category in the brand Base, sync the readable columns in each shop Base:
+
+```bash
+npm run lark:sync-store-products
+```
+
+The command matches rows by `drinkId`, creates missing shop rows with `isAvailable = true`, `websiteEnabled = true`, `instoreEnabled = true`, `uberEnabled = false`, and `snsEnabled = false`, and refreshes only `drinkName` and `category` on existing rows, leaving shop selling flags and price overrides untouched.
 
 The `Drinks` table can use:
 

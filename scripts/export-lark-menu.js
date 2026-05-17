@@ -75,6 +75,7 @@ const categoryRows = [
 
 const drinkRows = [
   [
+    "drinkId",
     "name",
     "category",
     "price",
@@ -88,6 +89,7 @@ const drinkRows = [
     "imageUrl",
   ],
   ...menu.drinks.map((drink, index) => [
+    `drink-${String(index + 1).padStart(2, "0")}`,
     drink.name,
     drink.category,
     drink.price,

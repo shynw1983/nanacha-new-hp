@@ -148,8 +148,7 @@ const getTenantAccessToken = async () => {
   return body.tenant_access_token;
 };
 
-const fetchAllRecords = async (token, tableId) => {
-  const appToken = cleanEnv(process.env.LARK_BASE_APP_TOKEN);
+const fetchAllRecords = async (token, tableId, appToken = cleanEnv(process.env.LARK_BASE_APP_TOKEN)) => {
 
   if (!appToken || !tableId) {
     return [];
@@ -186,7 +185,35 @@ const fetchAllRecords = async (token, tableId) => {
   return records;
 };
 
-const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRecords = [] } = {}) => {
+const parseStores = () => {
+  const raw = cleanEnv(process.env.LARK_STORES_JSON);
+
+  if (!raw) {
+    return [
+      {
+        id: "kiyokawa",
+        label: "福岡清川店",
+        appToken: "",
+        storeDrinksTableId: "",
+      },
+    ];
+  }
+
+  try {
+    return JSON.parse(raw)
+      .filter((store) => store?.id && store?.label)
+      .map((store) => ({
+        id: textValue(store.id),
+        label: textValue(store.label),
+        appToken: textValue(store.appToken),
+        storeDrinksTableId: textValue(store.storeDrinksTableId),
+      }));
+  } catch {
+    return [];
+  }
+};
+
+const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRecords = [], stores = [] } = {}) => {
   const categories = categoryRecords
     .map((record) => record.fields || {})
     .filter((fields) => fields.id && fields.label)
@@ -207,6 +234,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
     .filter((fields) => fields.name && fields.category && Number.isFinite(Number(fields.price)))
     .map((fields) =>
       withTemperatures({
+        id: textValue(fields.drinkId) || textValue(fields.id) || textValue(fields.name),
         name: textValue(fields.name),
         category: textValue(fields.category),
         price: Number(fields.price),
@@ -252,6 +280,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
   return {
     ...fallbackMenu,
     categories,
+    stores,
     drinks,
     sizes: normalizePricedItems(getSettingsByType("size"), fallbackMenu.sizes),
     sweetness: normalizeStrings(arrayValue(singleValue("sweetness")), fallbackMenu.sweetness),
@@ -264,13 +293,12 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
   };
 };
 
-const fetchLarkMenu = async () => {
-  const token = await getTenantAccessToken();
-
+const fetchLarkMenu = async (token) => {
   if (!token) {
     return null;
   }
 
+  const stores = parseStores();
   const [categoryRecords, drinkRecords, settingsRecords] = await Promise.all([
     fetchAllRecords(token, cleanEnv(process.env.LARK_CATEGORIES_TABLE_ID)),
     fetchAllRecords(token, cleanEnv(process.env.LARK_DRINKS_TABLE_ID)),
@@ -281,12 +309,72 @@ const fetchLarkMenu = async () => {
     categoryRecords,
     drinkRecords,
     settingsRecords,
+    stores,
   });
 };
 
-const getMenuData = async () => {
+const applyStoreAvailability = async (token, menu, storeId) => {
+  if (!storeId) {
+    return menu;
+  }
+
+  const store = menu.stores.find((item) => item.id === storeId);
+
+  if (!store?.appToken || !store?.storeDrinksTableId) {
+    return {
+      ...menu,
+      selectedStoreId: storeId,
+    };
+  }
+
+  const records = await fetchAllRecords(token, store.storeDrinksTableId, store.appToken);
+  const availabilityByDrinkId = new Map(
+    records
+      .map((record) => record.fields || {})
+      .filter((fields) => fields.drinkId)
+      .map((fields) => [
+        textValue(fields.drinkId),
+        {
+          isAvailable: fields.isAvailable == null ? true : booleanValue(fields.isAvailable),
+          websiteEnabled: fields.websiteEnabled == null ? true : booleanValue(fields.websiteEnabled),
+          websitePriceOverride: Number.isFinite(Number(fields.websitePriceOverride))
+            ? Number(fields.websitePriceOverride)
+            : null,
+        },
+      ]),
+  );
+
+  return {
+    ...menu,
+    selectedStoreId: storeId,
+    drinks: menu.drinks
+      .map((drink) => {
+        const availability = availabilityByDrinkId.get(drink.id);
+
+        if (!availability) {
+          return {
+            ...drink,
+            isAvailable: false,
+            websiteEnabled: false,
+          };
+        }
+
+        return {
+          ...drink,
+          price: availability.websitePriceOverride ?? drink.price,
+          isAvailable: availability.isAvailable,
+          websiteEnabled: availability.websiteEnabled,
+        };
+      })
+      .filter((drink) => drink.isAvailable),
+  };
+};
+
+const getMenuData = async (storeId = "") => {
   try {
-    return (await fetchLarkMenu()) || fallbackMenu;
+    const token = await getTenantAccessToken();
+    const menu = (await fetchLarkMenu(token)) || fallbackMenu;
+    return token ? applyStoreAvailability(token, menu, storeId) : menu;
   } catch (error) {
     console.error(error);
     return fallbackMenu;

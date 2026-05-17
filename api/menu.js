@@ -13,6 +13,7 @@ module.exports = async (request, response) => {
     return json(response, 405, { error: "Method not allowed" });
   }
 
-  const menu = await getMenuData();
+  const store = String(request.query.store || "");
+  const menu = await getMenuData(store);
   return json(response, 200, menu);
 };
