@@ -72,39 +72,48 @@ export function I18nProvider({ children }) {
     const storageKey = `nanacha-dictionary-${LOCALE_CACHE_VERSION}-${language}`;
 
     const load = async () => {
+      let cachedDictionary = null;
+
       try {
         const cached = localStorage.getItem(storageKey);
         if (cached) {
-          if (active) setDictionary(JSON.parse(cached));
-          return;
+          cachedDictionary = JSON.parse(cached);
+          if (active) setDictionary(cachedDictionary);
         }
       } catch {
         // Fetch a fresh copy below.
       }
 
-      const response = await fetch(`/locales/${language}.json`, {
-        headers: { Accept: "application/json" },
-      });
-
-      if (!response.ok) {
-        if (active) {
-          setDictionary({});
-        }
-        return;
-      }
-
-      const nextDictionary = await response.json();
-
-      if (active) {
-        setDictionary(nextDictionary);
-      }
-
       try {
-        if (Object.keys(nextDictionary).length) {
-          localStorage.setItem(storageKey, JSON.stringify(nextDictionary));
+        const response = await fetch(`/locales/${language}.json`, {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        });
+
+        if (!response.ok) {
+          if (active && !cachedDictionary) {
+            setDictionary({});
+          }
+          return;
+        }
+
+        const nextDictionary = await response.json();
+
+        if (active) {
+          setDictionary(nextDictionary);
+        }
+
+        try {
+          if (Object.keys(nextDictionary).length) {
+            localStorage.setItem(storageKey, JSON.stringify(nextDictionary));
+          }
+        } catch {
+          // Ignore cache failures.
         }
       } catch {
-        // Ignore cache failures.
+        if (active && !cachedDictionary) {
+          setDictionary({});
+        }
       }
     };
 
