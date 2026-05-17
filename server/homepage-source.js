@@ -11,6 +11,21 @@ const {
 const sortByOrder = (items = []) =>
   [...items].sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
 
+const mergeWithFallbackStore = (store) => {
+  const fallbackStore = homepageFallback.stores.find((item) => item.id === store.id);
+
+  if (!fallbackStore) {
+    return store;
+  }
+
+  return Object.fromEntries(
+    Object.entries({
+      ...fallbackStore,
+      ...store,
+    }).map(([key, value]) => [key, value || fallbackStore[key] || value]),
+  );
+};
+
 const normalizeLegacyHomepageSetting = (key, value) => {
   if (key === "primaryButtonUrl" && value === "menu.html") {
     return "/menu";
@@ -73,24 +88,26 @@ const normalizeHomepage = ({
     storeRecords
       .map((record) => record.fields || {})
       .filter((fields) => booleanValue(fields.isActive) && fields.name)
-      .map((fields) => ({
-        id: textValue(fields.storeId),
-        statusLabel: textValue(fields.statusLabel),
-        name: textValue(fields.name),
-        summary: textValue(fields.summary),
-        postalCode: textValue(fields.postalCode),
-        address: textValue(fields.address),
-        intro: textValue(fields.intro),
-        hours: textValue(fields.hours),
-        closedDays: textValue(fields.closedDays),
-        nearestStation: textValue(fields.nearestStation),
-        usage: textValue(fields.usage),
-        paymentNote: textValue(fields.paymentNote),
-        googleMapsUrl: textValue(fields.googleMapsUrl),
-        googleMapsEmbedUrl: textValue(fields.googleMapsEmbedUrl),
-        uberEatsUrl: textValue(fields.uberEatsUrl),
-        sortOrder: Number(fields.sortOrder) || 9999,
-      })),
+      .map((fields) =>
+        mergeWithFallbackStore({
+          id: textValue(fields.storeId),
+          statusLabel: textValue(fields.statusLabel),
+          name: textValue(fields.name),
+          summary: textValue(fields.summary),
+          postalCode: textValue(fields.postalCode),
+          address: textValue(fields.address),
+          intro: textValue(fields.intro),
+          hours: textValue(fields.hours),
+          closedDays: textValue(fields.closedDays),
+          nearestStation: textValue(fields.nearestStation),
+          usage: textValue(fields.usage),
+          paymentNote: textValue(fields.paymentNote),
+          googleMapsUrl: textValue(fields.googleMapsUrl),
+          googleMapsEmbedUrl: textValue(fields.googleMapsEmbedUrl),
+          uberEatsUrl: textValue(fields.uberEatsUrl),
+          sortOrder: Number(fields.sortOrder) || 9999,
+        }),
+      ),
   );
 
   const faqs = sortByOrder(
