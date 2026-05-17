@@ -110,7 +110,7 @@ Create this table separately in each shop's own Base.
 - `title`: text
 - `caption`: text
 - `altText`: text
-- `variant`: single select (`photo`, `tapioca`, `seasonal`)
+- `variant`: single select; use `photo` for homepage photography
 - `sortOrder`: number
 - `isActive`: checkbox
 - `image`: attachment field for the homepage photo

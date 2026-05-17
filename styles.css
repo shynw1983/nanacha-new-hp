@@ -348,40 +348,6 @@ h3 {
   letter-spacing: 0.16em;
 }
 
-.hero-slide-product {
-  place-items: center;
-  isolation: isolate;
-}
-
-.hero-slide-product::before {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  content: "";
-}
-
-.hero-slide-product img {
-  width: auto;
-  height: min(58svh, 560px);
-  max-width: 72%;
-  object-fit: contain;
-  filter: drop-shadow(0 24px 28px rgba(67, 48, 35, 0.12));
-}
-
-.hero-slide-tapioca::before {
-  background:
-    radial-gradient(circle at 24% 22%, rgba(255, 255, 255, 0.96), transparent 28%),
-    radial-gradient(circle at 72% 76%, rgba(118, 86, 57, 0.2), transparent 28%),
-    linear-gradient(135deg, #fffaf5, #f1e2d4);
-}
-
-.hero-slide-seasonal::before {
-  background:
-    radial-gradient(circle at 74% 20%, rgba(255, 255, 255, 0.96), transparent 26%),
-    radial-gradient(circle at 24% 78%, rgba(138, 158, 109, 0.18), transparent 28%),
-    linear-gradient(135deg, #f8fbf2, #e6ead6);
-}
-
 .hero-carousel-controls {
   position: absolute;
   right: 18px;
@@ -1181,9 +1147,6 @@ footer p {
     height: 100%;
   }
 
-  .hero-carousel .hero-slide-product img {
-    height: min(44svh, 420px);
-  }
 
   .map-card,
   .map-card iframe {

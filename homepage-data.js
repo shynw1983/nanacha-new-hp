@@ -31,7 +31,7 @@ const homepageFallbackData = {
       caption: "もちもち食感の黒糖タピオカ。",
       imageUrl: "assets/menu/drink-01.png",
       altText: "黒糖タピオカミルク",
-      variant: "tapioca",
+      variant: "photo",
       sortOrder: 20,
     },
     {
@@ -40,7 +40,7 @@ const homepageFallbackData = {
       caption: "新しい一杯も、少しずつ。",
       imageUrl: "assets/menu/drink-08.png",
       altText: "季節のおすすめドリンク",
-      variant: "seasonal",
+      variant: "photo",
       sortOrder: 30,
     },
   ],

@@ -539,14 +539,8 @@ const renderHeroSlides = () => {
 
   slidesWrap.innerHTML = homepageData.slides
     .map((slide, index) => {
-      const variantClass =
-        slide.variant === "tapioca"
-          ? " hero-slide-product hero-slide-tapioca"
-          : slide.variant === "seasonal"
-            ? " hero-slide-product hero-slide-seasonal"
-            : "";
       return `
-        <article class="hero-slide${variantClass}${index === 0 ? " is-active" : ""}" data-hero-slide>
+        <article class="hero-slide${index === 0 ? " is-active" : ""}" data-hero-slide>
           <img src="${escapeHtml(slide.imageUrl)}" alt="${escapeHtml(slide.altText || slide.title)}" />
           <figcaption>
             <span>${escapeHtml(slide.title)}</span>
