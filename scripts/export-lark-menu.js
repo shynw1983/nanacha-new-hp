@@ -1,6 +1,7 @@
 const { existsSync, mkdirSync, readFileSync, writeFileSync } = require("fs");
 const path = require("path");
 const menu = require("../menu-data.js");
+const homepage = require("../homepage-data.js");
 
 const root = path.resolve(__dirname, "..");
 const outputDir = path.join(root, "lark-import");
@@ -116,9 +117,123 @@ const settingsRows = [
   ["hotIce", "", "", "", menu.hotIce],
 ];
 
+const homepageSettingsRows = [
+  [
+    "key",
+    "heroEyebrow",
+    "heroTitle",
+    "heroDescription",
+    "primaryButtonLabel",
+    "primaryButtonUrl",
+    "secondaryButtonLabel",
+    "secondaryButtonUrl",
+    "seasonEyebrow",
+    "seasonTitle",
+    "seasonIntro",
+    "footerTextLeft",
+    "footerTextRight",
+    "isActive",
+  ],
+  [
+    "main",
+    homepage.settings.heroEyebrow,
+    homepage.settings.heroTitle,
+    homepage.settings.heroDescription,
+    homepage.settings.primaryButtonLabel,
+    homepage.settings.primaryButtonUrl,
+    homepage.settings.secondaryButtonLabel,
+    homepage.settings.secondaryButtonUrl,
+    homepage.settings.seasonEyebrow,
+    homepage.settings.seasonTitle,
+    homepage.settings.seasonIntro,
+    homepage.settings.footerTextLeft,
+    homepage.settings.footerTextRight,
+    true,
+  ],
+];
+
+const homepageSlidesRows = [
+  ["slideId", "title", "caption", "altText", "variant", "sortOrder", "isActive", "imageFile", "imageUrl", "linkUrl"],
+  ...homepage.slides.map((slide) => [
+    slide.id,
+    slide.title,
+    slide.caption,
+    slide.altText,
+    slide.variant,
+    slide.sortOrder,
+    true,
+    slide.imageUrl,
+    "",
+    slide.linkUrl || "",
+  ]),
+];
+
+const homepageCardsRows = [
+  ["cardId", "section", "badge", "title", "body", "linkedDrinkId", "sortOrder", "isActive"],
+  ...homepage.cards.map((card) => [
+    card.id,
+    card.section,
+    card.badge || "",
+    card.title,
+    card.body,
+    card.linkedDrinkId || "",
+    card.sortOrder,
+    true,
+  ]),
+];
+
+const storesRows = [
+  [
+    "storeId",
+    "statusLabel",
+    "name",
+    "summary",
+    "postalCode",
+    "address",
+    "intro",
+    "hours",
+    "closedDays",
+    "nearestStation",
+    "usage",
+    "paymentNote",
+    "googleMapsUrl",
+    "googleMapsEmbedUrl",
+    "sortOrder",
+    "isActive",
+  ],
+  ...homepage.stores.map((store) => [
+    store.id,
+    store.statusLabel,
+    store.name,
+    store.summary,
+    store.postalCode || "",
+    store.address || "",
+    store.intro || "",
+    store.hours || "",
+    store.closedDays || "",
+    store.nearestStation || "",
+    store.usage || "",
+    store.paymentNote || "",
+    store.googleMapsUrl || "",
+    store.googleMapsEmbedUrl || "",
+    store.sortOrder,
+    true,
+  ]),
+];
+
+const faqRows = [
+  ["faqId", "question", "answer", "sortOrder", "isActive"],
+  ...homepage.faqs.map((faq) => [faq.id, faq.question, faq.answer, faq.sortOrder, true]),
+];
+
 mkdirSync(outputDir, { recursive: true });
 writeFileSync(path.join(outputDir, "categories.csv"), `${csv(categoryRows)}\n`);
 writeFileSync(path.join(outputDir, "drinks.csv"), `${csv(drinkRows)}\n`);
 writeFileSync(path.join(outputDir, "menu-settings.csv"), `${csv(settingsRows)}\n`);
+writeFileSync(path.join(outputDir, "homepage-settings.csv"), `${csv(homepageSettingsRows)}\n`);
+writeFileSync(path.join(outputDir, "homepage-slides.csv"), `${csv(homepageSlidesRows)}\n`);
+writeFileSync(path.join(outputDir, "homepage-cards.csv"), `${csv(homepageCardsRows)}\n`);
+writeFileSync(path.join(outputDir, "stores.csv"), `${csv(storesRows)}\n`);
+writeFileSync(path.join(outputDir, "faq.csv"), `${csv(faqRows)}\n`);
 
 console.log(`Exported Lark import files to ${path.relative(root, outputDir)}/`);

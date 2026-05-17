@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260513-seo2" />
+    <link rel="stylesheet" href="styles.css?v=20260517-carousel" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -66,8 +66,39 @@
             <span><strong>pickup</strong> 予約対応</span>
           </div>
         </div>
-        <figure class="hero-visual">
-          <img src="assets/nanacha-hero.png" alt="nanacha のドリンク" />
+        <figure class="hero-visual hero-carousel" data-hero-carousel aria-label="nanacha の紹介">
+          <div class="hero-slides">
+            <article class="hero-slide is-active" data-hero-slide>
+              <img src="assets/nanacha-hero.png" alt="nanacha の人気ドリンク" />
+              <figcaption>
+                <span>signature drinks</span>
+                香りまで楽しむ、nanacha の定番。
+              </figcaption>
+            </article>
+            <article class="hero-slide hero-slide-product hero-slide-tapioca" data-hero-slide>
+              <img src="assets/menu/drink-01.png" alt="黒糖タピオカミルク" />
+              <figcaption>
+                <span>fresh tapioca</span>
+                もちもち食感の黒糖タピオカ。
+              </figcaption>
+            </article>
+            <article class="hero-slide hero-slide-product hero-slide-seasonal" data-hero-slide>
+              <img src="assets/menu/drink-08.png" alt="季節のおすすめドリンク" />
+              <figcaption>
+                <span>seasonal pick</span>
+                新しい一杯も、少しずつ。
+              </figcaption>
+            </article>
+          </div>
+          <div class="hero-carousel-controls">
+            <button type="button" data-hero-prev aria-label="前の画像を見る">←</button>
+            <div class="hero-carousel-dots" aria-label="スライドを選択">
+              <button type="button" class="is-active" data-hero-dot="0" aria-label="1枚目の画像"></button>
+              <button type="button" data-hero-dot="1" aria-label="2枚目の画像"></button>
+              <button type="button" data-hero-dot="2" aria-label="3枚目の画像"></button>
+            </div>
+            <button type="button" data-hero-next aria-label="次の画像を見る">→</button>
+          </div>
         </figure>
       </section>
 
@@ -408,6 +439,7 @@
     </footer>
 
     <script src="menu-data.js"></script>
-    <script src="script.js?v=20260513"></script>
+    <script src="homepage-data.js"></script>
+    <script src="script.js?v=20260517-carousel"></script>
   </body>
 </html>

@@ -1,10 +1,18 @@
 # Lark Base Import
 
-Use one brand Base for shared product information:
+Use one menu Base for shared product information:
 
 1. `Categories` -> `categories.csv`
 2. `Drinks` -> `drinks.csv`
 3. `Menu Settings` -> `menu-settings.csv`
+
+Use one separate homepage Base for website-maintained content:
+
+4. `Homepage Settings` -> `homepage-settings.csv`
+5. `Homepage Slides` -> `homepage-slides.csv`
+6. `Homepage Cards` -> `homepage-cards.csv`
+7. `Stores` -> `stores.csv`
+8. `FAQ` -> `faq.csv`
 
 Each shop should have its own separate Lark Base with one table:
 
@@ -78,6 +86,81 @@ Create this table separately in each shop's own Base.
 - `uberPriceOverride`: number, optional Uber-specific price
 - `snsPriceOverride`: number, optional SNS-specific price
 - `note`: text, optional internal shop note
+
+## Homepage Settings
+
+- `key`: text
+- `heroEyebrow`: text
+- `heroTitle`: text
+- `heroDescription`: text
+- `primaryButtonLabel`: text
+- `primaryButtonUrl`: text
+- `secondaryButtonLabel`: text
+- `secondaryButtonUrl`: text
+- `seasonEyebrow`: text
+- `seasonTitle`: text
+- `seasonIntro`: text
+- `footerTextLeft`: text
+- `footerTextRight`: text
+- `isActive`: checkbox
+
+## Homepage Slides
+
+- `slideId`: text
+- `title`: text
+- `caption`: text
+- `altText`: text
+- `variant`: single select (`photo`, `tapioca`, `seasonal`)
+- `sortOrder`: number
+- `isActive`: checkbox
+- `image`: attachment field for the homepage photo
+- `imageFile`: text helper showing the current local image path
+- `imageUrl`: optional public image URL
+- `linkUrl`: optional text URL
+
+The website reads homepage slide images in this order:
+
+1. `image` attachment
+2. `imageUrl`
+3. `imageFile`
+
+## Homepage Cards
+
+- `cardId`: text
+- `section`: single select (`orderSteps`, `recommendGuide`, `seasonalPicks`, `story`)
+- `badge`: text, optional
+- `title`: text
+- `body`: text
+- `linkedDrinkId`: text, optional
+- `sortOrder`: number
+- `isActive`: checkbox
+
+## Stores
+
+- `storeId`: text
+- `statusLabel`: text
+- `name`: text
+- `summary`: text
+- `postalCode`: text
+- `address`: text
+- `intro`: text
+- `hours`: text
+- `closedDays`: text
+- `nearestStation`: text
+- `usage`: text
+- `paymentNote`: text
+- `googleMapsUrl`: text
+- `googleMapsEmbedUrl`: text
+- `sortOrder`: number
+- `isActive`: checkbox
+
+## FAQ
+
+- `faqId`: text
+- `question`: text
+- `answer`: text
+- `sortOrder`: number
+- `isActive`: checkbox
 
 After changing brand product names or categories, run:
 
