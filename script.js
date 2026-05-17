@@ -8,6 +8,7 @@ let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
 const heroCarousel = document.querySelector("[data-hero-carousel]");
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
+const LOCALE_CACHE_VERSION = "20260517-hero-copy";
 const HOMEPAGE_STORAGE_KEY = "nanacha-homepage";
 const getStoredLanguage = () => {
   try {
@@ -16,7 +17,7 @@ const getStoredLanguage = () => {
     return "ja";
   }
 };
-const getDictionaryStorageKey = (language) => `nanacha-dictionary-${language}`;
+const getDictionaryStorageKey = (language) => `nanacha-dictionary-${LOCALE_CACHE_VERSION}-${language}`;
 const getCachedHomepageData = () => {
   try {
     const cachedHomepage = localStorage.getItem(HOMEPAGE_STORAGE_KEY);

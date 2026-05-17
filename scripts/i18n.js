@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getMenuData } = require("../api/menu-source.js");
+const homepageData = require("../homepage-data.js");
 
 const root = path.resolve(__dirname, "..");
 const localeDir = path.join(root, "locales");
@@ -151,7 +152,38 @@ const collectMenuTexts = async () => {
   return texts;
 };
 
-const getSourceTexts = async () => Array.from(new Set([...collectHtmlTexts(), ...(await collectMenuTexts())])).sort();
+const collectHomepageTexts = () => {
+  const texts = [];
+  const push = (text) => {
+    if (shouldTranslate(text)) {
+      texts.push(normalize(text));
+    }
+  };
+
+  Object.values(homepageData.settings || {}).forEach(push);
+  (homepageData.slides || []).forEach((slide) => {
+    push(slide.title);
+    push(slide.caption);
+    push(slide.altText);
+  });
+  (homepageData.cards || []).forEach((card) => {
+    push(card.badge);
+    push(card.title);
+    push(card.body);
+  });
+  (homepageData.stores || []).forEach((store) => {
+    Object.values(store).forEach(push);
+  });
+  (homepageData.faqs || []).forEach((faq) => {
+    push(faq.question);
+    push(faq.answer);
+  });
+
+  return texts;
+};
+
+const getSourceTexts = async () =>
+  Array.from(new Set([...collectHtmlTexts(), ...collectHomepageTexts(), ...(await collectMenuTexts())])).sort();
 
 const readJson = (file, fallback = {}) => {
   if (!fs.existsSync(file)) {
