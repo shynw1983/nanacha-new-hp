@@ -1,4 +1,4 @@
-const homepageData = {
+const homepageFallbackData = {
   settings: {
     heroEyebrow: "tapioca & more...",
     heroTitle: "nanacha",
@@ -219,9 +219,9 @@ const homepageData = {
 };
 
 if (typeof module !== "undefined") {
-  module.exports = homepageData;
+  module.exports = homepageFallbackData;
 }
 
 if (typeof window !== "undefined") {
-  window.NANACHA_HOMEPAGE = homepageData;
+  window.NANACHA_HOMEPAGE = homepageFallbackData;
 }
