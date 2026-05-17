@@ -8,6 +8,7 @@ let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
 const heroCarousel = document.querySelector("[data-hero-carousel]");
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
+const HOMEPAGE_STORAGE_KEY = "nanacha-homepage";
 const getStoredLanguage = () => {
   try {
     return localStorage.getItem(LANGUAGE_STORAGE_KEY) || "ja";
@@ -16,6 +17,21 @@ const getStoredLanguage = () => {
   }
 };
 const getDictionaryStorageKey = (language) => `nanacha-dictionary-${language}`;
+const getCachedHomepageData = () => {
+  try {
+    const cachedHomepage = localStorage.getItem(HOMEPAGE_STORAGE_KEY);
+    return cachedHomepage ? JSON.parse(cachedHomepage) : null;
+  } catch (error) {
+    return null;
+  }
+};
+const cacheHomepageData = (data) => {
+  try {
+    localStorage.setItem(HOMEPAGE_STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    // Homepage data should still render when storage is unavailable.
+  }
+};
 const translationState = {
   language: getStoredLanguage(),
   isApplying: false,
@@ -192,6 +208,10 @@ const restoreOriginalLanguage = () => {
 
 const revealInitialLanguage = () => {
   document.documentElement.classList.remove("is-language-pending");
+};
+
+const revealHomepage = () => {
+  document.documentElement.classList.remove("is-homepage-pending");
 };
 
 const loadDictionary = async (language) => {
@@ -700,6 +720,7 @@ const renderHomepageSections = () => {
   const footerLines = document.querySelectorAll("footer p");
   if (footerLines[0]) footerLines[0].textContent = settings.footerTextLeft;
   if (footerLines[1]) footerLines[1].textContent = settings.footerTextRight;
+  revealHomepage();
 };
 
 const categoryDecor = (categoryId) =>
@@ -902,7 +923,9 @@ const loadRemoteHomepageData = async () => {
       return null;
     }
 
-    return await response.json();
+    const data = await response.json();
+    cacheHomepageData(data);
+    return data;
   } catch {
     return null;
   }
@@ -1158,6 +1181,12 @@ const initPage = async () => {
     translationState.language !== "ja"
       ? translatePage(translationState.language, { isRefresh: true, isInitialLoad: true })
       : Promise.resolve().then(revealInitialLanguage);
+
+  const cachedHomepageData = getCachedHomepageData();
+  if (cachedHomepageData) {
+    homepageData = cachedHomepageData;
+    renderHomepageSections();
+  }
 
   homepageData = (await loadRemoteHomepageData()) || homepageData;
   renderHomepageSections();

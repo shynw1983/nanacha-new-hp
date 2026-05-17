@@ -18,6 +18,8 @@
         } catch (error) {
           // Ignore storage access failures and fall back to Japanese.
         }
+
+        document.documentElement.classList.add("is-homepage-pending");
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

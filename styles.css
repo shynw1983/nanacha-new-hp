@@ -146,6 +146,14 @@ html.is-language-pending body {
   opacity: 0;
 }
 
+.hero-visual {
+  transition: opacity 180ms ease;
+}
+
+html.is-homepage-pending .hero-visual {
+  opacity: 0;
+}
+
 .hero {
   min-height: calc(100svh - 72px);
   display: grid;
