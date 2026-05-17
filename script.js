@@ -553,14 +553,12 @@ const syncVisibleMenuCards = () => {
   });
 };
 
-const loadRemoteMenuData = async () => {
+const loadRemoteMenuData = async (store = "") => {
   if (window.location.protocol === "file:") {
     return null;
   }
 
   try {
-    const storeSelect = form?.querySelector("[data-store-select]");
-    const store = storeSelect?.value || "";
     const url = new URL("/api/menu", window.location.origin);
 
     if (store) {
@@ -708,7 +706,7 @@ const initOrderForm = () => {
 
   form.addEventListener("change", (event) => {
     if (event.target === storeSelect) {
-      initMenuData();
+      initMenuData(storeSelect.value);
       return;
     }
     if (event.target === categorySelect) {
@@ -773,8 +771,14 @@ const initOrderForm = () => {
   });
 };
 
-const initMenuData = async () => {
-  const remoteMenu = await loadRemoteMenuData();
+const initMenuData = async (store = "") => {
+  let remoteMenu = await loadRemoteMenuData(store);
+
+  if (!store && remoteMenu?.stores?.length) {
+    const defaultStore = remoteMenu.stores[0].id;
+    remoteMenu = (await loadRemoteMenuData(defaultStore)) || remoteMenu;
+  }
+
   const hasRemoteMenu = Boolean(remoteMenu);
 
   if (remoteMenu) {
