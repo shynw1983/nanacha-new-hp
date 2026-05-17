@@ -2,12 +2,11 @@
   "name": "nanacha-kiyokawa-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Static website for nanacha Fukuoka Kiyokawa.",
+  "description": "Next.js website for nanacha Fukuoka Kiyokawa.",
   "scripts": {
-    "dev": "python3 -m http.server 8000",
-    "start": "python3 -m http.server 8000",
-    "build": "node scripts/build.js",
-    "build:site": "node scripts/build.js",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "i18n": "node scripts/i18n.js",
     "i18n:extract": "node scripts/i18n.js extract",
     "i18n:translate": "node scripts/i18n.js translate:openai",
@@ -18,11 +17,11 @@
     "lark:sync-images": "node scripts/sync-lark-images.js",
     "lark:sync-store-products": "node scripts/sync-store-products.js"
   },
-  "keywords": [
-    "nanacha",
-    "static-site",
-    "vercel"
-  ],
+  "keywords": ["nanacha", "nextjs", "vercel"],
   "license": "UNLICENSED",
-  "dependencies": {}
+  "dependencies": {
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
 }

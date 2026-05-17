@@ -1,6 +1,6 @@
-const { existsSync, readFileSync } = require("fs");
-const path = require("path");
 const localMenu = require("../menu-data.js");
+const localDrinkDescriptions = require("../data/menu-descriptions.js");
+const localCategoryNotes = require("../data/category-notes.js");
 const {
   cleanEnv,
   textValue,
@@ -20,29 +20,15 @@ const arrayValue = (value) => {
     .filter(Boolean);
 };
 
-const menuHtmlPath = path.join(__dirname, "..", "menu.html");
-const menuHtml = existsSync(menuHtmlPath) ? readFileSync(menuHtmlPath, "utf8") : "";
-
-const stripTags = (value = "") => value.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-
-const parseLocalDrinkDescriptions = () => {
-  const descriptions = new Map();
-  const pattern = /<h3>([^<]+)<\/h3><p>([^<]+)<\/p>/g;
-  let match;
-
-  while ((match = pattern.exec(menuHtml))) {
-    descriptions.set(stripTags(match[1]), stripTags(match[2]));
-  }
-
-  return descriptions;
-};
-
-const localDrinkDescriptions = parseLocalDrinkDescriptions();
 const withLocalDescriptions = (menu) => ({
   ...menu,
+  categories: menu.categories.map((category) => ({
+    ...category,
+    note: category.note || localCategoryNotes[category.id] || "",
+  })),
   drinks: menu.drinks.map((drink) => ({
     ...drink,
-    description: drink.description || localDrinkDescriptions.get(drink.name) || "",
+    description: drink.description || localDrinkDescriptions[drink.name] || "",
   })),
 });
 const fallbackMenu = withLocalDescriptions(localMenu);
@@ -139,7 +125,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         name: textValue(fields.name),
         category: textValue(fields.category),
         price: Number(fields.price),
-        description: textValue(fields.description) || localDrinkDescriptions.get(textValue(fields.name)) || "",
+        description: textValue(fields.description) || localDrinkDescriptions[textValue(fields.name)] || "",
         imageUrl: imageValue(fields.image) || textValue(fields.imageUrl) || textValue(fields.imageFile),
         temperatures: arrayValue(fields.temperatures),
         isRecommended: booleanValue(fields.isRecommended),

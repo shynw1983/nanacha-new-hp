@@ -11,6 +11,22 @@ const {
 const sortByOrder = (items = []) =>
   [...items].sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
 
+const normalizeLegacyHomepageSetting = (key, value) => {
+  if (key === "primaryButtonUrl" && value === "menu.html") {
+    return "/menu";
+  }
+
+  if (
+    key === "heroDescription" &&
+    value ===
+      "黒糖タピオカミルク、フルーツティー、八女抹茶ラテ、スムージーまで。素材の香りと選ぶ楽しさを大切にした、気軽に立ち寄れるティースタンドです。"
+  ) {
+    return "2019年12月に福岡で誕生した nanacha は、黒糖タピオカミルク、フルーツティー、八女抹茶ラテ、スムージーまで、素材の香りと選ぶ楽しさを大切にした、気軽に立ち寄れるティースタンドです。";
+  }
+
+  return value;
+};
+
 const normalizeHomepage = ({
   settingsRecords = [],
   slideRecords = [],
@@ -92,7 +108,7 @@ const normalizeHomepage = ({
     settings: {
       ...homepageFallback.settings,
       ...Object.fromEntries(
-        Object.entries(settings).map(([key, value]) => [key, textValue(value)]),
+        Object.entries(settings).map(([key, value]) => [key, normalizeLegacyHomepageSetting(key, textValue(value))]),
       ),
     },
     slides: slides.length ? slides : homepageFallback.slides,

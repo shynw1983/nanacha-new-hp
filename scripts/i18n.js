@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
-const { getMenuData } = require("../api/menu-source.js");
+const localMenu = require("../menu-data.js");
+const localDescriptions = require("../data/menu-descriptions.js");
+const localCategoryNotes = require("../data/category-notes.js");
 const homepageData = require("../homepage-data.js");
 
 const root = path.resolve(__dirname, "..");
-const localeDir = path.join(root, "locales");
-const sourceFiles = ["index.html", "menu.html"];
+const localeDir = path.join(root, "public", "locales");
 
 const loadLocalEnv = () => {
   const envFile = path.join(root, ".env.local");
@@ -62,6 +63,50 @@ const openAiTargetLanguages = (process.env.OPENAI_TRANSLATION_LANGUAGES || "")
   .filter(Boolean);
 
 const extraTexts = [
+  "nanacha ホーム",
+  "メインナビゲーション",
+  "メニュー",
+  "アクセス",
+  "予約",
+  "注文方法",
+  "受け取り予約",
+  "甘さゼロ対応",
+  "予約対応",
+  "人気メニュー",
+  "全メニューを見る",
+  "はじめての方へ",
+  "おすすめの選び方",
+  "メニューで探す",
+  "nanachaのこだわり",
+  "店舗紹介",
+  "店舗情報を見る",
+  "営業時間",
+  "定休日",
+  "最寄り",
+  "利用方法",
+  "支払い",
+  "google mapsで開く",
+  "受け取り予約へ",
+  "よくある質問",
+  "店舗",
+  "カテゴリー",
+  "ドリンク",
+  "サイズ",
+  "温度",
+  "甘さ",
+  "氷の量",
+  "オプション",
+  "受け取り時間",
+  "トッピング",
+  "Squareで注文・支払い",
+  "福岡清川店で楽しめるタピオカミルク、フラッペ、チーズティー、スムージー、ティー、コーヒーまで。 サイズ・甘さ・氷の量・トッピングを選んで、自分好みの一杯に。",
+  "アレルギー・カフェインについて",
+  "アレルギー",
+  "牛乳、豆乳、ナッツ、ごま、チョコレート、オレオ、ホイップ、チーズフォームなどを使用する商品があります。アレルギーをお持ちの方は注文前にスタッフへご確認ください。",
+  "カフェイン",
+  "紅茶、緑茶、ほうじ茶、ジャスミン茶、コーヒーを使う商品にはカフェインが含まれる場合があります。デカフェ変更は対応可能な商品で選べます。",
+  "甘さ・氷",
+  "甘さゼロ、少なめ、ふつう、多め、氷少なめ、氷抜きに対応しています。すっきり飲みたい方は甘さ少なめがおすすめです。",
   "合計",
   "決済画面を作成中...",
   "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。",
@@ -69,7 +114,7 @@ const extraTexts = [
   "お支払いありがとうございます。店頭でお名前とSquareの決済画面をご提示ください。",
 ];
 
-const normalize = (text) => text.replace(/\s+/g, " ").trim();
+const normalize = (text = "") => String(text).replace(/\s+/g, " ").trim();
 
 const shouldTranslate = (text) => {
   const value = normalize(text);
@@ -82,46 +127,11 @@ const shouldTranslate = (text) => {
     return false;
   }
 
+  if (/^(https?:|#|\/)/.test(value) || /^[a-z0-9-]+$/.test(value)) {
+    return false;
+  }
+
   return /[A-Za-z\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(value);
-};
-
-const stripNoTranslate = (html) =>
-  html.replace(/<([a-z0-9-]+)(?=[^>]*\bdata-no-translate\b)[^>]*>[\s\S]*?<\/\1>/gi, " ");
-
-const stripIgnoredTags = (html) =>
-  html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, " ")
-    .replace(/<svg[\s\S]*?<\/svg>/gi, " ");
-
-const decodeEntities = (text) =>
-  text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-
-const collectHtmlTexts = () => {
-  const texts = [];
-
-  sourceFiles.forEach((file) => {
-    const html = fs.readFileSync(path.join(root, file), "utf8");
-    const stripped = stripIgnoredTags(stripNoTranslate(html));
-    const withoutTags = stripped.replace(/<[^>]+>/g, "\n");
-
-    withoutTags.split("\n").forEach((line) => {
-      const text = normalize(decodeEntities(line));
-
-      if (shouldTranslate(text)) {
-        texts.push(text);
-      }
-    });
-  });
-
-  return texts;
 };
 
 const collectMenuTexts = async () => {
@@ -131,7 +141,17 @@ const collectMenuTexts = async () => {
       texts.push(normalize(text));
     }
   };
-  const menuData = await getMenuData();
+  const menuData = {
+    ...localMenu,
+    categories: localMenu.categories.map((category) => ({
+      ...category,
+      note: localCategoryNotes[category.id] || "",
+    })),
+    drinks: localMenu.drinks.map((drink) => ({
+      ...drink,
+      description: localDescriptions[drink.name] || "",
+    })),
+  };
 
   menuData.categories.forEach((category) => {
     push(category.label);
@@ -183,7 +203,7 @@ const collectHomepageTexts = () => {
 };
 
 const getSourceTexts = async () =>
-  Array.from(new Set([...collectHtmlTexts(), ...collectHomepageTexts(), ...(await collectMenuTexts())])).sort();
+  Array.from(new Set([...extraTexts, ...collectHomepageTexts(), ...(await collectMenuTexts())])).sort();
 
 const readJson = (file, fallback = {}) => {
   if (!fs.existsSync(file)) {

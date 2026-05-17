@@ -137,7 +137,7 @@ const outputPathFor = (name, extension) => {
     return null;
   }
 
-  return path.join(root, "assets", "menu", `${fileName}${extension}`);
+  return path.join(root, "public", "assets", "menu", `${fileName}${extension}`);
 };
 
 const updateImageFile = async (token, recordId, imageFile) => {
@@ -201,7 +201,7 @@ const main = async () => {
       continue;
     }
 
-    const finalImageFile = path.relative(root, finalOutputPath);
+    const finalImageFile = path.relative(path.join(root, "public"), finalOutputPath);
 
     mkdirSync(path.dirname(finalOutputPath), { recursive: true });
     writeFileSync(finalOutputPath, Buffer.from(await response.arrayBuffer()));

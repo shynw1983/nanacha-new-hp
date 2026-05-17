@@ -3,9 +3,9 @@ const homepageFallbackData = {
     heroEyebrow: "tapioca & more...",
     heroTitle: "nanacha",
     heroDescription:
-      "黒糖タピオカミルク、フルーツティー、八女抹茶ラテ、スムージーまで。素材の香りと選ぶ楽しさを大切にした、気軽に立ち寄れるティースタンドです。",
+      "2019年12月に福岡で誕生した nanacha は、黒糖タピオカミルク、フルーツティー、八女抹茶ラテ、スムージーまで、素材の香りと選ぶ楽しさを大切にした、気軽に立ち寄れるティースタンドです。",
     primaryButtonLabel: "メニューを見る",
-    primaryButtonUrl: "menu.html",
+    primaryButtonUrl: "/menu",
     secondaryButtonLabel: "受け取り予約",
     secondaryButtonUrl: "#reserve",
     seasonEyebrow: "seasonal picks",

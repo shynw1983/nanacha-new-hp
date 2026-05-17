@@ -1,0 +1,132 @@
+"use client";
+
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+const LANGUAGE_STORAGE_KEY = "nanacha-language";
+const LOCALE_CACHE_VERSION = "20260517-react-i18n";
+const LANGUAGE_META = {
+  ja: { htmlLang: "ja" },
+  en: { htmlLang: "en" },
+  zh: { htmlLang: "zh-Hans" },
+  ko: { htmlLang: "ko" },
+};
+const I18nContext = createContext({
+  language: "ja",
+  setLanguage: () => {},
+  t: (value) => value,
+});
+
+const getStoredLanguage = () => {
+  try {
+    const language = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return LANGUAGE_META[language] ? language : "ja";
+  } catch {
+    return "ja";
+  }
+};
+
+const translateText = (value, dictionary) => {
+  if (typeof value !== "string" || !value) {
+    return value;
+  }
+
+  const exact = dictionary[value];
+  if (exact) {
+    return exact;
+  }
+
+  let translated = value;
+  Object.entries(dictionary)
+    .filter(([source, target]) => source.length > 3 && target && translated.includes(source))
+    .sort((a, b) => b[0].length - a[0].length)
+    .forEach(([source, target]) => {
+      translated = translated.split(source).join(target);
+    });
+
+  return translated;
+};
+
+export function I18nProvider({ children }) {
+  const [language, setLanguage] = useState("ja");
+  const [dictionary, setDictionary] = useState({});
+
+  useEffect(() => {
+    setLanguage(getStoredLanguage());
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = LANGUAGE_META[language]?.htmlLang || "ja";
+
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+      // Continue without persistence.
+    }
+
+    if (language === "ja") {
+      setDictionary({});
+      return;
+    }
+
+    let active = true;
+    const storageKey = `nanacha-dictionary-${LOCALE_CACHE_VERSION}-${language}`;
+
+    const load = async () => {
+      try {
+        const cached = localStorage.getItem(storageKey);
+        if (cached) {
+          if (active) setDictionary(JSON.parse(cached));
+          return;
+        }
+      } catch {
+        // Fetch a fresh copy below.
+      }
+
+      const response = await fetch(`/locales/${language}.json`, {
+        headers: { Accept: "application/json" },
+      });
+      const nextDictionary = response.ok ? await response.json() : {};
+
+      if (active) {
+        setDictionary(nextDictionary);
+      }
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(nextDictionary));
+      } catch {
+        // Ignore cache failures.
+      }
+    };
+
+    load();
+
+    return () => {
+      active = false;
+    };
+  }, [language]);
+
+  const value = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      t: (text) => translateText(text, dictionary),
+    }),
+    [dictionary, language],
+  );
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+export const useI18n = () => useContext(I18nContext);
+
+export const localizeValue = (value, t) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => localizeValue(item, t));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, localizeValue(item, t)]));
+  }
+
+  return typeof value === "string" ? t(value) : value;
+};

@@ -59,7 +59,7 @@ After replacing product photos in Lark, run:
 npm run lark:sync-images
 ```
 
-The command downloads each row's `image` attachment into `assets/menu/` using the product name as the filename, then writes that path back to `imageFile`.
+The command downloads each row's `image` attachment into `public/assets/menu/` using the product name as the filename, then writes the browser path back to `imageFile`.
 
 ## Menu Settings
 
