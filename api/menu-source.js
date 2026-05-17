@@ -243,7 +243,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         temperatures: arrayValue(fields.temperatures),
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
-        isActive: fields.isActive == null ? true : booleanValue(fields.isActive),
+        isActive: booleanValue(fields.isActive),
         sortOrder: Number(fields.sortOrder) || 9999,
       }),
     )
