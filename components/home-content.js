@@ -69,7 +69,7 @@ export function HomeContent({ homepage, menu }) {
             {t("全メニューを見る")}
           </a>
         </div>
-        <div className="menu-grid">
+        <div className="menu-grid reveal-group">
           {picks.map((drink, index) => (
             <article className={`drink-card${drink.isFeatured || index === 0 ? " featured" : ""}`} key={drink.id}>
               {drink.imageUrl ? <img className="drink-photo" src={normalizeAssetUrl(drink.imageUrl)} alt={drink.name} /> : null}
@@ -94,7 +94,7 @@ export function HomeContent({ homepage, menu }) {
             </h2>
           </div>
         </div>
-        <div className="step-grid">
+        <div className="step-grid reveal-group">
           {cardsBySection(localizedHomepage, "orderSteps").map((card) => (
             <article key={card.id}>
               <span>{card.badge}</span>
@@ -118,7 +118,7 @@ export function HomeContent({ homepage, menu }) {
             {t("メニューで探す")}
           </a>
         </div>
-        <div className="guide-grid">
+        <div className="guide-grid reveal-group">
           {cardsBySection(localizedHomepage, "recommendGuide").map((card) => (
             <article key={card.id}>
               <h3>{card.title}</h3>
@@ -137,7 +137,7 @@ export function HomeContent({ homepage, menu }) {
           </h2>
           <p>{settings.seasonIntro}</p>
         </div>
-        <div className="season-list">
+        <div className="season-list reveal-group">
           {cardsBySection(localizedHomepage, "seasonalPicks").map((card) => (
             <article key={card.id}>
               <h3>{card.title}</h3>
@@ -157,7 +157,7 @@ export function HomeContent({ homepage, menu }) {
             </h2>
           </div>
         </div>
-        <div className="story-grid">
+        <div className="story-grid reveal-group">
           {cardsBySection(localizedHomepage, "story").map((card) => (
             <article key={card.id}>
               <h3>{card.title}</h3>
@@ -177,7 +177,7 @@ export function HomeContent({ homepage, menu }) {
             </h2>
           </div>
         </div>
-        <div className="store-list">
+        <div className="store-list reveal-group">
           {localizedHomepage.stores.map((store) => (
             <article className={`store-card${store.id === "next-store" ? " is-upcoming" : ""}`} key={store.id}>
               <p className="store-status">{store.statusLabel}</p>
@@ -267,7 +267,7 @@ export function HomeContent({ homepage, menu }) {
             </h2>
           </div>
         </div>
-        <div className="faq-grid">
+        <div className="faq-grid reveal-group">
           {localizedHomepage.faqs.map((faq) => (
             <details key={faq.id}>
               <summary>{faq.question}</summary>
