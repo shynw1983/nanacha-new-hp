@@ -151,6 +151,7 @@ The website reads homepage slide images in this order:
 - `paymentNote`: text
 - `googleMapsUrl`: text
 - `googleMapsEmbedUrl`: text
+- `uberEatsUrl`: text, optional store-specific delivery link
 - `sortOrder`: number
 - `isActive`: checkbox
 

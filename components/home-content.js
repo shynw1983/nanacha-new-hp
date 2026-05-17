@@ -2,7 +2,6 @@
 
 import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
-import siteLinks from "../data/site-links";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
@@ -233,12 +232,11 @@ export function HomeContent({ homepage, menu }) {
               <a className="ghost-button" href="#reserve">
                 {t("受け取り予約へ")}
               </a>
-              <a className="ghost-button" href={siteLinks.instagram} target="_blank" rel="noreferrer">
-                Instagram
-              </a>
-              <a className="ghost-button" href={siteLinks.uberEats} target="_blank" rel="noreferrer">
-                Uber Eats
-              </a>
+              {primaryStore.uberEatsUrl ? (
+                <a className="ghost-button" href={primaryStore.uberEatsUrl} target="_blank" rel="noreferrer">
+                  Uber Eats
+                </a>
+              ) : null}
             </div>
           </div>
           <div className="map-card" aria-label="nanacha 福岡清川店 地図">

@@ -166,6 +166,8 @@ const homepageFallbackData = {
         "https://www.google.com/maps/search/?api=1&query=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6",
       googleMapsEmbedUrl:
         "https://www.google.com/maps?q=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6&output=embed",
+      uberEatsUrl:
+        "https://www.ubereats.com/jp/store/nanacha-%E6%B8%85%E5%B7%9D%E5%BA%97-nanacha-kiyokawa/4qJ-17U0RB-kK4GdDu_35w",
       sortOrder: 10,
     },
     {

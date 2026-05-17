@@ -88,6 +88,7 @@ const normalizeHomepage = ({
         paymentNote: textValue(fields.paymentNote),
         googleMapsUrl: textValue(fields.googleMapsUrl),
         googleMapsEmbedUrl: textValue(fields.googleMapsEmbedUrl),
+        uberEatsUrl: textValue(fields.uberEatsUrl),
         sortOrder: Number(fields.sortOrder) || 9999,
       })),
   );
