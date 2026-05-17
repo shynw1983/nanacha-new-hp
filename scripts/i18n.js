@@ -3,7 +3,7 @@ const path = require("path");
 const localMenu = require("../menu-data.js");
 const localDescriptions = require("../data/menu-descriptions.js");
 const localCategoryNotes = require("../data/category-notes.js");
-const homepageData = require("../homepage-data.js");
+const { getHomepageData } = require("../server/homepage-source");
 
 const root = path.resolve(__dirname, "..");
 const localeDir = path.join(root, "public", "locales");
@@ -172,7 +172,7 @@ const collectMenuTexts = async () => {
   return texts;
 };
 
-const collectHomepageTexts = () => {
+const collectHomepageTexts = (homepageData) => {
   const texts = [];
   const push = (text) => {
     if (shouldTranslate(text)) {
@@ -202,8 +202,10 @@ const collectHomepageTexts = () => {
   return texts;
 };
 
-const getSourceTexts = async () =>
-  Array.from(new Set([...extraTexts, ...collectHomepageTexts(), ...(await collectMenuTexts())])).sort();
+const getSourceTexts = async () => {
+  const homepageData = await getHomepageData();
+  return Array.from(new Set([...extraTexts, ...collectHomepageTexts(homepageData), ...(await collectMenuTexts())])).sort();
+};
 
 const readJson = (file, fallback = {}) => {
   if (!fs.existsSync(file)) {
