@@ -619,9 +619,9 @@ h3 {
 .access-copy address {
   margin-bottom: 20px;
   font-style: normal;
-  font-size: clamp(24px, 3vw, 42px);
-  font-weight: 800;
-  line-height: 1.18;
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .access-copy p {
