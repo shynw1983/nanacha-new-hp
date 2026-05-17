@@ -1268,7 +1268,8 @@ footer p {
 
   .hero-slide figcaption {
     right: 16px;
-    bottom: 76px;
+    top: 16px;
+    bottom: auto;
     left: 16px;
     width: auto;
     max-width: none;
