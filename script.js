@@ -646,7 +646,9 @@ const initOrderForm = () => {
 
   const syncDrinks = () => {
     const category = categorySelect.value;
-    const drinks = orderData.drinks.filter((drink) => drink.category === category);
+    const drinks = orderData.drinks.filter(
+      (drink) => drink.category === category && drink.isAvailable !== false && drink.websiteEnabled !== false,
+    );
 
     fillSelect(
       drinkSelect,
