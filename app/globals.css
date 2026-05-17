@@ -287,6 +287,17 @@ h3 {
   background: var(--paper);
 }
 
+.uber-eats-button {
+  border-color: #06c167;
+  background: #06c167;
+  color: #ffffff;
+}
+
+.uber-eats-button:hover {
+  border-color: #05a958;
+  background: #05a958;
+}
+
 .hero-metrics {
   flex-wrap: wrap;
   gap: 10px;

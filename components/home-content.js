@@ -233,7 +233,12 @@ export function HomeContent({ homepage, menu }) {
                 {t("受け取り予約へ")}
               </a>
               {primaryStore.uberEatsUrl ? (
-                <a className="ghost-button" href={primaryStore.uberEatsUrl} target="_blank" rel="noreferrer">
+                <a
+                  className="ghost-button uber-eats-button"
+                  href={primaryStore.uberEatsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Uber Eats
                 </a>
               ) : null}
