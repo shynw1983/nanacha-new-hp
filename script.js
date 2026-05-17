@@ -8,7 +8,7 @@ let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
 const heroCarousel = document.querySelector("[data-hero-carousel]");
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
-const LOCALE_CACHE_VERSION = "20260517-compact-en-metrics";
+const LOCALE_CACHE_VERSION = "20260517-zero-available-copy";
 const HOMEPAGE_STORAGE_KEY = "nanacha-homepage";
 const getStoredLanguage = () => {
   try {
