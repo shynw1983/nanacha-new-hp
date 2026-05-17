@@ -2,6 +2,7 @@
 
 import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
+import siteLinks from "../data/site-links";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
@@ -231,6 +232,12 @@ export function HomeContent({ homepage, menu }) {
               </a>
               <a className="ghost-button" href="#reserve">
                 {t("受け取り予約へ")}
+              </a>
+              <a className="ghost-button" href={siteLinks.instagram} target="_blank" rel="noreferrer">
+                Instagram
+              </a>
+              <a className="ghost-button" href={siteLinks.uberEats} target="_blank" rel="noreferrer">
+                Uber Eats
               </a>
             </div>
           </div>
