@@ -111,6 +111,7 @@ Useful maintenance commands:
 
 ```bash
 npm run lark:export-menu
+npm run lark:sync-homepage-settings
 npm run lark:sync-images
 npm run lark:sync-store-products
 ```
