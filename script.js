@@ -3,8 +3,10 @@ const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
 const languageSelect = document.querySelector("[data-language-select]");
 let orderData = window.NANACHA_MENU;
+let homepageData = window.NANACHA_HOMEPAGE;
 let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
+const heroCarousel = document.querySelector("[data-hero-carousel]");
 const translationState = {
   language: localStorage.getItem("nanacha-language") || "ja",
   isApplying: false,
@@ -40,6 +42,67 @@ const FORM_VALUE_LABELS = {
 const syncHeader = () => {
   header.style.boxShadow =
     window.scrollY > 12 ? "0 12px 36px rgba(0, 0, 0, 0.05)" : "none";
+};
+
+const initHeroCarousel = () => {
+  if (!heroCarousel) {
+    return;
+  }
+
+  const slides = Array.from(heroCarousel.querySelectorAll("[data-hero-slide]"));
+  const dots = Array.from(heroCarousel.querySelectorAll("[data-hero-dot]"));
+  const previousButton = heroCarousel.querySelector("[data-hero-prev]");
+  const nextButton = heroCarousel.querySelector("[data-hero-next]");
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let activeIndex = 0;
+  let autoplayTimer = null;
+
+  const showSlide = (index) => {
+    activeIndex = (index + slides.length) % slides.length;
+    slides.forEach((slide, slideIndex) => {
+      slide.classList.toggle("is-active", slideIndex === activeIndex);
+    });
+    dots.forEach((dot, dotIndex) => {
+      dot.classList.toggle("is-active", dotIndex === activeIndex);
+    });
+  };
+
+  const stopAutoplay = () => {
+    window.clearInterval(autoplayTimer);
+    autoplayTimer = null;
+  };
+
+  const startAutoplay = () => {
+    if (prefersReducedMotion || autoplayTimer || slides.length < 2) {
+      return;
+    }
+
+    autoplayTimer = window.setInterval(() => {
+      showSlide(activeIndex + 1);
+    }, 4800);
+  };
+
+  previousButton?.addEventListener("click", () => {
+    showSlide(activeIndex - 1);
+  });
+
+  nextButton?.addEventListener("click", () => {
+    showSlide(activeIndex + 1);
+  });
+
+  dots.forEach((dot) => {
+    dot.addEventListener("click", () => {
+      showSlide(Number(dot.dataset.heroDot));
+    });
+  });
+
+  heroCarousel.addEventListener("mouseenter", stopAutoplay);
+  heroCarousel.addEventListener("mouseleave", startAutoplay);
+  heroCarousel.addEventListener("focusin", stopAutoplay);
+  heroCarousel.addEventListener("focusout", startAutoplay);
+
+  showSlide(0);
+  startAutoplay();
 };
 
 if (header) {
@@ -432,6 +495,173 @@ const renderHomepagePicks = () => {
   grid.innerHTML = drinks.map(renderDrinkCard).join("");
 };
 
+const getCardsBySection = (section) =>
+  (homepageData?.cards || []).filter((card) => card.section === section);
+
+const renderHeroContent = () => {
+  if (!homepageData?.settings) {
+    return;
+  }
+
+  const { settings } = homepageData;
+  const eyebrow = document.querySelector(".hero-copy .eyebrow");
+  const title = document.querySelector("#hero-title");
+  const description = document.querySelector(".hero-text");
+  const primaryButton = document.querySelector(".hero-actions .primary-button");
+  const secondaryButton = document.querySelector(".hero-actions .ghost-button");
+
+  if (eyebrow?.lastChild) {
+    eyebrow.lastChild.nodeValue = `\n            ${settings.heroEyebrow}`;
+  }
+
+  if (title?.firstChild) {
+    title.firstChild.nodeValue = `\n            ${settings.heroTitle}\n            `;
+  }
+
+  if (description) description.textContent = settings.heroDescription;
+  if (primaryButton) {
+    primaryButton.textContent = settings.primaryButtonLabel;
+    primaryButton.href = settings.primaryButtonUrl;
+  }
+  if (secondaryButton) {
+    secondaryButton.textContent = settings.secondaryButtonLabel;
+    secondaryButton.href = settings.secondaryButtonUrl;
+  }
+};
+
+const renderHeroSlides = () => {
+  const slidesWrap = document.querySelector(".hero-slides");
+  const dotsWrap = document.querySelector(".hero-carousel-dots");
+
+  if (!slidesWrap || !dotsWrap || !homepageData?.slides?.length) {
+    return;
+  }
+
+  slidesWrap.innerHTML = homepageData.slides
+    .map((slide, index) => {
+      const variantClass =
+        slide.variant === "tapioca"
+          ? " hero-slide-product hero-slide-tapioca"
+          : slide.variant === "seasonal"
+            ? " hero-slide-product hero-slide-seasonal"
+            : "";
+      return `
+        <article class="hero-slide${variantClass}${index === 0 ? " is-active" : ""}" data-hero-slide>
+          <img src="${escapeHtml(slide.imageUrl)}" alt="${escapeHtml(slide.altText || slide.title)}" />
+          <figcaption>
+            <span>${escapeHtml(slide.title)}</span>
+            ${escapeHtml(slide.caption)}
+          </figcaption>
+        </article>
+      `;
+    })
+    .join("");
+
+  dotsWrap.innerHTML = homepageData.slides
+    .map(
+      (_, index) =>
+        `<button type="button" class="${index === 0 ? "is-active" : ""}" data-hero-dot="${index}" aria-label="${index + 1}枚目の画像"></button>`,
+    )
+    .join("");
+};
+
+const renderSimpleCards = (selector, cards, template) => {
+  const container = document.querySelector(selector);
+  if (container && cards.length) {
+    container.innerHTML = cards.map(template).join("");
+  }
+};
+
+const renderHomepageSections = () => {
+  if (!homepageData) {
+    return;
+  }
+
+  renderHeroContent();
+  renderHeroSlides();
+
+  renderSimpleCards(".step-grid", getCardsBySection("orderSteps"), (card) => `
+    <article>
+      <span>${escapeHtml(card.badge)}</span>
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.body)}</p>
+    </article>
+  `);
+
+  renderSimpleCards(".guide-grid", getCardsBySection("recommendGuide"), (card) => `
+    <article>
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.body)}</p>
+    </article>
+  `);
+
+  renderSimpleCards(".season-list", getCardsBySection("seasonalPicks"), (card) => `
+    <article>
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.body)}</p>
+    </article>
+  `);
+
+  renderSimpleCards(".story-grid", getCardsBySection("story"), (card) => `
+    <article>
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.body)}</p>
+    </article>
+  `);
+
+  const settings = homepageData.settings || {};
+  const seasonEyebrow = document.querySelector(".season-copy .eyebrow");
+  const seasonTitle = document.querySelector("#season-title");
+  const seasonIntro = document.querySelector(".season-copy > p:last-child");
+  if (seasonEyebrow) seasonEyebrow.textContent = settings.seasonEyebrow;
+  if (seasonTitle?.firstChild) seasonTitle.firstChild.nodeValue = `\n            ${settings.seasonTitle}\n            `;
+  if (seasonIntro) seasonIntro.textContent = settings.seasonIntro;
+
+  renderSimpleCards(".store-list", homepageData.stores || [], (store) => `
+    <article class="store-card ${store.id === "next-store" ? "is-upcoming" : ""}">
+      <p class="store-status">${escapeHtml(store.statusLabel)}</p>
+      <h3>${escapeHtml(store.name)}</h3>
+      <p>${escapeHtml(store.summary)}</p>
+      ${
+        store.address
+          ? `<a class="text-link" href="#access">店舗情報を見る</a>`
+          : ""
+      }
+    </article>
+  `);
+
+  const primaryStore = homepageData.stores?.find((store) => store.address);
+  if (primaryStore) {
+    const accessTitle = document.querySelector("#access-title");
+    const address = document.querySelector(".access-copy address");
+    const intro = document.querySelector(".access-copy > p:not(.eyebrow)");
+    const infoValues = document.querySelectorAll(".shop-info dd");
+    const mapLink = document.querySelector(".access-actions .primary-button");
+    const mapFrame = document.querySelector(".map-card iframe");
+    if (accessTitle?.firstChild) accessTitle.firstChild.nodeValue = `\n            ${primaryStore.name}\n            `;
+    if (address) address.textContent = `${primaryStore.postalCode} ${primaryStore.address}`.trim();
+    if (intro) intro.textContent = primaryStore.intro;
+    [primaryStore.hours, primaryStore.closedDays, primaryStore.nearestStation, primaryStore.usage, primaryStore.paymentNote].forEach(
+      (value, index) => {
+        if (infoValues[index]) infoValues[index].textContent = value;
+      },
+    );
+    if (mapLink) mapLink.href = primaryStore.googleMapsUrl;
+    if (mapFrame) mapFrame.src = primaryStore.googleMapsEmbedUrl;
+  }
+
+  renderSimpleCards(".faq-grid", homepageData.faqs || [], (faq) => `
+    <details>
+      <summary>${escapeHtml(faq.question)}</summary>
+      <p>${escapeHtml(faq.answer)}</p>
+    </details>
+  `);
+
+  const footerLines = document.querySelectorAll("footer p");
+  if (footerLines[0]) footerLines[0].textContent = settings.footerTextLeft;
+  if (footerLines[1]) footerLines[1].textContent = settings.footerTextRight;
+};
+
 const categoryDecor = (categoryId) =>
   ({
     frappe: "sparkle.png",
@@ -617,6 +847,22 @@ const loadRemoteMenuData = async (store = "") => {
 
     const menu = await response.json();
     return Array.isArray(menu.drinks) && menu.drinks.length ? menu : null;
+  } catch {
+    return null;
+  }
+};
+
+const loadRemoteHomepageData = async () => {
+  try {
+    const response = await fetch("/api/homepage", {
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
   } catch {
     return null;
   }
@@ -866,7 +1112,10 @@ const initMenuData = async (store = "") => {
 };
 
 const initPage = async () => {
+  homepageData = (await loadRemoteHomepageData()) || homepageData;
+  renderHomepageSections();
   await initMenuData();
+  initHeroCarousel();
   initTranslation();
 
   if (translationState.language !== "ja") {

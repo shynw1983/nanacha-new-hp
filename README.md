@@ -134,11 +134,19 @@ Lark Base is the source of truth for menu maintenance. The site reads menu data 
 
 The static HTML menu remains only as a fallback for local/offline preview. When Lark is configured, Lark data replaces the visible menu in the browser.
 
-Use one shared brand Base for product information:
+Use one shared menu Base for product information:
 
 - `Categories`
 - `Drinks`
 - `Menu Settings`
+
+Use one separate homepage Base for website-maintained content when menu staff and website staff are different:
+
+- `Homepage Settings`
+- `Homepage Slides`
+- `Homepage Cards`
+- `Stores`
+- `FAQ`
 
 For multiple shops, create one separate shop Base per location. Each shop Base contains:
 
@@ -161,6 +169,12 @@ LARK_BASE_APP_TOKEN
 LARK_CATEGORIES_TABLE_ID
 LARK_DRINKS_TABLE_ID
 LARK_MENU_SETTINGS_TABLE_ID
+LARK_HOMEPAGE_BASE_APP_TOKEN
+LARK_HOMEPAGE_SETTINGS_TABLE_ID
+LARK_HOMEPAGE_SLIDES_TABLE_ID
+LARK_HOMEPAGE_CARDS_TABLE_ID
+LARK_STORES_TABLE_ID
+LARK_FAQ_TABLE_ID
 ```
 
 For shop-specific availability, set `LARK_STORES_JSON` in Vercel and local `.env.local`:
@@ -194,6 +208,20 @@ The `Drinks` table can use:
 - `imageFile` for an existing site asset path such as `assets/menu/drink-01.png`
 
 The site reads images in this order: `image`, then `imageUrl`, then `imageFile`. Images uploaded to the Lark `image` attachment field are served through `/api/menu-image` so the browser can display files that require Lark API authorization. Because attachment image URLs include Lark's revision value, `/api/menu-image` can be cached for a long time and naturally refreshes when the attachment changes.
+
+Homepage content is loaded through `/api/homepage`. When the homepage Base is configured, Lark becomes the source of truth for:
+
+- hero copy and CTA labels
+- homepage carousel slides
+- order-guide cards
+- drink-guide cards
+- seasonal picks
+- brand story cards
+- shop cards and access details
+- FAQ entries
+- footer text
+
+If the homepage tables are missing or empty, the site falls back to `homepage-data.js` so the homepage still renders during local preview or partial setup.
 
 To copy uploaded Lark product photos into the site's own static assets, run:
 
