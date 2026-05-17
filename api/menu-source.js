@@ -244,6 +244,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
         isActive: booleanValue(fields.isActive),
+        supportsDecaf: booleanValue(fields.supportsDecaf),
         sortOrder: Number(fields.sortOrder) || 9999,
       }),
     )

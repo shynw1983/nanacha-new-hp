@@ -72,6 +72,13 @@
     ["カフェラテ", 490, "tea-coffee"],
   ].map(([name, price, category]) => ({ name, price, category }));
 
+  const decafDrinkNames = new Set([
+    "タピオカカフェラテ",
+    "タピオカコーヒー",
+    "カフェアメリカーノ",
+    "カフェラテ",
+  ]);
+
   const hotCategories = ["tea", "coffee", "tea-coffee"];
   const hotDrinkNames = [
     "黒糖タピオカほうじ茶ラテ",
@@ -89,6 +96,7 @@
       hotCategories.includes(drink.category) || hotDrinkNames.includes(drink.name)
         ? ["ICE", "HOT"]
         : ["ICE"];
+    drink.supportsDecaf = decafDrinkNames.has(drink.name);
   });
 
   const sizes = [

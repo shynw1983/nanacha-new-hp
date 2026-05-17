@@ -3,6 +3,7 @@ const form = document.querySelector(".reserve-form");
 const note = document.querySelector("[data-note]");
 const languageSelect = document.querySelector("[data-language-select]");
 let orderData = window.NANACHA_MENU;
+let refreshLocalizedOrderLabels = () => {};
 const menuCount = document.querySelector("[data-menu-count]");
 const translationState = {
   language: localStorage.getItem("nanacha-language") || "ja",
@@ -20,6 +21,20 @@ const LANGUAGE_META = {
   en: { htmlLang: "en" },
   zh: { htmlLang: "zh-Hans" },
   ko: { htmlLang: "ko" },
+};
+const FORM_VALUE_LABELS = {
+  sweetness: {
+    ja: { ふつう: "ふつう", 多め: "多め", 少なめ: "少なめ", ゼロ: "ゼロ" },
+    en: { ふつう: "Regular", 多め: "Extra Sweet", 少なめ: "Less Sweet", ゼロ: "Zero Sugar" },
+    zh: { ふつう: "正常", 多め: "多甜", 少なめ: "少甜", ゼロ: "无糖" },
+    ko: { ふつう: "보통", 多め: "당도 높게", 少なめ: "당도 낮게", ゼロ: "무가당" },
+  },
+  ice: {
+    ja: { ふつう: "ふつう", 氷少なめ: "氷少なめ", 氷抜き: "氷抜き", HOTは氷なし: "HOTは氷なし" },
+    en: { ふつう: "Regular Ice", 氷少なめ: "Less Ice", 氷抜き: "No Ice", HOTは氷なし: "No Ice for HOT" },
+    zh: { ふつう: "正常冰", 氷少なめ: "少冰", 氷抜き: "去冰", HOTは氷なし: "热饮不加冰" },
+    ko: { ふつう: "보통", 氷少なめ: "얼음 적게", 氷抜き: "얼음 없음", HOTは氷なし: "HOT은 얼음 없이" },
+  },
 };
 
 const syncHeader = () => {
@@ -100,6 +115,7 @@ const restoreOriginalLanguage = () => {
     node.nodeValue = getOriginalText(node);
   });
   translationState.isApplying = false;
+  refreshLocalizedOrderLabels();
 };
 
 const loadDictionary = async (language) => {
@@ -149,6 +165,7 @@ const applyDictionary = (dictionary) => {
     node.nodeValue = translateTextWithDictionary(original, dictionary);
   });
   translationState.isApplying = false;
+  refreshLocalizedOrderLabels();
 };
 
 const translatePage = async (language, { isRefresh = false } = {}) => {
@@ -234,6 +251,9 @@ const formatDelta = (price) => {
 
 const findById = (items, id) => items.find((item) => item.id === id);
 
+const getLocalizedFormValue = (group, value) =>
+  FORM_VALUE_LABELS[group]?.[translationState.language]?.[value] || value;
+
 const isTapiocaFreeCategory = (category) => orderData.tapiocaFreeCategories.includes(category);
 
 const hasWhipByDefault = (category) => orderData.whippedCategories.includes(category);
@@ -244,6 +264,9 @@ const getAvailableToppings = (category) =>
       !(topping.id === "no-tapioca" && isTapiocaFreeCategory(category)) &&
       !(topping.id === "no-whip" && !hasWhipByDefault(category)),
   );
+
+const getAvailableOptions = (drink) =>
+  orderData.options.filter((option) => option.id !== "decaf" || drink?.supportsDecaf);
 
 const getSelectedOrder = () => {
   const data = new FormData(form);
@@ -638,8 +661,44 @@ const initOrderForm = () => {
 
     fillSelect(
       iceSelect,
-      iceOptions.map((item) => ({ value: item, label: item })),
+      iceOptions.map((item) => ({ value: item, label: getLocalizedFormValue("ice", item) })),
     );
+  };
+
+  const syncOptions = () => {
+    const drink = orderData.drinks.find((item) => item.name === drinkSelect.value);
+    const previousOption = optionSelect.value;
+    const availableOptions = getAvailableOptions(drink);
+
+    fillSelect(
+      optionSelect,
+      availableOptions.map((option) => ({
+        value: option.id,
+        label: `${option.label} (${formatDelta(option.price)})`,
+      })),
+    );
+
+    optionSelect.value = availableOptions.some((option) => option.id === previousOption)
+      ? previousOption
+      : "none";
+  };
+
+  const syncLocalizedLabels = () => {
+    const currentSweetness = sweetnessSelect.value;
+    const currentIce = iceSelect.value;
+
+    fillSelect(
+      sweetnessSelect,
+      orderData.sweetness.map((item) => ({
+        value: item,
+        label: getLocalizedFormValue("sweetness", item),
+      })),
+    );
+    sweetnessSelect.value = currentSweetness || orderData.sweetness[0] || "";
+    syncIce();
+    iceSelect.value = Array.from(iceSelect.options).some((option) => option.value === currentIce)
+      ? currentIce
+      : iceSelect.value;
   };
 
   const syncDrinks = () => {
@@ -657,6 +716,7 @@ const initOrderForm = () => {
     );
     syncToppings();
     syncTemperatures();
+    syncOptions();
     updateOrderTotal();
   };
 
@@ -683,17 +743,6 @@ const initOrderForm = () => {
       label: `${size.label} (${formatDelta(size.price)})`,
     })),
   );
-  fillSelect(
-    sweetnessSelect,
-    orderData.sweetness.map((item) => ({ value: item, label: item })),
-  );
-  fillSelect(
-    optionSelect,
-    orderData.options.map((option) => ({
-      value: option.id,
-      label: `${option.label} (${formatDelta(option.price)})`,
-    })),
-  );
   categorySelect.value = orderData.categories.some((category) => category.id === "milk")
     ? "milk"
     : orderData.categories[0]?.id || "";
@@ -702,6 +751,8 @@ const initOrderForm = () => {
   window.setInterval(() => {
     syncPickupTime();
   }, 30000);
+  refreshLocalizedOrderLabels = syncLocalizedLabels;
+  syncLocalizedLabels();
   syncDrinks();
 
   form.addEventListener("change", (event) => {
@@ -716,6 +767,7 @@ const initOrderForm = () => {
 
     if (event.target === drinkSelect) {
       syncTemperatures();
+      syncOptions();
     }
 
     if (event.target === temperatureSelect) {

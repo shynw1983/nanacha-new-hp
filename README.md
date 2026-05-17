@@ -188,6 +188,7 @@ The command matches rows by `drinkId`, creates missing shop rows with `isAvailab
 
 The `Drinks` table can use:
 
+- `supportsDecaf` to decide whether the `デカフェ` option appears for a drink
 - `image` for a Lark attachment field containing the product photo
 - `imageUrl` for a public image URL
 - `imageFile` for an existing site asset path such as `assets/menu/drink-01.png`

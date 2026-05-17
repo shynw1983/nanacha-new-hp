@@ -32,6 +32,7 @@ Recommended field types:
 - `isRecommended`: checkbox
 - `isFeatured`: checkbox
 - `isActive`: checkbox
+- `supportsDecaf`: checkbox, check only drinks that can use the decaf option
 - `sortOrder`: number
 - `image`: attachment field for the product photo you maintain in Lark
 - `imageFile`: text helper showing the current local image path

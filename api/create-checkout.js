@@ -97,6 +97,10 @@ module.exports = async (request, response) => {
     return json(response, 400, { error: "Invalid customization" });
   }
 
+  if (optionId === "decaf" && !menuDrink.supportsDecaf) {
+    return json(response, 400, { error: "Invalid option for drink" });
+  }
+
   if (!menuDrink.temperatures.includes(temperature)) {
     return json(response, 400, { error: "Invalid temperature" });
   }
