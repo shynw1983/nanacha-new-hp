@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
-const LOCALE_CACHE_VERSION = "20260517-react-i18n";
+const LOCALE_CACHE_VERSION = "20260518-react-i18n";
 const LANGUAGE_META = {
   ja: { htmlLang: "ja" },
   en: { htmlLang: "en" },
@@ -85,14 +85,24 @@ export function I18nProvider({ children }) {
       const response = await fetch(`/locales/${language}.json`, {
         headers: { Accept: "application/json" },
       });
-      const nextDictionary = response.ok ? await response.json() : {};
+
+      if (!response.ok) {
+        if (active) {
+          setDictionary({});
+        }
+        return;
+      }
+
+      const nextDictionary = await response.json();
 
       if (active) {
         setDictionary(nextDictionary);
       }
 
       try {
-        localStorage.setItem(storageKey, JSON.stringify(nextDictionary));
+        if (Object.keys(nextDictionary).length) {
+          localStorage.setItem(storageKey, JSON.stringify(nextDictionary));
+        }
       } catch {
         // Ignore cache failures.
       }
