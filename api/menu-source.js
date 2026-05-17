@@ -324,6 +324,7 @@ const applyStoreAvailability = async (token, menu, storeId) => {
     return {
       ...menu,
       selectedStoreId: storeId,
+      drinks: [],
     };
   }
 
@@ -335,8 +336,8 @@ const applyStoreAvailability = async (token, menu, storeId) => {
       .map((fields) => [
         textValue(fields.drinkId),
         {
-          isAvailable: fields.isAvailable == null ? true : booleanValue(fields.isAvailable),
-          websiteEnabled: fields.websiteEnabled == null ? true : booleanValue(fields.websiteEnabled),
+          isAvailable: booleanValue(fields.isAvailable),
+          websiteEnabled: booleanValue(fields.websiteEnabled),
           websitePriceOverride: Number.isFinite(Number(fields.websitePriceOverride))
             ? Number(fields.websitePriceOverride)
             : null,
@@ -374,7 +375,8 @@ const getMenuData = async (storeId = "") => {
   try {
     const token = await getTenantAccessToken();
     const menu = (await fetchLarkMenu(token)) || fallbackMenu;
-    return token ? applyStoreAvailability(token, menu, storeId) : menu;
+    const selectedStoreId = storeId || menu.stores?.[0]?.id || "";
+    return token ? applyStoreAvailability(token, menu, selectedStoreId) : menu;
   } catch (error) {
     console.error(error);
     return fallbackMenu;
