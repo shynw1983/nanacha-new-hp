@@ -775,7 +775,7 @@ h3 {
   background: var(--line-soft);
 }
 
-.shop-info div {
+.shop-info > div {
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr);
   gap: var(--space-sm);
