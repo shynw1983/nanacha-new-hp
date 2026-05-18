@@ -930,10 +930,10 @@ h3 {
 
 .store-card {
   display: grid;
-  grid-template-columns: minmax(132px, 160px) minmax(0, 1fr);
+  grid-template-columns: minmax(118px, 138px) minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-sm);
-  min-height: 180px;
+  gap: clamp(20px, 2vw, 28px);
+  min-height: 164px;
   padding: clamp(22px, 2.6vw, 30px);
   border-right: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
@@ -945,14 +945,15 @@ h3 {
 
 .store-card-copy {
   display: grid;
-  gap: 10px;
+  align-content: center;
+  gap: 8px;
 }
 
 .store-photo,
 .store-photo-placeholder {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 18px;
+  border-radius: 16px;
 }
 
 .store-photo {
