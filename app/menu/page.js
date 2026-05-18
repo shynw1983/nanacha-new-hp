@@ -8,6 +8,15 @@ export const metadata = {
   title: "メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー",
   description:
     "nanacha 福岡清川店のメニュー。黒糖タピオカミルク、タピオカフラッペ、チーズティー、スムージー、八女抹茶ラテ、ティー、コーヒーの価格とカスタマイズ。",
+  alternates: {
+    canonical: "/menu",
+  },
+  openGraph: {
+    title: "メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー",
+    description:
+      "nanacha 福岡清川店のメニュー。黒糖タピオカミルク、タピオカフラッペ、チーズティー、スムージー、八女抹茶ラテ、ティー、コーヒーの価格とカスタマイズ。",
+    url: "/menu",
+  },
 };
 
 export const dynamic = "force-dynamic";
