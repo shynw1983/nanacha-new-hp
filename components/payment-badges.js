@@ -18,7 +18,6 @@ const paymentMethods = [
     id: "visa",
     label: "Visa",
     src: "/assets/payments/visa.png",
-    framed: true,
   },
   {
     id: "mastercard",
@@ -29,7 +28,6 @@ const paymentMethods = [
     id: "jcb",
     label: "JCB",
     src: "/assets/payments/jcb.png",
-    framed: true,
   },
 ];
 
@@ -41,7 +39,7 @@ export function PaymentBadges() {
     >
       {paymentMethods.map((method) => (
         <span
-          className={`payment-badge is-${method.id}${method.framed ? " is-framed" : ""}`}
+          className={`payment-badge is-${method.id}`}
           title={method.label}
           key={method.id}
         >

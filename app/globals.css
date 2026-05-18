@@ -806,17 +806,21 @@ h3 {
 
 .payment-badges {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .payment-badge {
-  width: 42px;
-  height: 42px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 5px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  background: var(--paper);
 }
 
 .payment-badge img {
@@ -826,16 +830,26 @@ h3 {
   object-fit: contain;
 }
 
-.payment-badge.is-framed {
-  padding: 8px;
-  border: 1px solid var(--line-soft);
-  border-radius: 12px;
-  background: var(--paper);
+.payment-badge.is-paypay img {
+  width: 102%;
+  height: 102%;
+}
+
+.payment-badge.is-alipay-plus img,
+.payment-badge.is-wechat-pay img,
+.payment-badge.is-mastercard img {
+  width: 88%;
+  height: 88%;
+}
+
+.payment-badge.is-visa img {
+  width: 92%;
+  height: 92%;
 }
 
 .payment-badge.is-jcb img {
-  width: 82%;
-  height: 82%;
+  width: 84%;
+  height: 84%;
 }
 
 .access-actions {
