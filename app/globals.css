@@ -708,6 +708,12 @@ h3 {
   justify-content: center;
 }
 
+.store-detail-section .heading-with-decor {
+  margin-bottom: 18px;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.12;
+}
+
 .access-copy address {
   margin-bottom: 20px;
   font-style: normal;
