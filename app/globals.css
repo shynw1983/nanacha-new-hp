@@ -922,6 +922,14 @@ h3 {
   padding: clamp(42px, 5vw, 72px) clamp(18px, 5vw, 72px);
 }
 
+.stores-page-list {
+  padding-top: 0;
+}
+
+.store-page-links {
+  padding: 0 clamp(18px, 5vw, 72px) clamp(58px, 7vw, 104px);
+}
+
 .full-menu {
   display: grid;
   gap: 48px;

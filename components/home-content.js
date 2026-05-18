@@ -3,6 +3,7 @@
 import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
 import { RevealOnScroll } from "./reveal-on-scroll";
+import { StoreDetail } from "./store-detail";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
@@ -165,7 +166,7 @@ export function HomeContent({ homepage, menu }) {
               <h3>{store.name}</h3>
               <p>{store.summary}</p>
               {store.address ? (
-                <a className="text-link" href="#access">
+                <a className="text-link" href={`/shops/${store.id}`}>
                   {t("店舗情報を見る")}
                 </a>
               ) : null}
@@ -175,67 +176,9 @@ export function HomeContent({ homepage, menu }) {
       </section>
 
       {primaryStore ? (
-        <section className="access-section" id="access" aria-labelledby="access-title" data-reveal>
-          <div className="access-copy">
-            <p className="eyebrow">shop map</p>
-            <h2 id="access-title" className="heading-with-decor">
-              {primaryStore.name}
-              <img src="/assets/decor/tail.png" alt="" aria-hidden="true" />
-            </h2>
-            <address>
-              {primaryStore.postalCode} {primaryStore.address}
-            </address>
-            <p>{primaryStore.intro}</p>
-            <dl className="shop-info">
-              <div>
-                <dt>{t("営業時間")}</dt>
-                <dd>{primaryStore.hours}</dd>
-              </div>
-              <div>
-                <dt>{t("定休日")}</dt>
-                <dd>{primaryStore.closedDays}</dd>
-              </div>
-              <div>
-                <dt>{t("最寄り")}</dt>
-                <dd>{primaryStore.nearestStation}</dd>
-              </div>
-              <div>
-                <dt>{t("利用方法")}</dt>
-                <dd>{primaryStore.usage}</dd>
-              </div>
-              <div>
-                <dt>{t("支払い")}</dt>
-                <dd>{primaryStore.paymentNote}</dd>
-              </div>
-            </dl>
-            <div className="access-actions">
-              <a className="primary-button" href={primaryStore.googleMapsUrl} target="_blank" rel="noreferrer">
-                {t("google mapsで開く")}
-              </a>
-              <a className="ghost-button" href="#reserve">
-                {t("受け取り予約へ")}
-              </a>
-              {primaryStore.uberEatsUrl ? (
-                <a
-                  className="ghost-button uber-eats-button"
-                  href={primaryStore.uberEatsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Uber Eats
-                </a>
-              ) : null}
-            </div>
-          </div>
-          <div className="map-card" aria-label="nanacha 福岡清川店 地図">
-            <iframe
-              title="nanacha 福岡清川店 google map"
-              src={primaryStore.googleMapsEmbedUrl}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </section>
+        <div id="access" data-reveal>
+          <StoreDetail store={primaryStore} headingLevel="h2" />
+        </div>
       ) : null}
 
       <section className="faq-section" id="faq" aria-labelledby="faq-title" data-reveal>

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useI18n } from "./i18n-provider";
 
-export function SiteHeader({ menu = false }) {
+export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
 
   useEffect(() => {
@@ -28,6 +28,9 @@ export function SiteHeader({ menu = false }) {
       <nav className="nav-links" aria-label={t("メインナビゲーション")}>
         <a href="/menu" aria-current={menu ? "page" : undefined}>
           {t("メニュー")}
+        </a>
+        <a href="/shops" aria-current={shops ? "page" : undefined}>
+          {t("店舗")}
         </a>
         {menu ? (
           <>

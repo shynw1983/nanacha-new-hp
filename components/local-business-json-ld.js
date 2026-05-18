@@ -3,7 +3,21 @@ import siteLinks from "../data/site-links";
 
 const cleanPostalCode = (value = "") => String(value).replace(/^〒/, "");
 
-export function LocalBusinessJsonLd({ store }) {
+const getAddressParts = (store) => {
+  if (store.id === "kiyokawa") {
+    return {
+      streetAddress: "清川2-9-6",
+      addressLocality: "福岡市中央区",
+      addressRegion: "福岡県",
+    };
+  }
+
+  return {
+    streetAddress: store.address,
+  };
+};
+
+export function LocalBusinessJsonLd({ store, url = siteConfig.siteUrl }) {
   if (!store) {
     return null;
   }
@@ -12,13 +26,11 @@ export function LocalBusinessJsonLd({ store }) {
     "@context": "https://schema.org",
     "@type": "CafeOrCoffeeShop",
     name: `${siteConfig.name} ${store.name}`,
-    url: siteConfig.siteUrl,
+    url,
     image: [`${siteConfig.siteUrl}${siteConfig.ogImagePath}`],
     address: {
       "@type": "PostalAddress",
-      streetAddress: "清川2-9-6",
-      addressLocality: "福岡市中央区",
-      addressRegion: "福岡県",
+      ...getAddressParts(store),
       postalCode: cleanPostalCode(store.postalCode),
       addressCountry: "JP",
     },
