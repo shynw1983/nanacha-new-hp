@@ -857,10 +857,20 @@ h3 {
 }
 
 .access-actions {
-  display: flex;
-  flex-wrap: wrap;
+  width: min(100%, 420px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-xs);
   margin-top: var(--space-lg);
+}
+
+.access-actions .primary-button,
+.access-actions .ghost-button {
+  width: 100%;
+}
+
+.access-actions .uber-eats-button {
+  grid-column: 1 / -1;
 }
 
 .map-card {
@@ -1591,6 +1601,15 @@ footer p {
   .map-card iframe {
     min-height: 360px;
     border-radius: 20px;
+  }
+
+  .access-actions {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .access-actions .uber-eats-button {
+    grid-column: auto;
   }
 
   .reserve-panel {
