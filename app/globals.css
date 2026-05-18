@@ -805,10 +805,12 @@ h3 {
 }
 
 .payment-badges {
-  display: flex;
-  flex-wrap: nowrap;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 30px;
   align-items: center;
   gap: 8px;
+  width: max-content;
 }
 
 .payment-badge {
