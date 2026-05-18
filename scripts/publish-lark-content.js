@@ -48,6 +48,10 @@ const writeJson = (fileName, value) => {
 const main = async () => {
   loadLocalEnv();
   const [homepage, baseMenu] = await Promise.all([getLiveHomepageData(), getLiveMenuData()]);
+
+  if (!homepage || !baseMenu) {
+    throw new Error("Lark publish did not return complete homepage and menu data.");
+  }
   const stores = baseMenu.stores || [];
   const storeMenus = {};
 

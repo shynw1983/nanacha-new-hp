@@ -190,13 +190,13 @@ const fetchLarkHomepage = async (token) => {
 };
 
 const getLiveHomepageData = async () => {
-  try {
-    const token = await getTenantAccessToken();
-    return (await fetchLarkHomepage(token)) || homepageFallback;
-  } catch (error) {
-    console.error(error);
-    return homepageFallback;
+  const token = await getTenantAccessToken();
+
+  if (!token) {
+    throw new Error("Lark is not configured.");
   }
+
+  return await fetchLarkHomepage(token);
 };
 
 const getHomepageData = async () => publishedHomepage || homepageFallback;

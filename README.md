@@ -117,6 +117,7 @@ npm run publish
 npm run lark:export-menu
 npm run lark:publish
 npm run lark:sync-homepage-settings
+npm run lark:sync-homepage-images
 npm run lark:sync-images
 npm run lark:sync-store-products
 ```
@@ -129,10 +130,11 @@ Recommended content workflow:
 
 `npm run publish` runs the full safe sequence:
 
-1. Sync Lark images into local static assets.
-2. Publish Lark content snapshots.
-3. Update translation dictionaries.
-4. Build the site.
+1. Sync Lark menu images into local static assets.
+2. Sync Lark homepage images into local static assets.
+3. Publish Lark content snapshots.
+4. Update translation dictionaries.
+5. Build the site.
 
 ## Translation Updates
 

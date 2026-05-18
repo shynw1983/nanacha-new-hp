@@ -261,15 +261,15 @@ const applyStoreAvailability = async (token, menu, storeId) => {
 };
 
 const getLiveMenuData = async (storeId = "") => {
-  try {
-    const token = await getTenantAccessToken();
-    const menu = (await fetchLarkMenu(token)) || fallbackMenu;
-    const selectedStoreId = storeId || menu.stores?.[0]?.id || "";
-    return token ? applyStoreAvailability(token, menu, selectedStoreId) : menu;
-  } catch (error) {
-    console.error(error);
-    return fallbackMenu;
+  const token = await getTenantAccessToken();
+
+  if (!token) {
+    throw new Error("Lark is not configured.");
   }
+
+  const menu = await fetchLarkMenu(token);
+  const selectedStoreId = storeId || menu.stores?.[0]?.id || "";
+  return applyStoreAvailability(token, menu, selectedStoreId);
 };
 
 const getMenuData = async (storeId = "") => {
