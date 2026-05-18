@@ -799,6 +799,56 @@ h3 {
   line-height: 1.6;
 }
 
+.payment-methods {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payment-badge {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.payment-badge.is-paypay {
+  color: #e60012;
+}
+
+.payment-badge.is-alipay {
+  color: #1677ff;
+}
+
+.payment-badge.is-wechat {
+  color: #07c160;
+}
+
+.payment-badge.is-visa {
+  color: #1434cb;
+}
+
+.payment-badge.is-mastercard {
+  color: #eb001b;
+}
+
+.payment-badge.is-jcb {
+  color: #007940;
+}
+
 .access-actions {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,5 @@
 import { useI18n } from "./i18n-provider";
+import { PaymentBadges } from "./payment-badges";
 
 export function StoreDetail({ store, headingLevel = "h1", reserveHref = "/#reserve" }) {
   const { t } = useI18n();
@@ -35,7 +36,10 @@ export function StoreDetail({ store, headingLevel = "h1", reserveHref = "/#reser
           </div>
           <div>
             <dt>{t("支払い")}</dt>
-            <dd>{store.paymentNote}</dd>
+            <dd className="payment-methods">
+              <PaymentBadges />
+              <span>{store.paymentNote}</span>
+            </dd>
           </div>
         </dl>
         <div className="access-actions">
