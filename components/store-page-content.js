@@ -1,10 +1,11 @@
 "use client";
 
 import { localizeValue, useI18n } from "./i18n-provider";
+import { localizedPath } from "./localized-path";
 import { StoreDetail } from "./store-detail";
 
 export function StorePageContent({ store }) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const localizedStore = localizeValue(store, t);
 
   return (
@@ -16,7 +17,7 @@ export function StorePageContent({ store }) {
       </section>
       <StoreDetail store={localizedStore} />
       <section className="store-page-links">
-        <a className="text-link" href="/shops">
+        <a className="text-link" href={localizedPath(language, "/shops")}>
           ← {t("店舗一覧へ戻る")}
         </a>
       </section>

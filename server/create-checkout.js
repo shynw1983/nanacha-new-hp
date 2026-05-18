@@ -1,5 +1,12 @@
 const { randomUUID } = require("crypto");
-const { getLiveMenuData } = require("./menu-source");
+const { getLiveMenuData, getMenuData } = require("./menu-source");
+const { getHomepageData } = require("./homepage-source");
+const {
+  compareDateTime,
+  getMinimumPickupDateTime,
+  getTokyoDateString,
+  isWithinOpeningWindow,
+} = require("./pickup-time");
 
 const SQUARE_VERSION = "2026-01-22";
 
@@ -25,25 +32,16 @@ const getBaseUrl = (request) => {
   return `${protocol}://${host}`;
 };
 
-const getTokyoMinutes = (date) => {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Tokyo",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date);
-  const hour = Number(parts.find((part) => part.type === "hour").value);
-  const minute = Number(parts.find((part) => part.type === "minute").value);
-
-  return hour * 60 + minute;
-};
-
-const toMinutes = (time) => {
-  const [hour, minute] = time.split(":").map(Number);
-  return hour * 60 + minute;
-};
-
 const createPickupCode = () => `N-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
+const getCheckoutMenu = async (storeId) => {
+  try {
+    return await getLiveMenuData(storeId);
+  } catch (error) {
+    console.error("Live Lark menu unavailable; falling back to the last published menu snapshot.", error);
+    return getMenuData(storeId);
+  }
+};
 
 module.exports = async (request, response) => {
   if (request.method !== "POST") {
@@ -82,8 +80,10 @@ module.exports = async (request, response) => {
   const sizeId = String(body.size || "");
   const optionId = String(body.option || "");
   const toppingIds = Array.isArray(body.toppings) ? body.toppings.map(String) : [];
+  const pickupDate = String(body.pickupDate || "");
   const pickup = String(body.pickup || "");
-  const menu = await getLiveMenuData(storeId);
+  const [menu, homepage] = await Promise.all([getCheckoutMenu(storeId), getHomepageData()]);
+  const store = homepage.stores.find((item) => item.id === storeId);
   const menuDrink = menu.drinks.find((item) => item.name === drink && item.websiteEnabled !== false);
   const size = findById(menu.sizes, sizeId);
   const option = findById(menu.options, optionId);
@@ -121,20 +121,26 @@ module.exports = async (request, response) => {
     return json(response, 400, { error: "Invalid topping for non-whip category" });
   }
 
-  if (!/^\d{2}:\d{2}$/.test(pickup)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(pickupDate) || !/^\d{2}:\d{2}$/.test(pickup)) {
     return json(response, 400, { error: "Invalid pickup time" });
   }
 
-  const nowMinutes = getTokyoMinutes(new Date());
-  const minimumPickupMinutes = getTokyoMinutes(new Date(Date.now() + 5 * 60 * 1000));
-  const pickupMinutes = toMinutes(pickup);
+  const minimumPickup = getMinimumPickupDateTime();
 
-  if (minimumPickupMinutes < nowMinutes) {
-    return json(response, 400, { error: "Pickup date is required after midnight" });
+  if (compareDateTime(pickupDate, pickup, minimumPickup.date, minimumPickup.time) < 0) {
+    return json(response, 400, { error: "Pickup time must be at least 5 minutes from now" });
   }
 
-  if (pickupMinutes < minimumPickupMinutes) {
-    return json(response, 400, { error: "Pickup time must be at least 5 minutes from now" });
+  if (
+    store?.hours &&
+    !isWithinOpeningWindow({
+      pickupDate,
+      pickupTime: pickup,
+      todayDate: getTokyoDateString(),
+      hours: store.hours,
+    })
+  ) {
+    return json(response, 400, { error: "Pickup time is outside store hours" });
   }
 
   const amount =
@@ -159,7 +165,7 @@ module.exports = async (request, response) => {
     `nanacha pickup order: ${orderName}`,
     `option: ${optionLabel}`,
     `topping: ${toppingLabel}`,
-    `pickup: ${pickup}`,
+    `pickup: ${pickupDate} ${pickup}`,
   ].join(" / ");
 
   const squareResponse = await fetch(`${squareHost}/v2/online-checkout/payment-links`, {
@@ -173,7 +179,7 @@ module.exports = async (request, response) => {
       idempotency_key: randomUUID(),
       description: orderDescription,
       quick_pay: {
-        name: `${drink} (${pickup} pickup)`,
+        name: `${drink} (${pickupDate} ${pickup} pickup)`,
         price_money: {
           amount,
           currency: "JPY",

@@ -1,6 +1,7 @@
 import "./globals.css";
 import { I18nProvider } from "../components/i18n-provider";
 import siteConfig from "../data/site-config";
+const { languageAlternates, localeConfig } = require("../data/locales");
 
 export const metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
@@ -11,6 +12,7 @@ export const metadata = {
   description: siteConfig.description,
   alternates: {
     canonical: "/",
+    languages: languageAlternates("/"),
   },
   openGraph: {
     type: "website",
@@ -28,9 +30,12 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children, params }) {
+  const routeParams = await params;
+  const htmlLang = localeConfig[routeParams?.lang]?.htmlLang || "ja";
+
   return (
-    <html lang="ja">
+    <html lang={htmlLang}>
       <body>
         <I18nProvider>{children}</I18nProvider>
       </body>

@@ -4,20 +4,27 @@ import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
 import { RevealOnScroll } from "./reveal-on-scroll";
 import { StoreDetail } from "./store-detail";
+import { localizedPath } from "./localized-path";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 
 const cardsBySection = (homepage, section) => homepage.cards.filter((card) => card.section === section);
+const storyImageByCardId = {
+  "story-01": "hero-03",
+  "story-02": "hero-01",
+  "story-03": "hero-02",
+};
 
 export function HomeContent({ homepage, menu }) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const localizedHomepage = localizeValue(homepage, t);
   const localizedMenu = localizeValue(menu, t);
   const { settings } = localizedHomepage;
   const recommended = localizedMenu.drinks.filter((drink) => drink.isRecommended);
   const picks = (recommended.length ? recommended : localizedMenu.drinks).slice(0, 4);
+  const slidesById = new Map(localizedHomepage.slides.map((slide) => [slide.id, slide]));
   const primaryStore =
     localizedHomepage.stores.find((store) => store.isPrimary && store.address) ||
     localizedHomepage.stores.find((store) => store.address);
@@ -37,7 +44,14 @@ export function HomeContent({ homepage, menu }) {
           </h1>
           <p className="hero-text">{settings.heroDescription}</p>
           <div className="hero-actions">
-            <a className="primary-button" href={normalizeAssetUrl(settings.primaryButtonUrl)}>
+            <a
+              className="primary-button"
+              href={
+                settings.primaryButtonUrl.startsWith("/")
+                  ? localizedPath(language, settings.primaryButtonUrl)
+                  : normalizeAssetUrl(settings.primaryButtonUrl)
+              }
+            >
               {settings.primaryButtonLabel}
             </a>
             <a className="ghost-button" href={settings.secondaryButtonUrl}>
@@ -68,7 +82,7 @@ export function HomeContent({ homepage, menu }) {
               <img src="/assets/decor/tapioca-two.png" alt="" aria-hidden="true" />
             </h2>
           </div>
-          <a className="text-link" href="/menu">
+          <a className="text-link" href={localizedPath(language, "/menu")}>
             {t("全メニューを見る")}
           </a>
         </div>
@@ -117,7 +131,7 @@ export function HomeContent({ homepage, menu }) {
               <img src="/assets/decor/heart-fill.png" alt="" aria-hidden="true" />
             </h2>
           </div>
-          <a className="text-link" href="/menu">
+          <a className="text-link" href={localizedPath(language, "/menu")}>
             {t("メニューで探す")}
           </a>
         </div>
@@ -142,12 +156,23 @@ export function HomeContent({ homepage, menu }) {
           </div>
         </div>
         <div className="story-grid reveal-group">
-          {cardsBySection(localizedHomepage, "story").map((card) => (
+          {cardsBySection(localizedHomepage, "story").map((card) => {
+            const slide = slidesById.get(storyImageByCardId[card.id]);
+
+            return (
             <article key={card.id}>
+              {slide ? (
+                <img
+                  className="story-photo"
+                  src={normalizeAssetUrl(slide.imageUrl)}
+                  alt={slide.altText}
+                />
+              ) : null}
               <h3>{card.title}</h3>
               <p>{card.body}</p>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -168,7 +193,7 @@ export function HomeContent({ homepage, menu }) {
               <h3>{store.name}</h3>
               <p>{store.summary}</p>
               {store.address ? (
-                <a className="text-link" href={`/shops/${store.id}`}>
+                <a className="text-link" href={localizedPath(language, `/shops/${store.id}`)}>
                   {t("店舗情報を見る")}
                 </a>
               ) : null}

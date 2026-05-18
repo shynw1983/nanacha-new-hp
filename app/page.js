@@ -6,14 +6,14 @@ import { ReservationForm } from "../components/reservation-form";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import siteConfig from "../data/site-config";
-
-export const dynamic = "force-dynamic";
+const { languageAlternates } = require("../data/locales");
 
 export const metadata = {
   title: siteConfig.title,
   description: siteConfig.description,
   alternates: {
     canonical: "/",
+    languages: languageAlternates("/"),
   },
 };
 

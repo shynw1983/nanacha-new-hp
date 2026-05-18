@@ -5,8 +5,14 @@ import { SiteFooter } from "../../../components/site-footer";
 import { SiteHeader } from "../../../components/site-header";
 import { StorePageContent } from "../../../components/store-page-content";
 import siteConfig from "../../../data/site-config";
+const { languageAlternates } = require("../../../data/locales");
 
 const findStore = (stores, slug) => stores.find((store) => store.id === slug && store.address);
+
+export async function generateStaticParams() {
+  const homepage = await getHomepageData();
+  return homepage.stores.filter((store) => store.address).map((store) => ({ slug: store.id }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -25,6 +31,7 @@ export async function generateMetadata({ params }) {
     description,
     alternates: {
       canonical: `/shops/${store.id}`,
+      languages: languageAlternates(`/shops/${store.id}`),
     },
     openGraph: {
       title,
@@ -34,7 +41,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = false;
 
 export default async function StorePage({ params }) {
   const { slug } = await params;

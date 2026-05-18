@@ -6,13 +6,25 @@ import { useI18n } from "./i18n-provider";
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
 const findById = (items, id) => items.find((item) => item.id === id);
-const formatTimeInput = (date) =>
-  `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-const getMinimumPickupTime = () => {
-  const now = new Date();
-  const date = new Date(now);
-  date.setMinutes(date.getMinutes() + 5);
-  return date.getDate() !== now.getDate() ? "23:59" : formatTimeInput(date);
+const getTokyoDateTimeParts = (date = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  return Object.fromEntries(parts.map((part) => [part.type, part.value]));
+};
+const getMinimumPickupDateTime = () => {
+  const parts = getTokyoDateTimeParts(new Date(Date.now() + 5 * 60 * 1000));
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`,
+  };
 };
 
 export function ReservationForm({ initialMenu }) {
@@ -29,14 +41,20 @@ export function ReservationForm({ initialMenu }) {
   const [ice, setIce] = useState(initialMenu.ice[0] || "");
   const [optionId, setOptionId] = useState("none");
   const [toppingIds, setToppingIds] = useState([]);
-  const [pickup, setPickup] = useState(getMinimumPickupTime());
+  const [minimumPickup, setMinimumPickup] = useState(getMinimumPickupDateTime());
+  const [pickupDate, setPickupDate] = useState(minimumPickup.date);
+  const [pickup, setPickup] = useState(minimumPickup.time);
   const [note, setNote] = useState("注文内容を確認して、Squareの決済画面へ進みます。");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      const minimum = getMinimumPickupTime();
-      setPickup((current) => (!current || current < minimum ? minimum : current));
+      const nextMinimum = getMinimumPickupDateTime();
+      setMinimumPickup(nextMinimum);
+      setPickupDate((current) => (!current || current < nextMinimum.date ? nextMinimum.date : current));
+      setPickup((current) =>
+        pickupDate === nextMinimum.date && (!current || current < nextMinimum.time) ? nextMinimum.time : current,
+      );
     }, 30000);
 
     const params = new URLSearchParams(window.location.search);
@@ -50,7 +68,7 @@ export function ReservationForm({ initialMenu }) {
     }
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [pickupDate]);
 
   useEffect(() => {
     setNote((current) =>
@@ -65,8 +83,20 @@ export function ReservationForm({ initialMenu }) {
     fetch(`/api/menu?store=${encodeURIComponent(store)}`, { headers: { Accept: "application/json" } })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (active && data?.drinks?.length) {
+        if (active && data?.categories && Array.isArray(data.drinks)) {
           setMenu(data);
+          setCategory((current) => {
+            const categoriesWithDrinks = new Set(
+              data.drinks
+                .filter((drink) => drink.isAvailable !== false && drink.websiteEnabled !== false)
+                .map((drink) => drink.category),
+            );
+            return categoriesWithDrinks.has(current)
+              ? current
+              : data.categories.find((item) => categoriesWithDrinks.has(item.id))?.id || data.categories[0]?.id || "";
+          });
+          setDrinkName("");
+          setToppingIds([]);
         }
       })
       .catch(() => {});
@@ -104,6 +134,9 @@ export function ReservationForm({ initialMenu }) {
     (selectedSize?.price || 0) +
     (selectedOption?.price || 0) +
     selectedToppings.reduce((sum, item) => sum + item.price, 0);
+  const hasAvailableDrinks = menu.drinks.some(
+    (drink) => drink.isAvailable !== false && drink.websiteEnabled !== false,
+  );
 
   useEffect(() => {
     if (selectedDrink && selectedDrink.name !== drinkName) {
@@ -113,8 +146,12 @@ export function ReservationForm({ initialMenu }) {
 
   const submitOrder = async (event) => {
     event.preventDefault();
-    const minimum = getMinimumPickupTime();
-    const safePickup = pickup < minimum ? minimum : pickup;
+    const nextMinimum = getMinimumPickupDateTime();
+    const safePickupDate = pickupDate < nextMinimum.date ? nextMinimum.date : pickupDate;
+    const safePickup =
+      safePickupDate === nextMinimum.date && pickup < nextMinimum.time ? nextMinimum.time : pickup;
+    setMinimumPickup(nextMinimum);
+    setPickupDate(safePickupDate);
     setPickup(safePickup);
 
     const order = {
@@ -127,6 +164,7 @@ export function ReservationForm({ initialMenu }) {
       ice: selectedIce,
       option: selectedOption?.id || "",
       toppings: selectedToppings.map((item) => item.id),
+      pickupDate: safePickupDate,
       pickup: safePickup,
       total,
       labels: {
@@ -139,7 +177,7 @@ export function ReservationForm({ initialMenu }) {
     };
 
     setNote(
-      `${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.temperature}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`,
+      `${order.pickupDate} ${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.temperature}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`,
     );
     setIsSubmitting(true);
 
@@ -203,11 +241,15 @@ export function ReservationForm({ initialMenu }) {
           <label>
             <span>{t("ドリンク")}</span>
             <select value={selectedDrink?.name || ""} onChange={(event) => setDrinkName(event.target.value)}>
-              {drinks.map((drink) => (
-                <option value={drink.name} key={drink.id}>
-                  {t(drink.name)} {formatPrice(drink.price)}
-                </option>
-              ))}
+              {drinks.length ? (
+                drinks.map((drink) => (
+                  <option value={drink.name} key={drink.id}>
+                    {t(drink.name)} {formatPrice(drink.price)}
+                  </option>
+                ))
+              ) : (
+                <option value="">{t("予約できる商品がありません")}</option>
+              )}
             </select>
           </label>
           <label>
@@ -261,11 +303,20 @@ export function ReservationForm({ initialMenu }) {
             </select>
           </label>
           <label>
+            <span>{t("受け取り日")}</span>
+            <input
+              type="date"
+              value={pickupDate}
+              min={minimumPickup.date}
+              onChange={(event) => setPickupDate(event.target.value)}
+            />
+          </label>
+          <label>
             <span>{t("受け取り時間")}</span>
             <input
               type="time"
               value={pickup}
-              min={getMinimumPickupTime()}
+              min={pickupDate === minimumPickup.date ? minimumPickup.time : undefined}
               onChange={(event) => setPickup(event.target.value)}
             />
           </label>
@@ -293,10 +344,12 @@ export function ReservationForm({ initialMenu }) {
             </div>
           </fieldset>
           <p className="order-total">{t("合計")} {formatPrice(total)}</p>
-          <button type="submit" disabled={isSubmitting}>
+          <button type="submit" disabled={isSubmitting || !hasAvailableDrinks || !selectedDrink}>
             {isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
-          <p className="form-note">{note}</p>
+          <p className="form-note">
+            {hasAvailableDrinks ? note : t("現在、この店舗で予約できる商品はありません。")}
+          </p>
         </form>
       </div>
     </section>

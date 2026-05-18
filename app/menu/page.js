@@ -3,6 +3,7 @@ import { MenuBrowser } from "../../components/menu-browser";
 import { MenuInfo, MenuIntro } from "../../components/menu-static-content";
 import { SiteFooter } from "../../components/site-footer";
 import { SiteHeader } from "../../components/site-header";
+const { languageAlternates } = require("../../data/locales");
 
 export const metadata = {
   title: "メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー",
@@ -10,6 +11,7 @@ export const metadata = {
     "nanacha 福岡清川店のメニュー。黒糖タピオカミルク、タピオカフラッペ、チーズティー、スムージー、八女抹茶ラテ、ティー、コーヒーの価格とカスタマイズ。",
   alternates: {
     canonical: "/menu",
+    languages: languageAlternates("/menu"),
   },
   openGraph: {
     title: "メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー",
@@ -18,8 +20,6 @@ export const metadata = {
     url: "/menu",
   },
 };
-
-export const dynamic = "force-dynamic";
 
 export default async function MenuPage() {
   const menu = await getMenuData();

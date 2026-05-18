@@ -46,13 +46,15 @@ const translateText = (value, dictionary) => {
   return translated;
 };
 
-export function I18nProvider({ children }) {
-  const [language, setLanguage] = useState("ja");
-  const [dictionary, setDictionary] = useState({});
+export function I18nProvider({ children, initialLanguage = "ja", initialDictionary = {} }) {
+  const [language, setLanguage] = useState(initialLanguage);
+  const [dictionary, setDictionary] = useState(initialDictionary);
 
   useEffect(() => {
-    setLanguage(getStoredLanguage());
-  }, []);
+    if (initialLanguage === "ja") {
+      setLanguage(getStoredLanguage());
+    }
+  }, [initialLanguage]);
 
   useEffect(() => {
     document.documentElement.lang = LANGUAGE_META[language]?.htmlLang || "ja";
