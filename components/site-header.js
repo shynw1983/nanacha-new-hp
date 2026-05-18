@@ -13,7 +13,6 @@ export function SiteHeader({ menu = false, shops = false }) {
   const homeBase = localizedPath(language, "/");
   const homeHref = isInteriorPage ? `${homeBase}#top` : "#top";
   const orderHref = isInteriorPage ? `${homeBase}#order` : "#order";
-  const accessHref = isInteriorPage ? `${homeBase}#access` : "#access";
   const faqHref = isInteriorPage ? `${homeBase}#faq` : "#faq";
   const reserveHref = isInteriorPage ? `${homeBase}#reserve` : "#reserve";
 
@@ -54,7 +53,6 @@ export function SiteHeader({ menu = false, shops = false }) {
           {t("店舗")}
         </a>
         <a href={orderHref}>{t("注文方法")}</a>
-        <a href={accessHref}>{t("アクセス")}</a>
         <a href={faqHref}>FAQ</a>
         <a href={reserveHref}>{t("予約")}</a>
       </nav>
