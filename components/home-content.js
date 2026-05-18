@@ -179,7 +179,7 @@ export function HomeContent({ homepage, menu }) {
 
       {primaryStore ? (
         <div id="access" data-reveal>
-          <StoreDetail store={primaryStore} headingLevel="h2" />
+          <StoreDetail store={primaryStore} headingLevel="h2" reserveHref="#reserve" />
         </div>
       ) : null}
 

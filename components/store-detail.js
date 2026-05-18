@@ -1,6 +1,6 @@
 import { useI18n } from "./i18n-provider";
 
-export function StoreDetail({ store, headingLevel = "h1" }) {
+export function StoreDetail({ store, headingLevel = "h1", reserveHref = "/#reserve" }) {
   const { t } = useI18n();
   const Heading = headingLevel;
 
@@ -41,6 +41,9 @@ export function StoreDetail({ store, headingLevel = "h1" }) {
         <div className="access-actions">
           <a className="primary-button" href={store.googleMapsUrl} target="_blank" rel="noreferrer">
             {t("google mapsで開く")}
+          </a>
+          <a className="ghost-button" href={reserveHref}>
+            {t("受け取り予約へ")}
           </a>
           {store.uberEatsUrl ? (
             <a className="ghost-button uber-eats-button" href={store.uberEatsUrl} target="_blank" rel="noreferrer">
