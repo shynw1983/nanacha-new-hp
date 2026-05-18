@@ -47,15 +47,18 @@ scripts/              Maintenance scripts for i18n and Lark sync
 
 ## Data Sources
 
-Menu data is served through `/api/menu`.
+Homepage content and the base menu are served from published snapshots:
 
-- When Lark is configured, Lark is the source of truth.
-- If Lark is unavailable, the site falls back to `menu-data.js` plus local metadata in `data/`.
+- `published/homepage.json`
+- `published/menu.json`
 
-Homepage data is served through `/api/homepage`.
+Lark is the editing system. Run `npm run lark:publish` to pull current Lark content into those published snapshots before deployment.
 
-- When the homepage Lark tables are configured, Lark is the source of truth.
-- Otherwise the site falls back to `homepage-data.js`.
+Store-specific drink availability remains live:
+
+- `/api/menu?store=...` starts from the published base menu, then reads the current store availability table from Lark.
+- `/api/create-checkout` performs a fresh live Lark validation before creating a Square checkout link.
+- If live store availability cannot be read, the site falls back to the last published store snapshot when available.
 
 ## Square Checkout
 
@@ -111,10 +114,19 @@ Useful maintenance commands:
 
 ```bash
 npm run lark:export-menu
+npm run lark:publish
 npm run lark:sync-homepage-settings
 npm run lark:sync-images
 npm run lark:sync-store-products
 ```
+
+Recommended content workflow:
+
+1. Edit content in Lark.
+2. Run `npm run lark:sync-images` when menu images change.
+3. Run `npm run lark:publish`.
+4. Run `npm run i18n:update` when visible text changes.
+5. Build, commit, and deploy.
 
 ## Translation Updates
 

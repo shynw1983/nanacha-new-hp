@@ -1,5 +1,5 @@
 const { randomUUID } = require("crypto");
-const { getMenuData } = require("./menu-source");
+const { getLiveMenuData } = require("./menu-source");
 
 const SQUARE_VERSION = "2026-01-22";
 
@@ -83,7 +83,7 @@ module.exports = async (request, response) => {
   const optionId = String(body.option || "");
   const toppingIds = Array.isArray(body.toppings) ? body.toppings.map(String) : [];
   const pickup = String(body.pickup || "");
-  const menu = await getMenuData(storeId);
+  const menu = await getLiveMenuData(storeId);
   const menuDrink = menu.drinks.find((item) => item.name === drink && item.websiteEnabled !== false);
   const size = findById(menu.sizes, sizeId);
   const option = findById(menu.options, optionId);

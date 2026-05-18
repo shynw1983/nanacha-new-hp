@@ -18,7 +18,9 @@ export function HomeContent({ homepage, menu }) {
   const { settings } = localizedHomepage;
   const recommended = localizedMenu.drinks.filter((drink) => drink.isRecommended);
   const picks = (recommended.length ? recommended : localizedMenu.drinks).slice(0, 4);
-  const primaryStore = localizedHomepage.stores.find((store) => store.address);
+  const primaryStore =
+    localizedHomepage.stores.find((store) => store.isPrimary && store.address) ||
+    localizedHomepage.stores.find((store) => store.address);
 
   return (
     <>

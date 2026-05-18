@@ -3,18 +3,12 @@ import siteLinks from "../data/site-links";
 
 const cleanPostalCode = (value = "") => String(value).replace(/^〒/, "");
 
-const getAddressParts = (store) => {
-  if (store.id === "kiyokawa") {
-    return {
-      streetAddress: "清川2-9-6",
-      addressLocality: "福岡市中央区",
-      addressRegion: "福岡県",
-    };
+const parseOpeningHours = (value = "") => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
   }
-
-  return {
-    streetAddress: store.address,
-  };
 };
 
 export function LocalBusinessJsonLd({ store, url = siteConfig.siteUrl }) {
@@ -30,12 +24,16 @@ export function LocalBusinessJsonLd({ store, url = siteConfig.siteUrl }) {
     image: [`${siteConfig.siteUrl}${siteConfig.ogImagePath}`],
     address: {
       "@type": "PostalAddress",
-      ...getAddressParts(store),
+      streetAddress: store.streetAddress || store.address,
+      addressLocality: store.addressLocality || undefined,
+      addressRegion: store.addressRegion || undefined,
       postalCode: cleanPostalCode(store.postalCode),
       addressCountry: "JP",
     },
     sameAs: [siteLinks.instagram],
     hasMenu: `${siteConfig.siteUrl}/menu`,
+    telephone: store.phone || undefined,
+    openingHoursSpecification: parseOpeningHours(store.openingHoursSchema),
   };
 
   return (

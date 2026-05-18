@@ -1,4 +1,5 @@
 const localMenu = require("../menu-data.js");
+const publishedMenu = require("../published/menu.json");
 const localDrinkDescriptions = require("../data/menu-descriptions.js");
 const localCategoryNotes = require("../data/category-notes.js");
 const {
@@ -126,7 +127,7 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         category: textValue(fields.category),
         price: Number(fields.price),
         description: textValue(fields.description) || localDrinkDescriptions[textValue(fields.name)] || "",
-        imageUrl: imageValue(fields.image) || textValue(fields.imageUrl) || textValue(fields.imageFile),
+        imageUrl: textValue(fields.imageFile) || textValue(fields.imageUrl) || imageValue(fields.image),
         temperatures: arrayValue(fields.temperatures),
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
@@ -259,7 +260,7 @@ const applyStoreAvailability = async (token, menu, storeId) => {
   };
 };
 
-const getMenuData = async (storeId = "") => {
+const getLiveMenuData = async (storeId = "") => {
   try {
     const token = await getTenantAccessToken();
     const menu = (await fetchLarkMenu(token)) || fallbackMenu;
@@ -271,7 +272,33 @@ const getMenuData = async (storeId = "") => {
   }
 };
 
+const getMenuData = async (storeId = "") => {
+  const baseMenu = publishedMenu.baseMenu || fallbackMenu;
+
+  if (!storeId) {
+    return baseMenu;
+  }
+
+  try {
+    const token = await getTenantAccessToken();
+
+    if (token) {
+      return await applyStoreAvailability(token, baseMenu, storeId);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return publishedMenu.storeMenus?.[storeId] || {
+    ...baseMenu,
+    selectedStoreId: storeId,
+    drinks: [],
+  };
+};
+
 module.exports = {
   getMenuData,
+  getLiveMenuData,
+  fallbackMenu,
   localMenu,
 };

@@ -14,6 +14,7 @@
     "i18n:update": "node scripts/i18n.js extract && node scripts/i18n.js translate:openai",
     "i18n:update:en": "node scripts/i18n.js extract && OPENAI_TRANSLATION_LANGUAGES=en node scripts/i18n.js translate:openai",
     "lark:export-menu": "node scripts/export-lark-menu.js",
+    "lark:publish": "node scripts/publish-lark-content.js",
     "lark:sync-homepage-settings": "node scripts/sync-homepage-settings.js",
     "lark:sync-images": "node scripts/sync-lark-images.js",
     "lark:sync-store-products": "node scripts/sync-store-products.js"

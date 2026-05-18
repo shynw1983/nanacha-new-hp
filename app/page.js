@@ -19,7 +19,7 @@ export const metadata = {
 
 export default async function HomePage() {
   const [menu, homepage] = await Promise.all([getMenuData(), getHomepageData()]);
-  const primaryStore = homepage.stores.find((store) => store.address);
+  const primaryStore = homepage.stores.find((store) => store.isPrimary && store.address) || homepage.stores.find((store) => store.address);
 
   return (
     <>

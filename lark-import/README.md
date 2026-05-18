@@ -120,9 +120,11 @@ Create this table separately in each shop's own Base.
 
 The website reads homepage slide images in this order:
 
-1. `image` attachment
+1. `imageFile`
 2. `imageUrl`
-3. `imageFile`
+3. `image` attachment
+
+Use `imageFile` for published production images so the live site does not depend on Lark attachments at runtime.
 
 ## Homepage Cards
 
@@ -142,9 +144,13 @@ The website reads homepage slide images in this order:
 - `name`: text
 - `summary`: text
 - `postalCode`: text
+- `addressRegion`: text
+- `addressLocality`: text
+- `streetAddress`: text
 - `address`: text
 - `intro`: text
 - `hours`: text
+- `openingHoursSchema`: text, JSON array for structured data
 - `closedDays`: text
 - `nearestStation`: text
 - `usage`: text
@@ -152,6 +158,8 @@ The website reads homepage slide images in this order:
 - `googleMapsUrl`: text
 - `googleMapsEmbedUrl`: text
 - `uberEatsUrl`: text, optional store-specific delivery link
+- `phone`: text, optional
+- `isPrimary`: checkbox
 - `sortOrder`: number
 - `isActive`: checkbox
 

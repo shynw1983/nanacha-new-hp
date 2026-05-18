@@ -1,0 +1,1943 @@
+{
+  "baseMenu": {
+    "categories": [
+      {
+        "id": "frappe",
+        "label": "タピオカフラッペ",
+        "note": "ひんやり濃厚なデザート感覚のタピオカドリンク。オレオ、抹茶、黒ごま、バナナなど甘い一杯を楽しみたい方におすすめです。",
+        "isTapiocaFree": false,
+        "hasWhipByDefault": true
+      },
+      {
+        "id": "milk",
+        "label": "タピオカミルク",
+        "note": "黒糖タピオカとミルクのコクを楽しめる定番カテゴリー。初めての方には黒糖タピオカミルクがおすすめです。",
+        "isTapiocaFree": false,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "smoothie",
+        "label": "スムージー",
+        "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+        "isTapiocaFree": true,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "cheese-tea",
+        "label": "タピオカチーズティー",
+        "note": "店内抽出のお茶に特製チーズフォームを合わせたシリーズ。甘さ控えめでも満足感のある味わいです。",
+        "isTapiocaFree": false,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "tea",
+        "label": "タピオカティー",
+        "note": "アッサム紅茶、ジャスミン茶、緑茶、ほうじ茶、八女抹茶など、お茶の香りを主役にしたタピオカメニューです。",
+        "isTapiocaFree": false,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "special",
+        "label": "スペシャル",
+        "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+        "isTapiocaFree": true,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "coffee",
+        "label": "タピオカコーヒー",
+        "note": "コーヒーの香りともちもちタピオカを合わせた、甘いドリンクが苦手な方にも選びやすいカテゴリーです。",
+        "isTapiocaFree": false,
+        "hasWhipByDefault": false
+      },
+      {
+        "id": "tea-coffee",
+        "label": "Tea & Coffee",
+        "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+        "isTapiocaFree": true,
+        "hasWhipByDefault": false
+      }
+    ],
+    "drinks": [
+      {
+        "id": "8000082",
+        "name": "濃厚黒ごまチーズタピオカフラッペ",
+        "category": "frappe",
+        "price": 1080,
+        "description": "濃厚黒ごまと特製チーズフォームを合わせたリッチな一杯。",
+        "imageUrl": "assets/menu/drink-01.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000079",
+        "name": "キャラメルタピオカフラッペ",
+        "category": "frappe",
+        "price": 980,
+        "description": "高品質エスプレッソ、キャラメルソース、厳選ミルクの芳醇な味わい。",
+        "imageUrl": "assets/menu/drink-02.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000078",
+        "name": "バニラタピオカフラッペ",
+        "category": "frappe",
+        "price": 980,
+        "description": "バニラフレーバー、厳選ミルク、国産練乳を使ったまろやかな一杯。",
+        "imageUrl": "assets/menu/drink-03.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000049",
+        "name": "チョコミントタピオカフラッペ",
+        "category": "frappe",
+        "price": 1080,
+        "description": "ダークチョコとミントの爽快感。プレミアム版への変更もおすすめ。",
+        "imageUrl": "assets/menu/drink-04.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000022",
+        "name": "オレオタピオカフラッペ",
+        "category": "frappe",
+        "price": 980,
+        "description": "砕いたオレオともっちりタピオカを合わせた人気フラッペ。",
+        "imageUrl": "assets/menu/drink-05.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": true,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000024",
+        "name": "バナナタピオカフラッペ",
+        "category": "frappe",
+        "price": 1080,
+        "description": "丸ごと冷凍したバナナと黒糖タピオカの相性が抜群。",
+        "imageUrl": "assets/menu/drink-06.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000023",
+        "name": "チョコタピオカフラッペ",
+        "category": "frappe",
+        "price": 980,
+        "description": "ダークチョコとココアで、飲みやすさとチョコ感を両立。",
+        "imageUrl": "assets/menu/drink-07.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000100",
+        "name": "抹茶タピオカフラッペ",
+        "category": "frappe",
+        "price": 980,
+        "description": "八女産抹茶をたっぷり使用。ミルキーで抹茶感のある一杯。",
+        "imageUrl": "assets/menu/drink-08.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000092",
+        "name": "濃厚黒ごまタピオカミルク",
+        "category": "milk",
+        "price": 980,
+        "description": "黒ごまの芳醇な香りと粒感を楽しめる、黒ごま好きにおすすめの一品。",
+        "imageUrl": "assets/menu/drink-09.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000091",
+        "name": "濃厚ピーナッツタピオカミルク",
+        "category": "milk",
+        "price": 980,
+        "description": "ピーナッツの香りともちもちタピオカの組み合わせ。",
+        "imageUrl": "assets/menu/drink-10.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000050",
+        "name": "黒糖タピオカ練乳いちごミルク",
+        "category": "milk",
+        "price": 980,
+        "description": "特製いちごミルクに国産練乳を合わせた濃厚な味わい。",
+        "imageUrl": "assets/menu/drink-11.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000030",
+        "name": "黒糖タピオカオレオミルク",
+        "category": "milk",
+        "price": 740,
+        "description": "オレオ好きにおすすめ。たっぷり混ぜて楽しむ一杯。",
+        "imageUrl": "assets/menu/drink-12.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000011",
+        "name": "黒糖タピオカ塩キャラメルミルク",
+        "category": "milk",
+        "price": 640,
+        "description": "キャラメルの甘みとフランス産岩塩のほのかな塩味。",
+        "imageUrl": "assets/menu/drink-13.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000005",
+        "name": "黒糖タピオカチョコミルク",
+        "category": "milk",
+        "price": 640,
+        "description": "濃厚さと飲みやすさのバランスが良いチョコミルク。",
+        "imageUrl": "assets/menu/drink-14.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "27",
+        "name": "黒糖タピオカミルク",
+        "category": "milk",
+        "price": 590,
+        "description": "国産新鮮牛乳と黒糖タピオカの相性を楽しめる人気 no.1。",
+        "imageUrl": "assets/menu/drink-15.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": true,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000057",
+        "name": "バナナ豆乳黒ごまスムージー",
+        "category": "smoothie",
+        "price": 1080,
+        "description": "完熟バナナ、純豆乳、黒ごまを合わせた濃厚スムージー。",
+        "imageUrl": "assets/menu/drink-16.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000055",
+        "name": "八女抹茶バナナスムージー",
+        "category": "smoothie",
+        "price": 1180,
+        "description": "完熟バナナと八女産 100% 抹茶を合わせた一杯。",
+        "imageUrl": "assets/menu/drink-17.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000054",
+        "name": "特製ミックスジューススムージー",
+        "category": "smoothie",
+        "price": 1500,
+        "description": "バナナ、桃、みかん、バニラカスタードの王道ミックス。",
+        "imageUrl": "assets/menu/drink-18.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000101",
+        "name": "バナナヨーグルトスムージー",
+        "category": "smoothie",
+        "price": 1080,
+        "description": "完熟バナナとヨーグルトのシンプルな組み合わせ。",
+        "imageUrl": "assets/menu/drink-19.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000102",
+        "name": "濃厚マンゴーヨーグルトスムージー",
+        "category": "smoothie",
+        "price": 1500,
+        "description": "マンゴーをたっぷり使用し、ヨーグルトと合わせた濃厚な一杯。",
+        "imageUrl": "assets/menu/drink-20.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000031",
+        "name": "アッサム紅茶タピオカチーズティー",
+        "category": "cheese-tea",
+        "price": 750,
+        "description": "アッサム紅茶と店内手作りチーズフォーム。",
+        "imageUrl": "assets/menu/drink-21.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": true,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000033",
+        "name": "ルイボスタピオカチーズティー",
+        "category": "cheese-tea",
+        "price": 750,
+        "description": "甘い香りとチーズフォームのコクを楽しめる組み合わせ。",
+        "imageUrl": "assets/menu/drink-22.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000032",
+        "name": "ジャスミンタピオカチーズティー",
+        "category": "cheese-tea",
+        "price": 750,
+        "description": "店内抽出のジャスミン茶とチーズフォーム。",
+        "imageUrl": "assets/menu/drink-23.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000035",
+        "name": "グリーンタピオカチーズティー",
+        "category": "cheese-tea",
+        "price": 750,
+        "description": "国産緑茶と特製チーズフォームのすっきり濃厚な一杯。",
+        "imageUrl": "assets/menu/drink-24.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "22",
+        "name": "グリーンタピオカティー",
+        "category": "tea",
+        "price": 590,
+        "description": "国産緑茶のすっきり感と爽快感が特徴。",
+        "imageUrl": "assets/menu/drink-33.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000080",
+        "name": "黒糖タピオカほうじ茶ラテ",
+        "category": "tea",
+        "price": 680,
+        "description": "鹿児島県産ほうじ茶を使用した香ばしいラテ。",
+        "imageUrl": "assets/menu/drink-25.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000019",
+        "name": "黒糖タピオカ八女抹茶ラテ",
+        "category": "tea",
+        "price": 640,
+        "description": "福岡県八女産抹茶 100% 使用。",
+        "imageUrl": "assets/menu/drink-26.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000038",
+        "name": "アッサム紅茶タピオカミルクティー",
+        "category": "tea",
+        "price": 640,
+        "description": "力強い香りと渋みのアッサム紅茶をミルクに合わせました。",
+        "imageUrl": "assets/menu/drink-27.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000004",
+        "name": "ジャスミンタピオカミルクティー",
+        "category": "tea",
+        "price": 640,
+        "description": "ジャスミンの香りをしっかり感じるミルクティー。",
+        "imageUrl": "assets/menu/drink-28.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "26",
+        "name": "グリーンタピオカミルクティー",
+        "category": "tea",
+        "price": 640,
+        "description": "国産緑茶ベースのすっきりしたミルクティー。",
+        "imageUrl": "assets/menu/drink-29.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "24",
+        "name": "ルイボスタピオカティー",
+        "category": "tea",
+        "price": 590,
+        "description": "ルイボス茶葉を丁寧に抽出した香りの良い一杯。",
+        "imageUrl": "assets/menu/drink-30.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000037",
+        "name": "アッサム紅茶タピオカティー",
+        "category": "tea",
+        "price": 590,
+        "description": "力強い香りと黒糖タピオカの相性が良いティー。",
+        "imageUrl": "assets/menu/drink-31.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "23",
+        "name": "ジャスミンタピオカティー",
+        "category": "tea",
+        "price": 590,
+        "description": "店内抽出のジャスミン茶をダイレクトに楽しめます。",
+        "imageUrl": "assets/menu/drink-32.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000007",
+        "name": "ピーチクリーミー杏仁",
+        "category": "special",
+        "price": 690,
+        "description": "たっぷり杏仁とピーチの組み合わせ。",
+        "imageUrl": "assets/menu/drink-34.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000009",
+        "name": "きなこ豆乳くろごま",
+        "category": "special",
+        "price": 640,
+        "description": "純豆乳、きなこ、蜂蜜、くろごまのやさしい甘み。",
+        "imageUrl": "assets/menu/drink-35.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": true,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "28",
+        "name": "ピーチ紅茶",
+        "category": "special",
+        "price": 640,
+        "description": "香り豊かな紅茶茶葉を店内抽出した自慢の一品。",
+        "imageUrl": "assets/menu/drink-36.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "32",
+        "name": "蜂蜜柚子茶",
+        "category": "special",
+        "price": 590,
+        "description": "蜂蜜柚子の甘みと香りを楽しめる一杯。",
+        "imageUrl": "assets/menu/drink-37.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000053",
+        "name": "蜂蜜柚子アッサム紅茶",
+        "category": "special",
+        "price": 640,
+        "description": "渋みの強いアッサム紅茶と蜂蜜柚子の組み合わせ。",
+        "imageUrl": "assets/menu/drink-38.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000052",
+        "name": "蜂蜜柚子ジャスミン茶",
+        "category": "special",
+        "price": 640,
+        "description": "ジャスミンの香りと蜂蜜柚子のコラボ。",
+        "imageUrl": "assets/menu/drink-39.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000051",
+        "name": "蜂蜜柚子緑茶",
+        "category": "special",
+        "price": 640,
+        "description": "国産緑茶の香りと苦味を蜂蜜柚子に合わせました。",
+        "imageUrl": "assets/menu/drink-40.png",
+        "temperatures": [
+          "ICE"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000021",
+        "name": "タピオカカフェラテ",
+        "category": "coffee",
+        "price": 640,
+        "description": "高品質な豆で淹れたエスプレッソを使用したカフェラテ。",
+        "imageUrl": "assets/menu/drink-41.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": true,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000020",
+        "name": "タピオカコーヒー",
+        "category": "coffee",
+        "price": 590,
+        "description": "香りの良いコーヒーともちもちタピオカの組み合わせ。",
+        "imageUrl": "assets/menu/drink-42.png",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": true,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8",
+        "name": "緑茶",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000036",
+        "name": "アッサム紅茶",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "9",
+        "name": "プアール茶",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "10",
+        "name": "ジャスミン茶",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "11",
+        "name": "ルイボス茶",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": false,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "800015",
+        "name": "カフェアメリカーノ",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": true,
+        "isAvailable": true,
+        "websiteEnabled": true
+      },
+      {
+        "id": "8000016",
+        "name": "カフェラテ",
+        "category": "tea-coffee",
+        "price": 490,
+        "description": "",
+        "imageUrl": "",
+        "temperatures": [
+          "ICE",
+          "HOT"
+        ],
+        "isRecommended": false,
+        "isFeatured": false,
+        "supportsDecaf": true,
+        "isAvailable": true,
+        "websiteEnabled": true
+      }
+    ],
+    "sizes": [
+      {
+        "id": "small",
+        "label": "S スモール 360ml",
+        "price": -50
+      },
+      {
+        "id": "regular",
+        "label": "R レギュラー 500ml",
+        "price": 0
+      },
+      {
+        "id": "large",
+        "label": "L ラージ 700ml",
+        "price": 250
+      }
+    ],
+    "sweetness": [
+      "ふつう",
+      "多め",
+      "少なめ",
+      "ゼロ"
+    ],
+    "ice": [
+      "ふつう",
+      "氷少なめ",
+      "氷抜き"
+    ],
+    "hotIce": "HOTは氷なし",
+    "options": [
+      {
+        "id": "none",
+        "label": "なし",
+        "price": 0
+      },
+      {
+        "id": "premium",
+        "label": "プレミアム版",
+        "price": 300
+      },
+      {
+        "id": "soy",
+        "label": "豆乳変更",
+        "price": 50
+      },
+      {
+        "id": "decaf",
+        "label": "デカフェ",
+        "price": 50
+      }
+    ],
+    "toppings": [
+      {
+        "id": "extra-tapioca",
+        "label": "タピオカ追加",
+        "price": 150
+      },
+      {
+        "id": "extra-oreo",
+        "label": "オレオ追加",
+        "price": 150
+      },
+      {
+        "id": "extra-whip",
+        "label": "ホイップ追加",
+        "price": 150
+      },
+      {
+        "id": "choco-chip",
+        "label": "チョコチップ追加",
+        "price": 70
+      },
+      {
+        "id": "cheese-foam",
+        "label": "チーズフォーム追加",
+        "price": 300
+      },
+      {
+        "id": "no-tapioca",
+        "label": "タピオカ抜き",
+        "price": -50
+      },
+      {
+        "id": "no-whip",
+        "label": "ホイップ抜き",
+        "price": 0
+      }
+    ],
+    "tapiocaFreeCategories": [
+      "smoothie",
+      "special",
+      "tea-coffee"
+    ],
+    "whippedCategories": [
+      "frappe"
+    ],
+    "stores": [
+      {
+        "id": "kiyokawa",
+        "label": "福岡清川店",
+        "appToken": "KgJQb3qSeank4zs83Z7jCyHQpPd",
+        "storeDrinksTableId": "tblmlWuHuhfZw7Oo"
+      }
+    ],
+    "selectedStoreId": "kiyokawa"
+  },
+  "storeMenus": {
+    "kiyokawa": {
+      "categories": [
+        {
+          "id": "frappe",
+          "label": "タピオカフラッペ",
+          "note": "ひんやり濃厚なデザート感覚のタピオカドリンク。オレオ、抹茶、黒ごま、バナナなど甘い一杯を楽しみたい方におすすめです。",
+          "isTapiocaFree": false,
+          "hasWhipByDefault": true
+        },
+        {
+          "id": "milk",
+          "label": "タピオカミルク",
+          "note": "黒糖タピオカとミルクのコクを楽しめる定番カテゴリー。初めての方には黒糖タピオカミルクがおすすめです。",
+          "isTapiocaFree": false,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "smoothie",
+          "label": "スムージー",
+          "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+          "isTapiocaFree": true,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "cheese-tea",
+          "label": "タピオカチーズティー",
+          "note": "店内抽出のお茶に特製チーズフォームを合わせたシリーズ。甘さ控えめでも満足感のある味わいです。",
+          "isTapiocaFree": false,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "tea",
+          "label": "タピオカティー",
+          "note": "アッサム紅茶、ジャスミン茶、緑茶、ほうじ茶、八女抹茶など、お茶の香りを主役にしたタピオカメニューです。",
+          "isTapiocaFree": false,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "special",
+          "label": "スペシャル",
+          "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+          "isTapiocaFree": true,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "coffee",
+          "label": "タピオカコーヒー",
+          "note": "コーヒーの香りともちもちタピオカを合わせた、甘いドリンクが苦手な方にも選びやすいカテゴリーです。",
+          "isTapiocaFree": false,
+          "hasWhipByDefault": false
+        },
+        {
+          "id": "tea-coffee",
+          "label": "Tea & Coffee",
+          "note": "こちらの商品にはタピオカは入っていません。お好みでカスタマイズできます。",
+          "isTapiocaFree": true,
+          "hasWhipByDefault": false
+        }
+      ],
+      "drinks": [
+        {
+          "id": "8000082",
+          "name": "濃厚黒ごまチーズタピオカフラッペ",
+          "category": "frappe",
+          "price": 1080,
+          "description": "濃厚黒ごまと特製チーズフォームを合わせたリッチな一杯。",
+          "imageUrl": "assets/menu/drink-01.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000079",
+          "name": "キャラメルタピオカフラッペ",
+          "category": "frappe",
+          "price": 980,
+          "description": "高品質エスプレッソ、キャラメルソース、厳選ミルクの芳醇な味わい。",
+          "imageUrl": "assets/menu/drink-02.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000078",
+          "name": "バニラタピオカフラッペ",
+          "category": "frappe",
+          "price": 980,
+          "description": "バニラフレーバー、厳選ミルク、国産練乳を使ったまろやかな一杯。",
+          "imageUrl": "assets/menu/drink-03.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000049",
+          "name": "チョコミントタピオカフラッペ",
+          "category": "frappe",
+          "price": 1080,
+          "description": "ダークチョコとミントの爽快感。プレミアム版への変更もおすすめ。",
+          "imageUrl": "assets/menu/drink-04.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000022",
+          "name": "オレオタピオカフラッペ",
+          "category": "frappe",
+          "price": 980,
+          "description": "砕いたオレオともっちりタピオカを合わせた人気フラッペ。",
+          "imageUrl": "assets/menu/drink-05.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": true,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000024",
+          "name": "バナナタピオカフラッペ",
+          "category": "frappe",
+          "price": 1080,
+          "description": "丸ごと冷凍したバナナと黒糖タピオカの相性が抜群。",
+          "imageUrl": "assets/menu/drink-06.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000023",
+          "name": "チョコタピオカフラッペ",
+          "category": "frappe",
+          "price": 980,
+          "description": "ダークチョコとココアで、飲みやすさとチョコ感を両立。",
+          "imageUrl": "assets/menu/drink-07.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000100",
+          "name": "抹茶タピオカフラッペ",
+          "category": "frappe",
+          "price": 980,
+          "description": "八女産抹茶をたっぷり使用。ミルキーで抹茶感のある一杯。",
+          "imageUrl": "assets/menu/drink-08.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000092",
+          "name": "濃厚黒ごまタピオカミルク",
+          "category": "milk",
+          "price": 980,
+          "description": "黒ごまの芳醇な香りと粒感を楽しめる、黒ごま好きにおすすめの一品。",
+          "imageUrl": "assets/menu/drink-09.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000091",
+          "name": "濃厚ピーナッツタピオカミルク",
+          "category": "milk",
+          "price": 980,
+          "description": "ピーナッツの香りともちもちタピオカの組み合わせ。",
+          "imageUrl": "assets/menu/drink-10.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000050",
+          "name": "黒糖タピオカ練乳いちごミルク",
+          "category": "milk",
+          "price": 980,
+          "description": "特製いちごミルクに国産練乳を合わせた濃厚な味わい。",
+          "imageUrl": "assets/menu/drink-11.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000030",
+          "name": "黒糖タピオカオレオミルク",
+          "category": "milk",
+          "price": 740,
+          "description": "オレオ好きにおすすめ。たっぷり混ぜて楽しむ一杯。",
+          "imageUrl": "assets/menu/drink-12.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000011",
+          "name": "黒糖タピオカ塩キャラメルミルク",
+          "category": "milk",
+          "price": 640,
+          "description": "キャラメルの甘みとフランス産岩塩のほのかな塩味。",
+          "imageUrl": "assets/menu/drink-13.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000005",
+          "name": "黒糖タピオカチョコミルク",
+          "category": "milk",
+          "price": 640,
+          "description": "濃厚さと飲みやすさのバランスが良いチョコミルク。",
+          "imageUrl": "assets/menu/drink-14.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "27",
+          "name": "黒糖タピオカミルク",
+          "category": "milk",
+          "price": 590,
+          "description": "国産新鮮牛乳と黒糖タピオカの相性を楽しめる人気 no.1。",
+          "imageUrl": "assets/menu/drink-15.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": true,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000057",
+          "name": "バナナ豆乳黒ごまスムージー",
+          "category": "smoothie",
+          "price": 1080,
+          "description": "完熟バナナ、純豆乳、黒ごまを合わせた濃厚スムージー。",
+          "imageUrl": "assets/menu/drink-16.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000055",
+          "name": "八女抹茶バナナスムージー",
+          "category": "smoothie",
+          "price": 1180,
+          "description": "完熟バナナと八女産 100% 抹茶を合わせた一杯。",
+          "imageUrl": "assets/menu/drink-17.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000054",
+          "name": "特製ミックスジューススムージー",
+          "category": "smoothie",
+          "price": 1500,
+          "description": "バナナ、桃、みかん、バニラカスタードの王道ミックス。",
+          "imageUrl": "assets/menu/drink-18.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000101",
+          "name": "バナナヨーグルトスムージー",
+          "category": "smoothie",
+          "price": 1080,
+          "description": "完熟バナナとヨーグルトのシンプルな組み合わせ。",
+          "imageUrl": "assets/menu/drink-19.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000102",
+          "name": "濃厚マンゴーヨーグルトスムージー",
+          "category": "smoothie",
+          "price": 1500,
+          "description": "マンゴーをたっぷり使用し、ヨーグルトと合わせた濃厚な一杯。",
+          "imageUrl": "assets/menu/drink-20.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000031",
+          "name": "アッサム紅茶タピオカチーズティー",
+          "category": "cheese-tea",
+          "price": 750,
+          "description": "アッサム紅茶と店内手作りチーズフォーム。",
+          "imageUrl": "assets/menu/drink-21.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": true,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000033",
+          "name": "ルイボスタピオカチーズティー",
+          "category": "cheese-tea",
+          "price": 750,
+          "description": "甘い香りとチーズフォームのコクを楽しめる組み合わせ。",
+          "imageUrl": "assets/menu/drink-22.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000032",
+          "name": "ジャスミンタピオカチーズティー",
+          "category": "cheese-tea",
+          "price": 750,
+          "description": "店内抽出のジャスミン茶とチーズフォーム。",
+          "imageUrl": "assets/menu/drink-23.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000035",
+          "name": "グリーンタピオカチーズティー",
+          "category": "cheese-tea",
+          "price": 750,
+          "description": "国産緑茶と特製チーズフォームのすっきり濃厚な一杯。",
+          "imageUrl": "assets/menu/drink-24.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "22",
+          "name": "グリーンタピオカティー",
+          "category": "tea",
+          "price": 590,
+          "description": "国産緑茶のすっきり感と爽快感が特徴。",
+          "imageUrl": "assets/menu/drink-33.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000080",
+          "name": "黒糖タピオカほうじ茶ラテ",
+          "category": "tea",
+          "price": 680,
+          "description": "鹿児島県産ほうじ茶を使用した香ばしいラテ。",
+          "imageUrl": "assets/menu/drink-25.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000019",
+          "name": "黒糖タピオカ八女抹茶ラテ",
+          "category": "tea",
+          "price": 640,
+          "description": "福岡県八女産抹茶 100% 使用。",
+          "imageUrl": "assets/menu/drink-26.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000038",
+          "name": "アッサム紅茶タピオカミルクティー",
+          "category": "tea",
+          "price": 640,
+          "description": "力強い香りと渋みのアッサム紅茶をミルクに合わせました。",
+          "imageUrl": "assets/menu/drink-27.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000004",
+          "name": "ジャスミンタピオカミルクティー",
+          "category": "tea",
+          "price": 640,
+          "description": "ジャスミンの香りをしっかり感じるミルクティー。",
+          "imageUrl": "assets/menu/drink-28.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "26",
+          "name": "グリーンタピオカミルクティー",
+          "category": "tea",
+          "price": 640,
+          "description": "国産緑茶ベースのすっきりしたミルクティー。",
+          "imageUrl": "assets/menu/drink-29.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "24",
+          "name": "ルイボスタピオカティー",
+          "category": "tea",
+          "price": 590,
+          "description": "ルイボス茶葉を丁寧に抽出した香りの良い一杯。",
+          "imageUrl": "assets/menu/drink-30.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000037",
+          "name": "アッサム紅茶タピオカティー",
+          "category": "tea",
+          "price": 590,
+          "description": "力強い香りと黒糖タピオカの相性が良いティー。",
+          "imageUrl": "assets/menu/drink-31.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "23",
+          "name": "ジャスミンタピオカティー",
+          "category": "tea",
+          "price": 590,
+          "description": "店内抽出のジャスミン茶をダイレクトに楽しめます。",
+          "imageUrl": "assets/menu/drink-32.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000007",
+          "name": "ピーチクリーミー杏仁",
+          "category": "special",
+          "price": 690,
+          "description": "たっぷり杏仁とピーチの組み合わせ。",
+          "imageUrl": "assets/menu/drink-34.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000009",
+          "name": "きなこ豆乳くろごま",
+          "category": "special",
+          "price": 640,
+          "description": "純豆乳、きなこ、蜂蜜、くろごまのやさしい甘み。",
+          "imageUrl": "assets/menu/drink-35.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": true,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "28",
+          "name": "ピーチ紅茶",
+          "category": "special",
+          "price": 640,
+          "description": "香り豊かな紅茶茶葉を店内抽出した自慢の一品。",
+          "imageUrl": "assets/menu/drink-36.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "32",
+          "name": "蜂蜜柚子茶",
+          "category": "special",
+          "price": 590,
+          "description": "蜂蜜柚子の甘みと香りを楽しめる一杯。",
+          "imageUrl": "assets/menu/drink-37.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000053",
+          "name": "蜂蜜柚子アッサム紅茶",
+          "category": "special",
+          "price": 640,
+          "description": "渋みの強いアッサム紅茶と蜂蜜柚子の組み合わせ。",
+          "imageUrl": "assets/menu/drink-38.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000052",
+          "name": "蜂蜜柚子ジャスミン茶",
+          "category": "special",
+          "price": 640,
+          "description": "ジャスミンの香りと蜂蜜柚子のコラボ。",
+          "imageUrl": "assets/menu/drink-39.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000051",
+          "name": "蜂蜜柚子緑茶",
+          "category": "special",
+          "price": 640,
+          "description": "国産緑茶の香りと苦味を蜂蜜柚子に合わせました。",
+          "imageUrl": "assets/menu/drink-40.png",
+          "temperatures": [
+            "ICE"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000021",
+          "name": "タピオカカフェラテ",
+          "category": "coffee",
+          "price": 640,
+          "description": "高品質な豆で淹れたエスプレッソを使用したカフェラテ。",
+          "imageUrl": "assets/menu/drink-41.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": true,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000020",
+          "name": "タピオカコーヒー",
+          "category": "coffee",
+          "price": 590,
+          "description": "香りの良いコーヒーともちもちタピオカの組み合わせ。",
+          "imageUrl": "assets/menu/drink-42.png",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": true,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8",
+          "name": "緑茶",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000036",
+          "name": "アッサム紅茶",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "9",
+          "name": "プアール茶",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "10",
+          "name": "ジャスミン茶",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "11",
+          "name": "ルイボス茶",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": false,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "800015",
+          "name": "カフェアメリカーノ",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": true,
+          "isAvailable": true,
+          "websiteEnabled": true
+        },
+        {
+          "id": "8000016",
+          "name": "カフェラテ",
+          "category": "tea-coffee",
+          "price": 490,
+          "description": "",
+          "imageUrl": "",
+          "temperatures": [
+            "ICE",
+            "HOT"
+          ],
+          "isRecommended": false,
+          "isFeatured": false,
+          "supportsDecaf": true,
+          "isAvailable": true,
+          "websiteEnabled": true
+        }
+      ],
+      "sizes": [
+        {
+          "id": "small",
+          "label": "S スモール 360ml",
+          "price": -50
+        },
+        {
+          "id": "regular",
+          "label": "R レギュラー 500ml",
+          "price": 0
+        },
+        {
+          "id": "large",
+          "label": "L ラージ 700ml",
+          "price": 250
+        }
+      ],
+      "sweetness": [
+        "ふつう",
+        "多め",
+        "少なめ",
+        "ゼロ"
+      ],
+      "ice": [
+        "ふつう",
+        "氷少なめ",
+        "氷抜き"
+      ],
+      "hotIce": "HOTは氷なし",
+      "options": [
+        {
+          "id": "none",
+          "label": "なし",
+          "price": 0
+        },
+        {
+          "id": "premium",
+          "label": "プレミアム版",
+          "price": 300
+        },
+        {
+          "id": "soy",
+          "label": "豆乳変更",
+          "price": 50
+        },
+        {
+          "id": "decaf",
+          "label": "デカフェ",
+          "price": 50
+        }
+      ],
+      "toppings": [
+        {
+          "id": "extra-tapioca",
+          "label": "タピオカ追加",
+          "price": 150
+        },
+        {
+          "id": "extra-oreo",
+          "label": "オレオ追加",
+          "price": 150
+        },
+        {
+          "id": "extra-whip",
+          "label": "ホイップ追加",
+          "price": 150
+        },
+        {
+          "id": "choco-chip",
+          "label": "チョコチップ追加",
+          "price": 70
+        },
+        {
+          "id": "cheese-foam",
+          "label": "チーズフォーム追加",
+          "price": 300
+        },
+        {
+          "id": "no-tapioca",
+          "label": "タピオカ抜き",
+          "price": -50
+        },
+        {
+          "id": "no-whip",
+          "label": "ホイップ抜き",
+          "price": 0
+        }
+      ],
+      "tapiocaFreeCategories": [
+        "smoothie",
+        "special",
+        "tea-coffee"
+      ],
+      "whippedCategories": [
+        "frappe"
+      ],
+      "stores": [
+        {
+          "id": "kiyokawa",
+          "label": "福岡清川店",
+          "appToken": "KgJQb3qSeank4zs83Z7jCyHQpPd",
+          "storeDrinksTableId": "tblmlWuHuhfZw7Oo"
+        }
+      ],
+      "selectedStoreId": "kiyokawa"
+    }
+  },
+  "publishedAt": "2026-05-18T00:17:36.231Z"
+}

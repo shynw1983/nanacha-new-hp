@@ -155,9 +155,13 @@ const homepageFallbackData = {
       name: "福岡清川店",
       summary: "福岡市中央区清川の路面店。テイクアウト・受け取り予約に対応。",
       postalCode: "〒810-0005",
+      addressRegion: "福岡県",
+      addressLocality: "福岡市中央区",
+      streetAddress: "清川2-9-6",
       address: "福岡市中央区清川2-9-6",
       intro: "清川通りから少し入った路面店です。テイクアウトは店頭右側の pickup desk で受け取れます。",
       hours: "12:00-00:30",
+      openingHoursSchema: '[{"dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"12:00","closes":"00:30"}]',
       closedDays: "不定休",
       nearestStation: "渡辺通駅・西鉄平尾駅エリア",
       usage: "テイクアウト・受け取り予約",
@@ -168,6 +172,8 @@ const homepageFallbackData = {
         "https://www.google.com/maps?q=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6&output=embed",
       uberEatsUrl:
         "https://www.ubereats.com/jp/store/nanacha-%E6%B8%85%E5%B7%9D%E5%BA%97-nanacha-kiyokawa/4qJ-17U0RB-kK4GdDu_35w",
+      phone: "",
+      isPrimary: true,
       sortOrder: 10,
     },
     {

@@ -1,4 +1,5 @@
 const homepageFallback = require("../homepage-data.js");
+const publishedHomepage = require("../published/homepage.json");
 const {
   cleanEnv,
   textValue,
@@ -56,12 +57,16 @@ const normalizeHomepage = ({
   const slides = sortByOrder(
     slideRecords
       .map((record) => record.fields || {})
-      .filter((fields) => booleanValue(fields.isActive) && (imageValue(fields.image) || textValue(fields.imageUrl)))
+      .filter(
+        (fields) =>
+          booleanValue(fields.isActive) &&
+          (textValue(fields.imageFile) || textValue(fields.imageUrl) || imageValue(fields.image)),
+      )
       .map((fields) => ({
         id: textValue(fields.slideId),
         title: textValue(fields.title),
         caption: textValue(fields.caption),
-        imageUrl: imageValue(fields.image) || textValue(fields.imageUrl),
+        imageUrl: textValue(fields.imageFile) || textValue(fields.imageUrl) || imageValue(fields.image),
         altText: textValue(fields.altText),
         variant: textValue(fields.variant) || "photo",
         linkUrl: textValue(fields.linkUrl),
@@ -94,17 +99,23 @@ const normalizeHomepage = ({
           statusLabel: textValue(fields.statusLabel),
           name: textValue(fields.name),
           summary: textValue(fields.summary),
-          postalCode: textValue(fields.postalCode),
-          address: textValue(fields.address),
+        postalCode: textValue(fields.postalCode),
+        addressRegion: textValue(fields.addressRegion),
+        addressLocality: textValue(fields.addressLocality),
+        streetAddress: textValue(fields.streetAddress),
+        address: textValue(fields.address),
           intro: textValue(fields.intro),
-          hours: textValue(fields.hours),
+        hours: textValue(fields.hours),
+        openingHoursSchema: textValue(fields.openingHoursSchema),
           closedDays: textValue(fields.closedDays),
           nearestStation: textValue(fields.nearestStation),
           usage: textValue(fields.usage),
           paymentNote: textValue(fields.paymentNote),
           googleMapsUrl: textValue(fields.googleMapsUrl),
           googleMapsEmbedUrl: textValue(fields.googleMapsEmbedUrl),
-          uberEatsUrl: textValue(fields.uberEatsUrl),
+        uberEatsUrl: textValue(fields.uberEatsUrl),
+        phone: textValue(fields.phone),
+        isPrimary: booleanValue(fields.isPrimary),
           sortOrder: Number(fields.sortOrder) || 9999,
         }),
       ),
@@ -178,7 +189,7 @@ const fetchLarkHomepage = async (token) => {
   });
 };
 
-const getHomepageData = async () => {
+const getLiveHomepageData = async () => {
   try {
     const token = await getTenantAccessToken();
     return (await fetchLarkHomepage(token)) || homepageFallback;
@@ -188,7 +199,10 @@ const getHomepageData = async () => {
   }
 };
 
+const getHomepageData = async () => publishedHomepage || homepageFallback;
+
 module.exports = {
   getHomepageData,
+  getLiveHomepageData,
   homepageFallback,
 };

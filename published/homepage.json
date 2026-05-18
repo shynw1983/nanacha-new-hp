@@ -1,0 +1,266 @@
+{
+  "settings": {
+    "heroEyebrow": "tapioca & more...",
+    "heroTitle": "nanacha",
+    "heroDescription": "2019年12月に福岡で誕生した nanacha は、黒糖タピオカミルク、フルーツティー、八女抹茶ラテ、スムージーまで、素材の香りと選ぶ楽しさを大切にした、気軽に立ち寄れるティースタンドです。",
+    "primaryButtonLabel": "メニューを見る",
+    "primaryButtonUrl": "/menu",
+    "secondaryButtonLabel": "受け取り予約",
+    "secondaryButtonUrl": "#reserve",
+    "seasonEyebrow": "seasonal picks",
+    "seasonTitle": "季節のおすすめ",
+    "seasonIntro": "春夏はフルーツティーやスムージー、秋冬は黒糖ミルクや抹茶ラテなど、季節に合わせて飲みたい一杯をおすすめしています。",
+    "footerTextLeft": "nanacha · tapioca & more...",
+    "footerTextRight": "福岡市中央区清川2-9-6 · online pickup",
+    "isActive": "true",
+    "key": "main"
+  },
+  "slides": [
+    {
+      "id": "hero-01",
+      "title": "fresh tapioca",
+      "caption": "もちもち食感は、店内仕込みから。",
+      "imageUrl": "assets/nanacha-hero.png",
+      "altText": "黒糖でじっくり炊き上げた生タピオカ。店内仕込みならではの艶ともちもち食感を楽しめる、nanacha自家製タピオカ",
+      "variant": "photo",
+      "linkUrl": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "hero-02",
+      "title": "fresh matcha",
+      "caption": "一杯ずつ、丁寧に点てる抹茶。",
+      "imageUrl": "assets/menu/drink-01.png",
+      "altText": "店内で丁寧に点てる抹茶。竹製の茶筅で泡立てる、nanachaの抹茶ドリンク用抹茶ベース",
+      "variant": "photo",
+      "linkUrl": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "hero-03",
+      "title": "fresh tea",
+      "caption": "店内で丁寧に抽出した、香り立つ紅茶。",
+      "imageUrl": "assets/menu/drink-08.png",
+      "altText": "ガラスティードリッパーで抽出する紅茶。店内で丁寧に淹れる、nanachaの香り高いティーベース",
+      "variant": "photo",
+      "linkUrl": "",
+      "sortOrder": 30
+    }
+  ],
+  "cards": [
+    {
+      "id": "order-01",
+      "section": "orderSteps",
+      "badge": "1",
+      "title": "ドリンクを選ぶ",
+      "body": "黒糖タピオカミルク、フラッペ、タピオカティー、スムージーなど、気分に合わせて選べます。",
+      "linkedDrinkId": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "guide-01",
+      "section": "recommendGuide",
+      "badge": "",
+      "title": "初めての方",
+      "body": "黒糖タピオカミルク。国産新鮮牛乳と黒糖タピオカの定番人気です。",
+      "linkedDrinkId": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "season-01",
+      "section": "seasonalPicks",
+      "badge": "",
+      "title": "濃厚マンゴーヨーグルトスムージー",
+      "body": "マンゴーとヨーグルトの濃厚な組み合わせ。暑い日にもデザートにも。",
+      "linkedDrinkId": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "story-01",
+      "section": "story",
+      "badge": "",
+      "title": "店内抽出のお茶",
+      "body": "アッサム紅茶、ジャスミン茶、ルイボス茶、国産緑茶など、香りを活かしたティーメニューを揃えています。",
+      "linkedDrinkId": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "order-02",
+      "section": "orderSteps",
+      "badge": "2",
+      "title": "サイズを選ぶ",
+      "body": "S 360ml、R 500ml、L 700ml から選択。しっかり楽しみたい日はラージがおすすめです。",
+      "linkedDrinkId": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "guide-02",
+      "section": "recommendGuide",
+      "badge": "",
+      "title": "甘さ控えめが好きな方",
+      "body": "ジャスミンタピオカティーやグリーンタピオカティー。茶葉の香りをすっきり楽しめます。",
+      "linkedDrinkId": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "season-02",
+      "section": "seasonalPicks",
+      "badge": "",
+      "title": "蜂蜜柚子ジャスミン茶",
+      "body": "蜂蜜柚子の香りとジャスミン茶のすっきり感を楽しめる一杯。",
+      "linkedDrinkId": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "story-02",
+      "section": "story",
+      "badge": "",
+      "title": "もちもちの黒糖タピオカ",
+      "body": "ミルク、ラテ、ティー、コーヒーまで、黒糖タピオカの食感を楽しめるメニューを用意しています。",
+      "linkedDrinkId": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "order-03",
+      "section": "orderSteps",
+      "badge": "3",
+      "title": "甘さ・氷を調整",
+      "body": "甘さはふつう、多め、少なめ、ゼロ。氷の量も好みに合わせて調整できます。",
+      "linkedDrinkId": "",
+      "sortOrder": 30
+    },
+    {
+      "id": "guide-03",
+      "section": "recommendGuide",
+      "badge": "",
+      "title": "濃厚な味が好きな方",
+      "body": "オレオ、黒ごま、抹茶、チョコ系のフラッペやミルクがおすすめです。",
+      "linkedDrinkId": "",
+      "sortOrder": 30
+    },
+    {
+      "id": "season-03",
+      "section": "seasonalPicks",
+      "badge": "",
+      "title": "黒糖タピオカ八女抹茶ラテ",
+      "body": "福岡県八女産抹茶 100% 使用。抹茶の香りと黒糖タピオカが好相性です。",
+      "linkedDrinkId": "",
+      "sortOrder": 30
+    },
+    {
+      "id": "story-03",
+      "section": "story",
+      "badge": "",
+      "title": "福岡らしい素材",
+      "body": "八女抹茶を使ったラテやフラッペなど、福岡で楽しみたい味わいも大切にしています。",
+      "linkedDrinkId": "",
+      "sortOrder": 30
+    },
+    {
+      "id": "order-04",
+      "section": "orderSteps",
+      "badge": "4",
+      "title": "トッピングを追加",
+      "body": "タピオカ追加、チーズフォーム、オレオ、ホイップなどで、自分好みの一杯にできます。",
+      "linkedDrinkId": "",
+      "sortOrder": 40
+    },
+    {
+      "id": "guide-04",
+      "section": "recommendGuide",
+      "badge": "",
+      "title": "暑い日や食後に",
+      "body": "フルーツティー、蜂蜜柚子茶、マンゴーヨーグルトスムージーでさっぱり。",
+      "linkedDrinkId": "",
+      "sortOrder": 40
+    }
+  ],
+  "stores": [
+    {
+      "id": "kiyokawa",
+      "statusLabel": "open now",
+      "name": "福岡清川店",
+      "summary": "福岡市中央区清川の路面店。テイクアウト・受け取り予約に対応。",
+      "postalCode": "〒810-0005",
+      "addressRegion": "福岡県",
+      "addressLocality": "福岡市中央区",
+      "streetAddress": "清川2-9-6",
+      "address": "福岡市中央区清川2-9-6",
+      "intro": "清川通りから少し入った路面店です。テイクアウトは店頭右側の pickup desk で受け取れます。",
+      "hours": "12:00-00:30",
+      "openingHoursSchema": "[{\"dayOfWeek\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\",\"Saturday\",\"Sunday\"],\"opens\":\"12:00\",\"closes\":\"00:30\"}]",
+      "closedDays": "不定休",
+      "nearestStation": "渡辺通駅・西鉄平尾駅エリア",
+      "usage": "テイクアウト・受け取り予約",
+      "paymentNote": "Square決済対応予定",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6",
+      "googleMapsEmbedUrl": "https://www.google.com/maps?q=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6&output=embed",
+      "uberEatsUrl": "https://www.ubereats.com/jp/store/nanacha-%E6%B8%85%E5%B7%9D%E5%BA%97-nanacha-kiyokawa/4qJ-17U0RB-kK4GdDu_35w",
+      "phone": "",
+      "isPrimary": true,
+      "sortOrder": 10
+    },
+    {
+      "id": "next-store",
+      "statusLabel": "coming soon",
+      "name": "次の店舗",
+      "summary": "新しい店舗情報は、準備が整い次第こちらでお知らせします。",
+      "sortOrder": 20,
+      "postalCode": "",
+      "addressRegion": "",
+      "addressLocality": "",
+      "streetAddress": "",
+      "address": "",
+      "intro": "",
+      "hours": "",
+      "openingHoursSchema": "",
+      "closedDays": "",
+      "nearestStation": "",
+      "usage": "",
+      "paymentNote": "",
+      "googleMapsUrl": "",
+      "googleMapsEmbedUrl": "",
+      "uberEatsUrl": "",
+      "phone": "",
+      "isPrimary": false
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq-01",
+      "question": "タピオカ抜きはできますか？",
+      "answer": "対象メニューはタピオカ抜きにできます。スムージーやスペシャルなど、もともとタピオカが入っていない商品もあります。",
+      "sortOrder": 10
+    },
+    {
+      "id": "faq-02",
+      "question": "甘さゼロや氷抜きは選べますか？",
+      "answer": "甘さはゼロ、少なめ、ふつう、多めから選べます。氷はふつう、少なめ、氷抜きに対応しています。",
+      "sortOrder": 20
+    },
+    {
+      "id": "faq-03",
+      "question": "テイクアウトできますか？",
+      "answer": "はい。福岡清川店ではテイクアウトでの受け取りに対応しています。受け取り予約も利用できます。",
+      "sortOrder": 30
+    },
+    {
+      "id": "faq-04",
+      "question": "カフェインが気になる場合は？",
+      "answer": "デカフェ変更に対応できるメニューがあります。気になる方は注文時にご確認ください。",
+      "sortOrder": 40
+    },
+    {
+      "id": "faq-05",
+      "question": "アレルギー情報は確認できますか？",
+      "answer": "牛乳、豆乳、ナッツ、ごま、チョコレートなどを使う商品があります。アレルギーをお持ちの方は注文前にスタッフへご相談ください。",
+      "sortOrder": 50
+    },
+    {
+      "id": "faq-06",
+      "question": "場所はどこですか？",
+      "answer": "福岡市中央区清川2-9-6です。渡辺通駅・西鉄平尾駅エリアからアクセスしやすい路面店です。",
+      "sortOrder": 60
+    }
+  ]
+}

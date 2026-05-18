@@ -46,13 +46,15 @@
 
 ## 数据流
 
-- `/api/homepage`：读取首页内容；优先 Lark，失败时回退到 `homepage-data.js`。
-- `/api/menu`：读取菜单内容；优先 Lark，失败时回退到 `menu-data.js` 和 `data/` 中的本地说明。
+- `/api/homepage`：读取 `published/homepage.json` 中最近一次正式发布的首页快照。
+- `/api/menu`：默认读取 `published/menu.json` 中的基础菜单；带 `store` 参数时，再实时读取该店 Lark 商品可售状态。
 - `/api/create-checkout`：创建 Square 支付链接。
 
 ## 维护注意事项
 
-- 页面内容优先维护 Lark；本地 fallback 仅用于无 CMS 或故障时继续渲染。
+- Lark 是编辑后台，不是线上页面的唯一实时数据源。
+- 首页、菜单基础资料、门店资料、图片路径以 `published/` 中最近一次正式发布快照为准；编辑 Lark 后运行 `npm run lark:publish`。
+- 各店商品可售状态仍由 Lark 实时管理；创建支付前会再次实时校验。
 - 饮品本地 fallback 元数据位于：
   - `menu-data.js`
   - `data/menu-descriptions.js`
