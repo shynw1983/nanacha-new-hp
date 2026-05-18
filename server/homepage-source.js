@@ -99,6 +99,8 @@ const normalizeHomepage = ({
           statusLabel: textValue(fields.statusLabel),
           name: textValue(fields.name),
           summary: textValue(fields.summary),
+          storefrontImageUrl: textValue(fields.storefrontImageFile) || textValue(fields.storefrontImageUrl) || imageValue(fields.storefrontImage),
+          storefrontImageAlt: textValue(fields.storefrontImageAlt),
         postalCode: textValue(fields.postalCode),
         addressRegion: textValue(fields.addressRegion),
         addressLocality: textValue(fields.addressLocality),

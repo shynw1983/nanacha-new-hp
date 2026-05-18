@@ -18,6 +18,11 @@ export function StoreListContent({ stores }) {
         <div className="store-list">
           {localizedStores.map((store) => (
             <article className={`store-card${store.address ? "" : " is-upcoming"}`} key={store.id}>
+              {store.storefrontImageUrl ? (
+                <img className="store-photo" src={store.storefrontImageUrl.startsWith("/") ? store.storefrontImageUrl : `/${store.storefrontImageUrl}`} alt={store.storefrontImageAlt || store.name} />
+              ) : (
+                <div className="store-photo-placeholder" aria-hidden="true" />
+              )}
               <p className="store-status">{store.statusLabel}</p>
               <h2>{store.name}</h2>
               <p>{store.summary}</p>

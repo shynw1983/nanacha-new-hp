@@ -3,7 +3,6 @@
 import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
 import { RevealOnScroll } from "./reveal-on-scroll";
-import { StoreDetail } from "./store-detail";
 import { localizedPath } from "./localized-path";
 
 const normalizeAssetUrl = (url = "") =>
@@ -25,9 +24,6 @@ export function HomeContent({ homepage, menu }) {
   const recommended = localizedMenu.drinks.filter((drink) => drink.isRecommended);
   const picks = (recommended.length ? recommended : localizedMenu.drinks).slice(0, 4);
   const slidesById = new Map(localizedHomepage.slides.map((slide) => [slide.id, slide]));
-  const primaryStore =
-    localizedHomepage.stores.find((store) => store.isPrimary && store.address) ||
-    localizedHomepage.stores.find((store) => store.address);
 
   return (
     <>
@@ -189,6 +185,15 @@ export function HomeContent({ homepage, menu }) {
         <div className="store-list reveal-group">
           {localizedHomepage.stores.map((store) => (
             <article className={`store-card${store.id === "next-store" ? " is-upcoming" : ""}`} key={store.id}>
+              {store.storefrontImageUrl ? (
+                <img
+                  className="store-photo"
+                  src={normalizeAssetUrl(store.storefrontImageUrl)}
+                  alt={store.storefrontImageAlt || store.name}
+                />
+              ) : (
+                <div className="store-photo-placeholder" aria-hidden="true" />
+              )}
               <p className="store-status">{store.statusLabel}</p>
               <h3>{store.name}</h3>
               <p>{store.summary}</p>
@@ -201,12 +206,6 @@ export function HomeContent({ homepage, menu }) {
           ))}
         </div>
       </section>
-
-      {primaryStore ? (
-        <div id="access" data-reveal>
-          <StoreDetail store={primaryStore} headingLevel="h2" reserveHref="#reserve" />
-        </div>
-      ) : null}
 
       <section className="faq-section" id="faq" aria-labelledby="faq-title" data-reveal>
         <div className="section-heading">

@@ -931,10 +931,39 @@ h3 {
 .store-card {
   display: grid;
   gap: var(--space-sm);
-  min-height: 220px;
+  min-height: 360px;
   padding: clamp(22px, 2.6vw, 30px);
   border-right: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
+}
+
+.store-photo,
+.store-photo-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: var(--space-xs);
+  border-radius: 20px;
+}
+
+.store-photo {
+  object-fit: cover;
+}
+
+.store-photo-placeholder {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(163, 182, 148, 0.28), transparent 34%),
+    linear-gradient(135deg, #fbfaf7 0%, #f1efe9 100%);
+}
+
+.store-photo-placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px dashed rgba(33, 28, 26, 0.18);
+  border-radius: 14px;
 }
 
 .store-card h2,
