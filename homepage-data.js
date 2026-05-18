@@ -165,7 +165,7 @@ const homepageFallbackData = {
       closedDays: "不定休",
       nearestStation: "渡辺通駅・西鉄平尾駅エリア",
       usage: "テイクアウト・受け取り予約",
-      paymentNote: "PayPay・Alipay・WeChat Pay・クレジットカード（Visa / Mastercard / JCB）",
+      paymentNote: "PayPay・Alipay+・WeChat Pay・クレジットカード（Visa / Mastercard / JCB）",
       googleMapsUrl:
         "https://www.google.com/maps/search/?api=1&query=%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E6%B8%85%E5%B7%9D2-9-6",
       googleMapsEmbedUrl:
