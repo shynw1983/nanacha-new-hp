@@ -55,6 +55,7 @@
 - Lark 是编辑后台，不是线上页面的唯一实时数据源。
 - 首页、菜单基础资料、门店资料、图片路径以 `published/` 中最近一次正式发布快照为准；编辑 Lark 后运行 `npm run lark:publish`。
 - 各店商品可售状态仍由 Lark 实时管理；创建支付前会再次实时校验。
+- 日常内容发布优先运行 `npm run publish`，它会依次同步图片、发布快照、更新翻译并执行构建。
 - 饮品本地 fallback 元数据位于：
   - `menu-data.js`
   - `data/menu-descriptions.js`

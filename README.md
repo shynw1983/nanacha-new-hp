@@ -113,6 +113,7 @@ LARK_STORES_JSON
 Useful maintenance commands:
 
 ```bash
+npm run publish
 npm run lark:export-menu
 npm run lark:publish
 npm run lark:sync-homepage-settings
@@ -123,10 +124,15 @@ npm run lark:sync-store-products
 Recommended content workflow:
 
 1. Edit content in Lark.
-2. Run `npm run lark:sync-images` when menu images change.
-3. Run `npm run lark:publish`.
-4. Run `npm run i18n:update` when visible text changes.
-5. Build, commit, and deploy.
+2. Run `npm run publish`.
+3. Review the generated changes, then commit and deploy.
+
+`npm run publish` runs the full safe sequence:
+
+1. Sync Lark images into local static assets.
+2. Publish Lark content snapshots.
+3. Update translation dictionaries.
+4. Build the site.
 
 ## Translation Updates
 
