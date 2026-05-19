@@ -1719,12 +1719,14 @@ h3 {
 }
 
 .form-note {
-  grid-column: 5 / -1;
+  grid-column: 8 / -1;
   width: 100%;
   margin: -2px 0 0;
   color: var(--muted);
-  text-align: center;
-  text-wrap: balance;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: left;
+  text-wrap: pretty;
 }
 
 footer {
@@ -1990,8 +1992,13 @@ footer p {
   .topping-field,
   .add-reservation-item-button,
   .checkout-button,
-  .order-total {
+  .order-total,
+  .form-note {
     grid-column: 1 / -1;
+  }
+
+  .form-note {
+    text-align: center;
   }
 
   .section-heading {
