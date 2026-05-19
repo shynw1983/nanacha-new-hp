@@ -1725,8 +1725,8 @@ h3 {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.55;
-  text-align: left;
-  text-wrap: pretty;
+  text-align: center;
+  text-wrap: balance;
 }
 
 footer {
