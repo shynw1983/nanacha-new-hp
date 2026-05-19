@@ -24,6 +24,21 @@ const paymentStatusLabels = {
   failed: "失敗",
   canceled: "キャンセル",
 };
+const splitOrderLines = (value = "") =>
+  String(value)
+    .split(/\n+|\s\/\s(?=\d+\.\s)/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+const getOrderItemLines = (order) => {
+  if (!order) return [];
+  const sizeLines = splitOrderLines(order.size);
+  if (sizeLines.length > 1) return sizeLines;
+
+  const toppingLines = splitOrderLines(order.toppings);
+  if (toppingLines.length > 1 && /^\d+\.\s/.test(toppingLines[0])) return toppingLines;
+
+  return [];
+};
 
 const shouldNotifyNewOrder = (previousOrder, nextOrder) =>
   nextOrder?.paymentStatus === "paid" &&
@@ -227,6 +242,7 @@ export function AdminOrdersBoard({ initialOrders }) {
   );
 
   const selectedOrder = visibleOrders.find((order) => order.orderId === selectedOrderId) || visibleOrders[0];
+  const selectedOrderItemLines = getOrderItemLines(selectedOrder);
   const counters = {
     new: orders.filter((order) => order.status === "new").length,
     preparing: orders.filter((order) => order.status === "preparing").length,
@@ -339,7 +355,11 @@ export function AdminOrdersBoard({ initialOrders }) {
                 >
                   <td>{order.pickupDate}<br />{order.pickupTime}</td>
                   <td>{order.pickupCode}</td>
-                  <td>{order.drink}</td>
+                  <td className="admin-order-product-cell">
+                    {splitOrderLines(order.drink).map((line) => (
+                      <span key={line}>{line}</span>
+                    ))}
+                  </td>
                   <td><span className={`status-${order.status}`}>{statusLabels[order.status] || order.status}</span></td>
                 </tr>
               ))}
@@ -354,17 +374,36 @@ export function AdminOrdersBoard({ initialOrders }) {
               <div>
                 <span className={`status-${selectedOrder.status}`}>{statusLabels[selectedOrder.status] || selectedOrder.status}</span>
                 <h2>{selectedOrder.pickupCode}</h2>
-                <p>{selectedOrder.drink}</p>
+                <p className="admin-order-product-lines">
+                  {splitOrderLines(selectedOrder.drink).map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                </p>
               </div>
               <dl>
                 <dt>受取時間</dt>
                 <dd>{selectedOrder.pickupDate} {selectedOrder.pickupTime}</dd>
-                <dt>内容</dt>
-                <dd>{selectedOrder.size} / {selectedOrder.temperature} / {selectedOrder.sweetness} / {selectedOrder.ice}</dd>
-                <dt>オプション</dt>
-                <dd>{selectedOrder.option}</dd>
-                <dt>トッピング</dt>
-                <dd>{selectedOrder.toppings}</dd>
+                {selectedOrderItemLines.length ? (
+                  <>
+                    <dt>商品明細</dt>
+                    <dd>
+                      <ol className="admin-order-item-lines">
+                        {selectedOrderItemLines.map((line) => (
+                          <li key={line}>{line.replace(/^\d+\.\s*/, "")}</li>
+                        ))}
+                      </ol>
+                    </dd>
+                  </>
+                ) : (
+                  <>
+                    <dt>内容</dt>
+                    <dd>{selectedOrder.size} / {selectedOrder.temperature} / {selectedOrder.sweetness} / {selectedOrder.ice}</dd>
+                    <dt>オプション</dt>
+                    <dd>{selectedOrder.option}</dd>
+                    <dt>トッピング</dt>
+                    <dd>{selectedOrder.toppings}</dd>
+                  </>
+                )}
                 <dt>合計</dt>
                 <dd>¥{selectedOrder.amount}</dd>
                 <dt>支払い</dt>

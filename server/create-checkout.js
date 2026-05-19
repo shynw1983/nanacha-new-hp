@@ -224,14 +224,14 @@ module.exports = async (request, response) => {
   const drinkLabel =
     itemSummaries.length === 1
       ? primarySummary.name
-      : itemSummaries.map((item, index) => `${index + 1}. ${item.name}`).join(" / ");
-  const sizeLabel = itemSummaries.length === 1 ? primarySummary.sizeLabel : `${itemSummaries.length}点`;
+      : itemSummaries.map((item, index) => `${index + 1}. ${item.name}`).join("\n");
+  const itemDetailLabel = itemSummaries.map((item) => item.description).join("\n");
+  const sizeLabel = itemSummaries.length === 1 ? primarySummary.sizeLabel : itemDetailLabel;
   const temperatureLabel = itemSummaries.length === 1 ? primaryItem.temperature : "複数商品";
   const sweetnessLabel = itemSummaries.length === 1 ? primaryItem.sweetness : "商品ごと";
   const iceLabel = itemSummaries.length === 1 ? primaryItem.ice : "商品ごと";
   const optionLabel = itemSummaries.length === 1 ? primarySummary.optionLabel : "商品ごと";
-  const toppingLabel =
-    itemSummaries.length === 1 ? primarySummary.toppingLabel : itemSummaries.map((item) => item.description).join(" / ");
+  const toppingLabel = itemSummaries.length === 1 ? primarySummary.toppingLabel : "商品ごと";
   const pickupCode = createPickupCode();
   const localOrder = await createOrder({
     pickupCode,

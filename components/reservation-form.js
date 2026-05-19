@@ -191,11 +191,57 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     (selectedSize?.price || 0) +
     (selectedOption?.price || 0) +
     selectedToppings.reduce((sum, item) => sum + item.price, 0);
-  const reservationTotal = reservationItems.reduce((sum, item) => sum + item.total, 0);
-  const displayTotal = reservationItems.length ? reservationTotal : total;
   const hasAvailableDrinks = menu.drinks.some(
     (drink) => drink.isAvailable !== false && drink.websiteEnabled !== false,
   );
+  const getReservationDrink = (item) =>
+    menu.drinks.find((drink) => drink.id === item.drinkId) || menu.drinks.find((drink) => drink.name === item.drink);
+  const getReservationOptions = (drink) =>
+    menu.options.filter((option) => option.id !== "decaf" || drink?.supportsDecaf);
+  const getReservationToppings = (item) =>
+    menu.toppings.filter(
+      (topping) =>
+        !(topping.id === "no-tapioca" && menu.tapiocaFreeCategories.includes(item.category)) &&
+        !(topping.id === "no-whip" && !menu.whippedCategories.includes(item.category)),
+    );
+  const getReservationIceOptions = (item) => (item.temperature === "HOT" ? [menu.hotIce] : menu.ice);
+  const normalizeReservationItem = (item) => {
+    const drink = getReservationDrink(item);
+    const size = findById(menu.sizes, item.size) || findById(menu.sizes, "regular") || menu.sizes[0];
+    const temperatures = drink?.temperatures?.length ? drink.temperatures : ["ICE"];
+    const itemTemperature = temperatures.includes(item.temperature) ? item.temperature : temperatures[0];
+    const iceOptions = itemTemperature === "HOT" ? [menu.hotIce] : menu.ice;
+    const itemIce = iceOptions.includes(item.ice) ? item.ice : iceOptions[0] || "";
+    const optionItems = getReservationOptions(drink);
+    const option = optionItems.find((optionItem) => optionItem.id === item.option) || optionItems[0];
+    const toppingItems = getReservationToppings({ ...item, category: drink?.category || item.category });
+    const toppings = (item.toppings || []).map((id) => toppingItems.find((topping) => topping.id === id)).filter(Boolean);
+    const itemTotal =
+      (drink?.price || 0) +
+      (size?.price || 0) +
+      (option?.price || 0) +
+      toppings.reduce((sum, topping) => sum + topping.price, 0);
+
+    return {
+      ...item,
+      drinkId: drink?.id || item.drinkId || "",
+      drink: drink?.name || item.drink || "",
+      category: drink?.category || item.category || "",
+      size: size?.id || "",
+      sizeLabel: size?.label || "",
+      temperature: itemTemperature,
+      sweetness: menu.sweetness.includes(item.sweetness) ? item.sweetness : menu.sweetness[0] || "",
+      ice: itemIce,
+      option: option?.id || "",
+      optionLabel: option?.label || "",
+      toppings: toppings.map((topping) => topping.id),
+      toppingLabels: toppings.map((topping) => topping.label),
+      total: itemTotal,
+    };
+  };
+  const preparedReservationItems = reservationItems.map(normalizeReservationItem).filter((item) => item.drink);
+  const reservationTotal = preparedReservationItems.reduce((sum, item) => sum + item.total, 0);
+  const displayTotal = preparedReservationItems.length ? reservationTotal : total;
 
   const createReservationItem = ({
     drink,
@@ -290,8 +336,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     setPickupDate(safePickupDate);
     setPickup(safePickup);
 
-    const selectedItem = selectedDrink ? createReservationItem({ drink: selectedDrink }) : null;
-    const orderItems = reservationItems.length ? reservationItems : selectedItem ? [selectedItem] : [];
+    const selectedItem = selectedDrink ? normalizeReservationItem(createReservationItem({ drink: selectedDrink })) : null;
+    const orderItems = preparedReservationItems.length ? preparedReservationItems : selectedItem ? [selectedItem] : [];
     const drinkSummary =
       orderItems.length === 1
         ? orderItems[0].drink
@@ -379,17 +425,14 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     setReservationItems((current) => [...current, createReservationItem({ drink: selectedDrink })]);
     setNote(t("予約リストに追加しました。ほかの商品も続けて選べます。"));
   };
-  const editReservationItem = (item) => {
-    setCategory(item.category);
-    setDrinkName(item.drink);
-    setSizeId(item.size);
-    setTemperature(item.temperature);
-    setSweetness(item.sweetness);
-    setIce(item.ice);
-    setOptionId(item.option);
-    setToppingIds(item.toppings);
-    setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id));
-    setNote(t("選んだ商品を編集できます。変更後、予約リストに追加してください。"));
+  const updateReservationItem = (itemId, patch) => {
+    setReservationItems((current) =>
+      current.map((item) => {
+        if (item.id !== itemId) return item;
+        const next = { ...item, ...patch };
+        return normalizeReservationItem(next);
+      }),
+    );
   };
 
   return (
@@ -540,35 +583,119 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             </div>
             {reservationItems.length ? (
               <ul>
-                {reservationItems.map((item, index) => (
-                  <li key={item.id}>
-                    <div>
-                      <span>
-                        {index + 1}. {t(item.drink)}
-                      </span>
-                      <small>
-                        {t(item.sizeLabel)} / {item.temperature} / {t(item.sweetness)} / {t(item.ice)}
-                        {item.option !== "none" ? ` / ${t(item.optionLabel)}` : ""}
-                        {item.toppingLabels.length ? ` / ${item.toppingLabels.map((label) => t(label)).join(", ")}` : ""}
-                      </small>
-                    </div>
-                    <strong>{formatPrice(item.total)}</strong>
-                    <div className="reservation-item-actions">
-                      <button type="button" onClick={() => editReservationItem(item)}>
-                        {t("編集")}
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`${item.drink}を予約リストから削除`}
-                        onClick={() =>
-                          setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id))
-                        }
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                {preparedReservationItems.map((item, index) => {
+                  const drink = getReservationDrink(item);
+                  const itemTemperatures = drink?.temperatures?.length ? drink.temperatures : ["ICE"];
+                  const itemIceOptions = getReservationIceOptions(item);
+                  const itemOptions = getReservationOptions(drink);
+                  const itemToppings = getReservationToppings(item);
+
+                  return (
+                    <li className="reservation-item-card" key={item.id}>
+                      <div className="reservation-item-card-heading">
+                        <div>
+                          <span>
+                            {index + 1}. {t(item.drink)}
+                          </span>
+                          <small>{t("この1杯のカスタマイズ")}</small>
+                        </div>
+                        <strong>{formatPrice(item.total)}</strong>
+                        <button
+                          type="button"
+                          aria-label={`${item.drink}を予約リストから削除`}
+                          onClick={() =>
+                            setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id))
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="reservation-item-controls">
+                        <label>
+                          <span>{t("サイズ")}</span>
+                          <select value={item.size} onChange={(event) => updateReservationItem(item.id, { size: event.target.value })}>
+                            {menu.sizes.map((size) => (
+                              <option value={size.id} key={size.id}>
+                                {t(size.label)} ({formatDelta(size.price)})
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          <span>{t("温度")}</span>
+                          <select
+                            value={item.temperature}
+                            onChange={(event) =>
+                              updateReservationItem(item.id, {
+                                temperature: event.target.value,
+                                ice: event.target.value === "HOT" ? menu.hotIce : menu.ice[0] || "",
+                              })
+                            }
+                          >
+                            {itemTemperatures.map((itemTemperature) => (
+                              <option value={itemTemperature} key={itemTemperature}>
+                                {itemTemperature}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          <span>{t("甘さ")}</span>
+                          <select value={item.sweetness} onChange={(event) => updateReservationItem(item.id, { sweetness: event.target.value })}>
+                            {menu.sweetness.map((sweetnessItem) => (
+                              <option value={sweetnessItem} key={sweetnessItem}>
+                                {t(sweetnessItem)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          <span>{t("氷の量")}</span>
+                          <select value={item.ice} onChange={(event) => updateReservationItem(item.id, { ice: event.target.value })}>
+                            {itemIceOptions.map((iceItem) => (
+                              <option value={iceItem} key={iceItem}>
+                                {t(iceItem)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          <span>{t("オプション")}</span>
+                          <select value={item.option} onChange={(event) => updateReservationItem(item.id, { option: event.target.value })}>
+                            {itemOptions.map((option) => (
+                              <option value={option.id} key={option.id}>
+                                {t(option.label)} ({formatDelta(option.price)})
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                      <fieldset className="reservation-item-toppings">
+                        <legend>{t("トッピング")}</legend>
+                        <div>
+                          {itemToppings.map((topping) => (
+                            <label key={topping.id}>
+                              <input
+                                type="checkbox"
+                                checked={item.toppings.includes(topping.id)}
+                                onChange={(event) =>
+                                  updateReservationItem(item.id, {
+                                    toppings: event.target.checked
+                                      ? [...item.toppings, topping.id]
+                                      : item.toppings.filter((toppingId) => toppingId !== topping.id),
+                                  })
+                                }
+                              />
+                              <span>
+                                {t(topping.label)} ({formatDelta(topping.price)})
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p>{t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}</p>

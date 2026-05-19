@@ -144,8 +144,9 @@ export function MenuBrowser({ initialMenu }) {
                   </div>
                   <div className="product-item-actions">
                     <span>{formatPrice(drink.price)}</span>
-                    <button type="button" onClick={() => addReservationItem(drink)}>
-                      {t("予約に追加")}
+                    <button type="button" onClick={() => addReservationItem(drink)} aria-label={`${drink.name}を予約に追加`}>
+                      <span aria-hidden="true">+</span>
+                      <em>{t("予約")}</em>
                     </button>
                   </div>
                 </article>
