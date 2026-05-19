@@ -1604,22 +1604,28 @@ h3 {
 }
 
 .add-reservation-item-button {
-  grid-column: 1 / span 4;
+  grid-column: 1 / span 5;
   width: 100%;
+  min-height: 56px;
+  font-size: 14px;
 }
 
 .order-total {
-  grid-column: 5 / span 3;
+  grid-column: 6 / span 2;
   align-self: center;
+  justify-self: center;
   margin: 0;
   color: var(--ink);
   font-size: clamp(20px, 2vw, 28px);
   font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .checkout-button {
   grid-column: 8 / -1;
   width: 100%;
+  min-height: 56px;
 }
 
 .form-note {
