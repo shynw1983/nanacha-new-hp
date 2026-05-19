@@ -26,3 +26,4 @@ out/
 .vscode/
 .idea/
 Thumbs.db
+.vercel

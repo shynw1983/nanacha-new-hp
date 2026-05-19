@@ -22,10 +22,17 @@
     "lark:sync-images": "node scripts/sync-lark-images.js",
     "lark:sync-store-products": "node scripts/sync-store-products.js"
   },
-  "keywords": ["nanacha", "nextjs", "vercel"],
+  "keywords": [
+    "nanacha",
+    "nextjs",
+    "vercel"
+  ],
   "license": "UNLICENSED",
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "next": "^16.0.0",
+    "pusher": "^5.3.3",
+    "pusher-js": "^8.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   }

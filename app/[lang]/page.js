@@ -46,7 +46,7 @@ export default async function LocalizedHomePage({ params }) {
       <SiteHeader />
       <main id="top">
         <HomeContent homepage={homepage} menu={menu} />
-        <ReservationForm initialMenu={menu} />
+        <ReservationForm initialMenu={menu} stores={homepage.stores} />
       </main>
       <SiteFooter />
     </LocalizedShell>

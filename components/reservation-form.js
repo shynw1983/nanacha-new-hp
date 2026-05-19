@@ -6,6 +6,7 @@ import { useI18n } from "./i18n-provider";
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
 const findById = (items, id) => items.find((item) => item.id === id);
+const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const getTokyoDateTimeParts = (date = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -26,11 +27,58 @@ const getMinimumPickupDateTime = () => {
     time: `${parts.hour}:${parts.minute}`,
   };
 };
+const addDays = (dateString, amount) => {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + amount));
+  return date.toISOString().slice(0, 10);
+};
+const toMinutes = (time = "") => {
+  const [hour, minute] = String(time).split(":").map(Number);
+  return hour * 60 + minute;
+};
+const parseOpeningWindow = (hours = "") => {
+  const match = String(hours).match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+  if (!match) return null;
+  return {
+    opens: match[1],
+    closes: match[2],
+    crossesMidnight: toMinutes(match[2]) <= toMinutes(match[1]),
+  };
+};
+const compareDateTime = (leftDate, leftTime, rightDate, rightTime) =>
+  `${leftDate}T${leftTime}`.localeCompare(`${rightDate}T${rightTime}`);
+const getNextAvailablePickupDateTime = (hours = "") => {
+  const minimum = getMinimumPickupDateTime();
+  const window = parseOpeningWindow(hours);
+  if (!window) return minimum;
 
-export function ReservationForm({ initialMenu }) {
-  const { t } = useI18n();
+  for (let offset = -1; offset <= 2; offset += 1) {
+    const openDate = addDays(minimum.date, offset);
+    const closeDate = window.crossesMidnight ? addDays(openDate, 1) : openDate;
+    const startsAfterMinimum = compareDateTime(minimum.date, minimum.time, openDate, window.opens) <= 0;
+    const insideWindow =
+      compareDateTime(minimum.date, minimum.time, openDate, window.opens) >= 0 &&
+      compareDateTime(minimum.date, minimum.time, closeDate, window.closes) <= 0;
+
+    if (startsAfterMinimum) {
+      return { date: openDate, time: window.opens };
+    }
+
+    if (insideWindow) {
+      return minimum;
+    }
+  }
+
+  return minimum;
+};
+
+export function ReservationForm({ initialMenu, stores = [] }) {
+  const { language, t } = useI18n();
+  const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
+  const initialStore = stores.find((item) => item.id === initialStoreId);
+  const initialPickup = getNextAvailablePickupDateTime(initialStore?.hours);
   const [menu, setMenu] = useState(initialMenu);
-  const [store, setStore] = useState(initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa");
+  const [store, setStore] = useState(initialStoreId);
   const [category, setCategory] = useState(
     initialMenu.categories.some((item) => item.id === "milk") ? "milk" : initialMenu.categories[0]?.id || "",
   );
@@ -41,15 +89,17 @@ export function ReservationForm({ initialMenu }) {
   const [ice, setIce] = useState(initialMenu.ice[0] || "");
   const [optionId, setOptionId] = useState("none");
   const [toppingIds, setToppingIds] = useState([]);
-  const [minimumPickup, setMinimumPickup] = useState(getMinimumPickupDateTime());
-  const [pickupDate, setPickupDate] = useState(minimumPickup.date);
-  const [pickup, setPickup] = useState(minimumPickup.time);
+  const [minimumPickup, setMinimumPickup] = useState(initialPickup);
+  const [pickupDate, setPickupDate] = useState(initialPickup.date);
+  const [pickup, setPickup] = useState(initialPickup.time);
   const [note, setNote] = useState("注文内容を確認して、Squareの決済画面へ進みます。");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reservationItems, setReservationItems] = useState([]);
+  const [hasLoadedReservationItems, setHasLoadedReservationItems] = useState(false);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      const nextMinimum = getMinimumPickupDateTime();
+      const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
       setMinimumPickup(nextMinimum);
       setPickupDate((current) => (!current || current < nextMinimum.date ? nextMinimum.date : current));
       setPickup((current) =>
@@ -68,7 +118,7 @@ export function ReservationForm({ initialMenu }) {
     }
 
     return () => window.clearInterval(interval);
-  }, [pickupDate]);
+  }, [pickupDate, store, stores]);
 
   useEffect(() => {
     setNote((current) =>
@@ -106,6 +156,13 @@ export function ReservationForm({ initialMenu }) {
     };
   }, [store]);
 
+  useEffect(() => {
+    const nextPickup = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
+    setMinimumPickup(nextPickup);
+    setPickupDate(nextPickup.date);
+    setPickup(nextPickup.time);
+  }, [store, stores]);
+
   const drinks = useMemo(
     () =>
       menu.drinks.filter(
@@ -134,9 +191,88 @@ export function ReservationForm({ initialMenu }) {
     (selectedSize?.price || 0) +
     (selectedOption?.price || 0) +
     selectedToppings.reduce((sum, item) => sum + item.price, 0);
+  const reservationTotal = reservationItems.reduce((sum, item) => sum + item.total, 0);
+  const displayTotal = reservationItems.length ? reservationTotal : total;
   const hasAvailableDrinks = menu.drinks.some(
     (drink) => drink.isAvailable !== false && drink.websiteEnabled !== false,
   );
+
+  const createReservationItem = ({
+    drink,
+    size = selectedSize,
+    itemTemperature = selectedTemperature,
+    itemSweetness = sweetness,
+    itemIce = selectedIce,
+    option = selectedOption,
+    toppings = selectedToppings,
+  }) => {
+    const itemTotal =
+      (drink?.price || 0) +
+      (size?.price || 0) +
+      (option?.price || 0) +
+      toppings.reduce((sum, item) => sum + item.price, 0);
+
+    return {
+      id: `${drink?.id || drink?.name || "drink"}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      drinkId: drink?.id || "",
+      drink: drink?.name || "",
+      category: drink?.category || category,
+      size: size?.id || "",
+      sizeLabel: size?.label || "",
+      temperature: itemTemperature,
+      sweetness: itemSweetness,
+      ice: itemIce,
+      option: option?.id || "",
+      optionLabel: option?.label || "",
+      toppings: toppings.map((item) => item.id),
+      toppingLabels: toppings.map((item) => item.label),
+      total: itemTotal,
+    };
+  };
+
+  useEffect(() => {
+    if (hasLoadedReservationItems) return;
+    let stored = [];
+
+    try {
+      stored = JSON.parse(window.localStorage.getItem(RESERVATION_CART_KEY) || "[]");
+    } catch {
+      stored = [];
+    }
+
+    if (Array.isArray(stored) && stored.length) {
+      const defaultSize = findById(menu.sizes, "regular") || menu.sizes[0];
+      const defaultOption = findById(menu.options, "none") || menu.options[0];
+      const nextItems = stored
+        .map((storedItem) => {
+          const drink =
+            menu.drinks.find((item) => item.id === storedItem.drinkId) ||
+            menu.drinks.find((item) => item.name === storedItem.drinkName);
+          if (!drink || drink.isAvailable === false || drink.websiteEnabled === false) return null;
+          const itemTemperature = drink.temperatures?.includes("ICE") ? "ICE" : drink.temperatures?.[0] || "ICE";
+          const itemIce = itemTemperature === "HOT" ? menu.hotIce : menu.ice[0] || "";
+          return createReservationItem({
+            drink,
+            size: defaultSize,
+            itemTemperature,
+            itemSweetness: menu.sweetness[0] || "",
+            itemIce,
+            option: defaultOption,
+            toppings: [],
+          });
+        })
+        .filter(Boolean);
+
+      setReservationItems(nextItems);
+      try {
+        window.localStorage.removeItem(RESERVATION_CART_KEY);
+      } catch {
+        // Ignore storage cleanup failures.
+      }
+    }
+
+    setHasLoadedReservationItems(true);
+  }, [hasLoadedReservationItems, menu]);
 
   useEffect(() => {
     if (selectedDrink && selectedDrink.name !== drinkName) {
@@ -146,7 +282,7 @@ export function ReservationForm({ initialMenu }) {
 
   const submitOrder = async (event) => {
     event.preventDefault();
-    const nextMinimum = getMinimumPickupDateTime();
+    const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
     const safePickupDate = pickupDate < nextMinimum.date ? nextMinimum.date : pickupDate;
     const safePickup =
       safePickupDate === nextMinimum.date && pickup < nextMinimum.time ? nextMinimum.time : pickup;
@@ -154,30 +290,58 @@ export function ReservationForm({ initialMenu }) {
     setPickupDate(safePickupDate);
     setPickup(safePickup);
 
+    const selectedItem = selectedDrink ? createReservationItem({ drink: selectedDrink }) : null;
+    const orderItems = reservationItems.length ? reservationItems : selectedItem ? [selectedItem] : [];
+    const drinkSummary =
+      orderItems.length === 1
+        ? orderItems[0].drink
+        : orderItems.map((item, index) => `${index + 1}. ${item.drink}`).join(" / ");
+    const orderTotal = orderItems.reduce((sum, item) => sum + item.total, 0);
     const order = {
       store,
-      drink: selectedDrink?.name || "",
+      drink: selectedItem?.drink || "",
       category,
-      size: selectedSize?.id || "",
-      temperature: selectedTemperature,
-      sweetness,
-      ice: selectedIce,
-      option: selectedOption?.id || "",
-      toppings: selectedToppings.map((item) => item.id),
+      size: selectedItem?.size || "",
+      temperature: selectedItem?.temperature || "",
+      sweetness: selectedItem?.sweetness || "",
+      ice: selectedItem?.ice || "",
+      option: selectedItem?.option || "",
+      toppings: selectedItem?.toppings || [],
+      items: orderItems.map((item) => ({
+        drink: item.drink,
+        category: item.category,
+        size: item.size,
+        temperature: item.temperature,
+        sweetness: item.sweetness,
+        ice: item.ice,
+        option: item.option,
+        toppings: item.toppings,
+      })),
       pickupDate: safePickupDate,
       pickup: safePickup,
-      total,
+      completionPath: language === "ja" ? "/order-complete" : `/${language}/order-complete`,
+      completionSummary: {
+        drink: drinkSummary,
+        size: orderItems.length === 1 ? orderItems[0].sizeLabel : `${orderItems.length}点`,
+        temperature: orderItems.length === 1 ? orderItems[0].temperature : "複数商品",
+        sweetness: orderItems.length === 1 ? orderItems[0].sweetness : "商品ごと",
+        ice: orderItems.length === 1 ? orderItems[0].ice : "商品ごと",
+        option: orderItems.length === 1 ? orderItems[0].optionLabel : "商品ごと",
+        toppings: orderItems.length === 1 ? orderItems[0].toppingLabels : orderItems.map((item) => item.drink),
+        total: orderTotal,
+      },
+      total: orderTotal,
       labels: {
-        drink: selectedDrink?.name || "",
-        size: selectedSize?.label || "",
-        temperature: selectedTemperature,
-        option: selectedOption?.label || "",
-        toppings: selectedToppings.map((item) => item.label),
+        drink: drinkSummary,
+        size: orderItems.length === 1 ? orderItems[0].sizeLabel : `${orderItems.length}点`,
+        temperature: orderItems.length === 1 ? orderItems[0].temperature : "複数商品",
+        option: orderItems.length === 1 ? orderItems[0].optionLabel : "商品ごと",
+        toppings: orderItems.length === 1 ? orderItems[0].toppingLabels : orderItems.map((item) => item.drink),
       },
     };
 
     setNote(
-      `${order.pickupDate} ${order.pickup} 受け取り：${order.drink}、${order.labels.size}、${order.temperature}、${order.sweetness}、${order.ice}、合計${formatPrice(order.total)}でSquare決済を作成しています。`,
+      `${order.pickupDate} ${order.pickup} 受け取り：${order.labels.drink}、合計${formatPrice(order.total)}でSquare決済を作成しています。`,
     );
     setIsSubmitting(true);
 
@@ -200,10 +364,32 @@ export function ReservationForm({ initialMenu }) {
       setNote(
         error.code === "SQUARE_NOT_CONFIGURED"
           ? "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。"
+          : error.message === "Pickup time is outside store hours"
+            ? "現在は営業時間外です。予約できる最短の受け取り時間を選択してください。"
+            : error.message === "Reservations are temporarily paused for this store"
+              ? "現在、この店舗では受け取り予約を停止しています。"
           : "決済画面を作成できませんでした。時間をおいて再度お試しください。",
       );
       setIsSubmitting(false);
     }
+  };
+
+  const addSelectedReservationItem = () => {
+    if (!selectedDrink) return;
+    setReservationItems((current) => [...current, createReservationItem({ drink: selectedDrink })]);
+    setNote(t("予約リストに追加しました。ほかの商品も続けて選べます。"));
+  };
+  const editReservationItem = (item) => {
+    setCategory(item.category);
+    setDrinkName(item.drink);
+    setSizeId(item.size);
+    setTemperature(item.temperature);
+    setSweetness(item.sweetness);
+    setIce(item.ice);
+    setOptionId(item.option);
+    setToppingIds(item.toppings);
+    setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id));
+    setNote(t("選んだ商品を編集できます。変更後、予約リストに追加してください。"));
   };
 
   return (
@@ -343,8 +529,61 @@ export function ReservationForm({ initialMenu }) {
               ))}
             </div>
           </fieldset>
-          <p className="order-total">{t("合計")} {formatPrice(total)}</p>
-          <button type="submit" disabled={isSubmitting || !hasAvailableDrinks || !selectedDrink}>
+          <div className="reservation-list">
+            <div className="reservation-list-heading">
+              <span>{t("予約リスト")}</span>
+              {reservationItems.length ? (
+                <button type="button" onClick={() => setReservationItems([])}>
+                  {t("クリア")}
+                </button>
+              ) : null}
+            </div>
+            {reservationItems.length ? (
+              <ul>
+                {reservationItems.map((item, index) => (
+                  <li key={item.id}>
+                    <div>
+                      <span>
+                        {index + 1}. {t(item.drink)}
+                      </span>
+                      <small>
+                        {t(item.sizeLabel)} / {item.temperature} / {t(item.sweetness)} / {t(item.ice)}
+                        {item.option !== "none" ? ` / ${t(item.optionLabel)}` : ""}
+                        {item.toppingLabels.length ? ` / ${item.toppingLabels.map((label) => t(label)).join(", ")}` : ""}
+                      </small>
+                    </div>
+                    <strong>{formatPrice(item.total)}</strong>
+                    <div className="reservation-item-actions">
+                      <button type="button" onClick={() => editReservationItem(item)}>
+                        {t("編集")}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`${item.drink}を予約リストから削除`}
+                        onClick={() =>
+                          setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id))
+                        }
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>{t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}</p>
+            )}
+          </div>
+          <button
+            className="add-reservation-item-button"
+            type="button"
+            disabled={!hasAvailableDrinks || !selectedDrink}
+            onClick={addSelectedReservationItem}
+          >
+            {t("この商品を予約リストに追加")}
+          </button>
+          <p className="order-total">{t("合計")} {formatPrice(displayTotal)}</p>
+          <button className="checkout-button" type="submit" disabled={isSubmitting || !hasAvailableDrinks || !selectedDrink}>
             {isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
           <p className="form-note">

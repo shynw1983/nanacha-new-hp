@@ -54,11 +54,12 @@ Homepage content and the base menu are served from published snapshots:
 
 Lark is the editing system. Run `npm run lark:publish` to pull current Lark content into those published snapshots before deployment.
 
-Store-specific drink availability remains live:
+Runtime store operations are managed by the website admin system:
 
-- `/api/menu?store=...` starts from the published base menu, then reads the current store availability table from Lark.
-- `/api/create-checkout` performs a fresh live Lark validation before creating a Square checkout link.
-- If live store availability cannot be read, the site falls back to the last published store snapshot when available.
+- Lark remains the editing source for publishable brand/menu content.
+- `/api/menu?store=...` starts from the published base menu, then applies store-specific availability from the admin database.
+- `/api/create-checkout` validates against the same admin-managed store availability before creating a Square checkout link.
+- If no database override exists for a drink, the site falls back to the last published store snapshot.
 
 ## Square Checkout
 
@@ -71,6 +72,30 @@ Required environment variables:
 - `SQUARE_ENVIRONMENT`: `production` or `sandbox`
 
 The browser never receives the Square access token. Prices and customizations are validated on the server before checkout is created.
+
+## Admin Operations
+
+The staff-facing admin area is available under:
+
+- `/admin/dashboard`
+- `/admin/orders`
+- `/admin/products`
+
+The admin system owns runtime operations:
+
+- pickup order queue and fulfillment status
+- paid-order synchronization from Square webhooks
+- store-level product availability and reservation toggles
+
+Required runtime environment variables:
+
+- `DATABASE_URL`
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+- `SQUARE_WEBHOOK_SIGNATURE_KEY`
+- `SQUARE_WEBHOOK_NOTIFICATION_URL`
+
+Initialize the database with `db/schema.sql` before using admin features.
 
 ## Lark CMS
 

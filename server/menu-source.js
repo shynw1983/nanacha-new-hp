@@ -10,6 +10,7 @@ const {
   getTenantAccessToken,
   fetchAllRecords,
 } = require("./lark-utils");
+const { applyStoreProductAvailability } = require("./store-products");
 const arrayValue = (value) => {
   if (Array.isArray(value)) {
     return value.map(textValue).filter(Boolean);
@@ -280,11 +281,7 @@ const getMenuData = async (storeId = "") => {
   }
 
   try {
-    const token = await getTenantAccessToken();
-
-    if (token) {
-      return await applyStoreAvailability(token, baseMenu, storeId);
-    }
+    return await applyStoreProductAvailability(baseMenu, storeId);
   } catch (error) {
     console.error(error);
   }
