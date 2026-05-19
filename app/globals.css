@@ -743,10 +743,50 @@ h3 {
   align-items: stretch;
 }
 
+.store-detail-section {
+  grid-template-rows: auto auto auto auto auto auto;
+  align-items: start;
+  column-gap: clamp(32px, 5vw, 72px);
+  row-gap: 0;
+}
+
 .access-copy {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.store-detail-eyebrow,
+.store-detail-title,
+.store-detail-address,
+.store-detail-intro,
+.store-detail-section .shop-info,
+.store-detail-section .access-actions {
+  grid-column: 1;
+}
+
+.store-detail-eyebrow {
+  grid-row: 1;
+}
+
+.store-detail-title {
+  grid-row: 2;
+}
+
+.store-detail-address {
+  grid-row: 3;
+}
+
+.store-detail-intro {
+  grid-row: 4;
+}
+
+.store-detail-section .shop-info {
+  grid-row: 5;
+}
+
+.store-detail-section .access-actions {
+  grid-row: 6;
 }
 
 .store-detail-section .heading-with-decor {
@@ -755,7 +795,8 @@ h3 {
   line-height: var(--leading-tight);
 }
 
-.access-copy address {
+.access-copy address,
+.store-detail-address {
   margin-bottom: var(--space-sm);
   font-style: normal;
   font-size: clamp(17px, 1.55vw, 22px);
@@ -763,7 +804,8 @@ h3 {
   line-height: 1.55;
 }
 
-.access-copy p {
+.access-copy p,
+.store-detail-intro {
   max-width: 480px;
   color: var(--muted);
   font-size: var(--type-body);
@@ -894,6 +936,34 @@ h3 {
   height: 100%;
   min-height: 520px;
   border: 0;
+  filter: grayscale(1) contrast(0.92) brightness(1.08);
+}
+
+.store-detail-media {
+  grid-column: 2;
+  grid-row: 2 / 6;
+  align-self: stretch;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 28px;
+  background: var(--soft);
+  box-shadow: var(--shadow);
+}
+
+.store-detail-media img,
+.store-detail-media iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  border: 0;
+}
+
+.store-detail-media img {
+  object-fit: cover;
+}
+
+.store-detail-media iframe {
   filter: grayscale(1) contrast(0.92) brightness(1.08);
 }
 
@@ -1687,6 +1757,17 @@ footer p {
     grid-template-columns: 1fr;
   }
 
+  .store-detail-eyebrow,
+  .store-detail-title,
+  .store-detail-address,
+  .store-detail-intro,
+  .store-detail-section .shop-info,
+  .store-detail-media,
+  .store-detail-section .access-actions {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .hero {
     padding-top: var(--space-2xl);
   }
@@ -1709,7 +1790,8 @@ footer p {
 
 
   .map-card,
-  .map-card iframe {
+  .map-card iframe,
+  .store-detail-media {
     min-height: 420px;
   }
 
@@ -1920,6 +2002,11 @@ footer p {
   .map-card,
   .map-card iframe {
     min-height: 360px;
+    border-radius: 20px;
+  }
+
+  .store-detail-media {
+    min-height: 320px;
     border-radius: 20px;
   }
 
