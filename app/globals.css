@@ -1006,7 +1006,9 @@ h3 {
 .store-card {
   display: grid;
   grid-template-columns: minmax(118px, 138px) minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto;
   align-items: stretch;
+  align-content: start;
   gap: clamp(20px, 2vw, 28px);
   min-height: 164px;
   padding: clamp(22px, 2.6vw, 30px);
@@ -1015,19 +1017,20 @@ h3 {
 }
 
 .store-card-media {
+  grid-column: 1;
+  grid-row: 2 / 5;
   min-width: 0;
 }
 
 .store-card-copy {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 8px;
+  display: contents;
 }
 
 .store-photo,
 .store-photo-placeholder {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
+  min-height: 118px;
   border-radius: 16px;
 }
 
@@ -1054,27 +1057,40 @@ h3 {
 
 .store-card h2,
 .store-card h3 {
+  grid-column: 2;
+  grid-row: 2;
   margin-bottom: 0;
   font-size: clamp(20px, 1.8vw, 26px);
   line-height: var(--leading-snug);
 }
 
 .store-card-copy .text-link {
+  grid-column: 2;
+  grid-row: 4;
   align-self: end;
-  margin-top: 0;
+  margin: 0;
 }
 
 .store-link-spacer {
+  grid-column: 2;
+  grid-row: 4;
   min-height: 24px;
 }
 
 .store-card p {
+  grid-column: 2;
   max-width: 420px;
   line-height: var(--leading-body);
   text-wrap: pretty;
 }
 
+.store-card-copy p:not(.store-status) {
+  grid-row: 3;
+}
+
 .store-status {
+  grid-column: 2;
+  grid-row: 1;
   color: var(--tea);
   font-size: 12px;
   font-weight: 700;
@@ -1989,10 +2005,30 @@ footer p {
 
   .store-card {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
   }
 
   .store-card-media {
+    grid-column: auto;
+    grid-row: auto;
     max-width: 180px;
+  }
+
+  .store-card-copy {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 8px;
+  }
+
+  .store-status,
+  .store-card h2,
+  .store-card h3,
+  .store-card p,
+  .store-card-copy p:not(.store-status),
+  .store-card-copy .text-link,
+  .store-link-spacer {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .drink-card {
