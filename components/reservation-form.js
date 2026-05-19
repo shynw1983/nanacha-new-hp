@@ -7,6 +7,7 @@ const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
 const findById = (items, id) => items.find((item) => item.id === id);
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
+const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const getTokyoDateTimeParts = (date = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -92,7 +93,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [minimumPickup, setMinimumPickup] = useState(initialPickup);
   const [pickupDate, setPickupDate] = useState(initialPickup.date);
   const [pickup, setPickup] = useState(initialPickup.time);
-  const [note, setNote] = useState("注文内容を確認して、Squareの決済画面へ進みます。");
+  const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reservationItems, setReservationItems] = useState([]);
   const [hasLoadedReservationItems, setHasLoadedReservationItems] = useState(false);
@@ -119,14 +120,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
 
     return () => window.clearInterval(interval);
   }, [pickupDate, store, stores]);
-
-  useEffect(() => {
-    setNote((current) =>
-      current === "注文内容を確認して、Squareの決済画面へ進みます。"
-        ? t("注文内容を確認して、Squareの決済画面へ進みます。")
-        : current,
-    );
-  }, [t]);
 
   useEffect(() => {
     let active = true;
@@ -434,6 +427,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       }),
     );
   };
+  const displayNote = note ? t(note) : t(DEFAULT_NOTE);
 
   return (
     <section className="reserve-section" id="reserve" aria-labelledby="reserve-title" data-react-reservation-form>
@@ -714,7 +708,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             {isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
           <p className="form-note">
-            {hasAvailableDrinks ? note : t("現在、この店舗で予約できる商品はありません。")}
+            {hasAvailableDrinks ? displayNote : t("現在、この店舗で予約できる商品はありません。")}
           </p>
         </form>
       </div>
