@@ -1920,16 +1920,26 @@ footer p {
   }
 
   .header-action {
-    padding: 10px 13px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .header-tools {
-    align-items: end;
-    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .language-picker {
-    padding: 7px 9px;
+    min-height: 44px;
+    padding: 0 10px 0 12px;
   }
 
   .language-picker span {
@@ -1937,8 +1947,9 @@ footer p {
   }
 
   .language-picker select {
-    max-width: 92px;
-    font-size: 12px;
+    max-width: 82px;
+    font-size: 13px;
+    line-height: 1;
   }
 
   h1 {
