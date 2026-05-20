@@ -488,8 +488,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               <div>
                 <span>{t("選択中の商品")}</span>
                 <strong>{t(selectedDrink.name)}</strong>
-                <small>{formatPrice(selectedDrink.price)}</small>
                 {selectedDrink.description ? <p>{t(selectedDrink.description)}</p> : null}
+                <small>{formatPrice(selectedDrink.price)}</small>
               </div>
             </div>
           ) : null}

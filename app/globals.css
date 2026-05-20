@@ -1479,23 +1479,35 @@ h3 {
 .reservation-drink-preview div {
   min-width: 0;
   display: grid;
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px var(--space-sm);
   align-content: center;
 }
 
+.reservation-drink-preview span {
+  grid-column: 1 / -1;
+}
+
 .reservation-drink-preview strong {
+  grid-column: 1;
   color: var(--ink);
   font-size: clamp(18px, 2vw, 22px);
   line-height: 1.25;
 }
 
 .reservation-drink-preview small {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
   color: var(--price);
-  font-size: 16px;
+  font-size: clamp(20px, 2.4vw, 28px);
   font-weight: 800;
+  line-height: 1.05;
+  white-space: nowrap;
 }
 
 .reservation-drink-preview p {
+  grid-column: 1 / -1;
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
