@@ -2054,7 +2054,7 @@ footer p {
     min-height: 0;
     display: grid;
     grid-template-columns: 86px minmax(0, 1fr) auto;
-    align-items: center;
+    align-items: start;
     gap: 14px;
     padding: 18px;
   }
@@ -2086,7 +2086,8 @@ footer p {
   }
 
   .menu-section .drink-card span {
-    align-self: end;
+    align-self: start;
+    padding-top: 22px;
     white-space: nowrap;
     font-size: 20px;
   }
