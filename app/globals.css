@@ -2204,10 +2204,12 @@ footer p {
   color: var(--ink);
 }
 
-.admin-sidebar p {
+.admin-sidebar .admin-brand-word {
   margin: 0 0 4px;
   color: var(--muted);
-  letter-spacing: 0.12em;
+  font-variant-caps: normal;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .admin-sidebar strong {
@@ -2253,8 +2255,8 @@ footer p {
 .admin-page-header p {
   margin: 0 0 4px;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .admin-page-header h1 {
@@ -3131,7 +3133,7 @@ footer p {
     gap: 12px;
   }
 
-  .admin-sidebar p {
+  .admin-sidebar .admin-brand-word {
     margin-bottom: 2px;
     font-size: 0.74rem;
     line-height: 1;

@@ -22,7 +22,7 @@ export function AdminShell({ title, eyebrow, activePath, children, actions, curr
     <main className="admin-app">
       <aside className="admin-sidebar">
         <div>
-          <p>nanacha</p>
+          <p className="admin-brand-word">nanacha</p>
           <strong>Admin</strong>
           {currentUser ? (
             <small>
