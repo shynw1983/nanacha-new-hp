@@ -2046,6 +2046,51 @@ footer p {
     min-height: 220px;
   }
 
+  .menu-section .menu-grid {
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .menu-section .drink-card {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .menu-section .drink-photo {
+    width: 70px;
+    height: 96px;
+    margin: 0 auto;
+  }
+
+  .menu-section .drink-tag {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+
+  .menu-section .drink-card h3 {
+    margin-bottom: 6px;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .menu-section .drink-card p:not(.drink-tag) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .menu-section .drink-card span {
+    align-self: end;
+    white-space: nowrap;
+    font-size: 20px;
+  }
+
   .map-card,
   .map-card iframe {
     min-height: 360px;
