@@ -8,6 +8,7 @@ const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}$
 const findById = (items, id) => items.find((item) => item.id === id);
 const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
 const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
+const normalizeAssetUrl = (url = "") => (url && url.startsWith("/") ? url : `/${url}`);
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
@@ -481,6 +482,16 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               )}
             </select>
           </label>
+          {selectedDrink?.imageUrl ? (
+            <div className="reservation-drink-preview" aria-live="polite">
+              <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={t(selectedDrink.name)} />
+              <div>
+                <span>{t("選択中の商品")}</span>
+                <strong>{t(selectedDrink.name)}</strong>
+                <small>{formatPrice(selectedDrink.price)}</small>
+              </div>
+            </div>
+          ) : null}
           <label>
             <span>{t("サイズ")}</span>
             <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
@@ -593,6 +604,13 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                   return (
                     <li className="reservation-item-card" key={item.id}>
                       <div className="reservation-item-card-heading">
+                        {drink?.imageUrl ? (
+                          <img
+                            className="reservation-item-thumb"
+                            src={normalizeAssetUrl(drink.imageUrl)}
+                            alt={t(item.drink)}
+                          />
+                        ) : null}
                         <div>
                           <span>
                             {index + 1}. {t(item.drink)}

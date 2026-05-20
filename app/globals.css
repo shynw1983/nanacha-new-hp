@@ -90,17 +90,6 @@ img {
   padding: 4px 0;
 }
 
-.brand::after {
-  content: "";
-  position: absolute;
-  right: 2px;
-  bottom: 1px;
-  left: 2px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(156, 175, 136, 0.28);
-}
-
 .brand-logo {
   width: auto;
   height: 54px;
@@ -1458,6 +1447,49 @@ h3 {
   font-size: 15px;
 }
 
+.reservation-drink-preview {
+  grid-column: span 4;
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.reservation-drink-preview img,
+.reservation-item-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.reservation-drink-preview div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.reservation-drink-preview strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reservation-drink-preview small {
+  color: var(--price);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .topping-field {
   grid-column: 1 / -1;
   margin: var(--space-2xs) 0 0;
@@ -1540,12 +1572,18 @@ h3 {
 
 .reservation-item-card-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--space-xs);
 }
 
 .reservation-item-card-heading > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.reservation-item-thumb + div {
   min-width: 0;
   display: grid;
   gap: 3px;
@@ -1797,6 +1835,7 @@ footer p {
   }
 
   .reserve-form > label:nth-of-type(2),
+  .reservation-drink-preview,
   .topping-field {
     grid-column: 1 / -1;
   }
@@ -1955,6 +1994,7 @@ footer p {
 
   .reserve-form > label,
   .reserve-form > label:nth-of-type(2),
+  .reservation-drink-preview,
   .topping-field,
   .add-reservation-item-button,
   .checkout-button,
