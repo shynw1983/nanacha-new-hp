@@ -495,7 +495,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               ))}
             </select>
           </label>
-          <label>
+          <label className="reservation-drink-field">
             <span>{t("ドリンク")}</span>
             <select value={selectedDrink?.name || ""} onChange={(event) => setDrinkName(event.target.value)}>
               {drinks.length ? (
@@ -570,24 +570,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               ))}
             </select>
           </label>
-          <label>
-            <span>{t("受け取り日")}</span>
-            <input
-              type="date"
-              value={pickupDate}
-              min={minimumPickup.date}
-              onChange={(event) => setPickupDate(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>{t("受け取り時間")}</span>
-            <input
-              type="time"
-              value={pickup}
-              min={pickupDate === minimumPickup.date ? minimumPickup.time : undefined}
-              onChange={(event) => setPickup(event.target.value)}
-            />
-          </label>
           <fieldset className="topping-field">
             <legend>{t("トッピング")}</legend>
             <div className="topping-grid">
@@ -611,6 +593,24 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               ))}
             </div>
           </fieldset>
+          <label className="reservation-pickup-date-field">
+            <span>{t("受け取り日")}</span>
+            <input
+              type="date"
+              value={pickupDate}
+              min={minimumPickup.date}
+              onChange={(event) => setPickupDate(event.target.value)}
+            />
+          </label>
+          <label className="reservation-pickup-time-field">
+            <span>{t("受け取り時間")}</span>
+            <input
+              type="time"
+              value={pickup}
+              min={pickupDate === minimumPickup.date ? minimumPickup.time : undefined}
+              onChange={(event) => setPickup(event.target.value)}
+            />
+          </label>
           <div className="reservation-list">
             <div className="reservation-list-heading">
               <span>{t("予約リスト")}</span>

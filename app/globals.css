@@ -1428,6 +1428,15 @@ h3 {
   grid-column: span 8;
 }
 
+.reserve-form > .reservation-drink-field {
+  grid-column: 1 / -1;
+}
+
+.reserve-form > .reservation-pickup-date-field,
+.reserve-form > .reservation-pickup-time-field {
+  grid-column: span 6;
+}
+
 .reserve-form span {
   color: var(--muted);
   font-size: 12px;
@@ -1865,6 +1874,9 @@ footer p {
   }
 
   .reserve-form > label:nth-of-type(2),
+  .reserve-form > .reservation-drink-field,
+  .reserve-form > .reservation-pickup-date-field,
+  .reserve-form > .reservation-pickup-time-field,
   .reservation-drink-preview,
   .topping-field {
     grid-column: 1 / -1;
