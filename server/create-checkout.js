@@ -22,6 +22,30 @@ const isTapiocaFreeCategory = (menu, category) => menu.tapiocaFreeCategories.inc
 
 const hasWhipByDefault = (menu, category) => menu.whippedCategories.includes(category);
 
+const allowedSet = (drink, field) => {
+  const values = Array.isArray(drink?.[field]) ? drink[field].filter(Boolean) : [];
+  return values.length ? new Set(values.map(String)) : null;
+};
+
+const filterAllowedIds = (items, drink, field) => {
+  const allowed = allowedSet(drink, field);
+  if (!allowed) return items;
+  const filtered = items.filter((item) => allowed.has(item.id));
+  return filtered.length ? filtered : items;
+};
+
+const filterAllowedValues = (items, drink, field) => {
+  const allowed = allowedSet(drink, field);
+  if (!allowed) return items;
+  const filtered = items.filter((item) => allowed.has(item));
+  return filtered.length ? filtered : items;
+};
+
+const filterAllowedOptions = (items, drink) => {
+  const allowed = allowedSet(drink, "allowedOptions");
+  return items.filter((item) => item.id === "none" || !allowed || allowed.has(item.id));
+};
+
 const json = (response, statusCode, body) => {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -121,27 +145,29 @@ module.exports = async (request, response) => {
 
   for (const item of requestedItems) {
     const menuDrink = menu.drinks.find((drinkItem) => drinkItem.name === item.drink && drinkItem.websiteEnabled !== false);
-    const size = findById(menu.sizes, item.size);
-    const option = findById(menu.options, item.option);
-    const toppings = item.toppings.map((id) => findById(menu.toppings, id));
 
     if (!menuDrink) {
       return json(response, 400, { error: "Unknown drink" });
     }
 
-    if (!size || !menu.sweetness.includes(item.sweetness) || !option) {
-      return json(response, 400, { error: "Invalid customization" });
-    }
+    const availableSizes = filterAllowedIds(menu.sizes, menuDrink, "allowedSizes");
+    const availableSweetness = filterAllowedValues(menu.sweetness, menuDrink, "allowedSweetness");
+    const availableIce = item.temperature === "HOT" ? [menu.hotIce] : filterAllowedValues(menu.ice, menuDrink, "allowedIce");
+    const availableOptions = filterAllowedOptions(menu.options, menuDrink);
+    const availableToppings = filterAllowedIds(menu.toppings, menuDrink, "allowedToppings");
+    const size = findById(availableSizes, item.size);
+    const option = findById(availableOptions, item.option);
+    const toppings = item.toppings.map((id) => findById(availableToppings, id));
 
-    if (item.option === "decaf" && !menuDrink.supportsDecaf) {
-      return json(response, 400, { error: "Invalid option for drink" });
+    if (!size || !availableSweetness.includes(item.sweetness) || !option) {
+      return json(response, 400, { error: "Invalid customization" });
     }
 
     if (!menuDrink.temperatures.includes(item.temperature)) {
       return json(response, 400, { error: "Invalid temperature" });
     }
 
-    if (item.temperature === "HOT" ? item.ice !== menu.hotIce : !menu.ice.includes(item.ice)) {
+    if (!availableIce.includes(item.ice)) {
       return json(response, 400, { error: "Invalid ice amount" });
     }
 

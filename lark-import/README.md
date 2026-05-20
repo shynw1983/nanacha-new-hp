@@ -40,11 +40,17 @@ Recommended field types:
 - `isRecommended`: checkbox
 - `isFeatured`: checkbox
 - `isActive`: checkbox
-- `supportsDecaf`: checkbox, check only drinks that can use the decaf option
+- `allowedSizes`: multi-select or comma-separated text, optional size IDs such as `regular,large`
+- `allowedSweetness`: multi-select or comma-separated text, optional sweetness values such as `ふつう,少なめ`
+- `allowedIce`: multi-select or comma-separated text, optional ICE ice values such as `ふつう,氷少なめ`
+- `allowedOptions`: multi-select or comma-separated text, optional option IDs such as `premium,soy`
+- `allowedToppings`: multi-select or comma-separated text, optional topping IDs such as `extra-tapioca,cheese-foam`
 - `sortOrder`: number
 - `image`: attachment field for the product photo you maintain in Lark
 - `imageFile`: text helper showing the current local image path
 - `imageUrl`: optional text field for a public product-image URL
+
+Customization allow-lists are read from the `Drinks` table. Leave an `allowed...` field empty to use every global setting from `Menu Settings`. When a field has values, the reservation form and checkout API only allow those values for that drink. The `none` option is always kept available, and HOT drinks still use `HOTは氷なし` for ice. To allow decaf, include `decaf` in `allowedOptions`.
 
 After importing `Drinks`, create an attachment field named `image`.
 The website reads product images in this order:

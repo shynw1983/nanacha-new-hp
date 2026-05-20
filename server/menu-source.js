@@ -60,6 +60,11 @@ const normalizeStrings = (items, fallback) => {
   return normalized.length ? normalized : fallback;
 };
 
+const normalizeOptionalStrings = (value) => {
+  const normalized = arrayValue(value);
+  return normalized.length ? normalized : undefined;
+};
+
 const withTemperatures = (drink) => {
   if (Array.isArray(drink.temperatures) && drink.temperatures.length) {
     return drink;
@@ -133,7 +138,11 @@ const normalizeLarkMenu = ({ categoryRecords = [], drinkRecords = [], settingsRe
         isRecommended: booleanValue(fields.isRecommended),
         isFeatured: booleanValue(fields.isFeatured),
         isActive: booleanValue(fields.isActive),
-        supportsDecaf: booleanValue(fields.supportsDecaf),
+        allowedSizes: normalizeOptionalStrings(fields.allowedSizes),
+        allowedSweetness: normalizeOptionalStrings(fields.allowedSweetness),
+        allowedIce: normalizeOptionalStrings(fields.allowedIce),
+        allowedOptions: normalizeOptionalStrings(fields.allowedOptions),
+        allowedToppings: normalizeOptionalStrings(fields.allowedToppings),
         sortOrder: Number(fields.sortOrder) || 9999,
       }),
     )

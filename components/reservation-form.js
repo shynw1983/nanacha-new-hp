@@ -9,6 +9,26 @@ const findById = (items, id) => items.find((item) => item.id === id);
 const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
 const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
 const normalizeAssetUrl = (url = "") => (url && url.startsWith("/") ? url : `/${url}`);
+const allowedSet = (drink, field) => {
+  const values = Array.isArray(drink?.[field]) ? drink[field].filter(Boolean) : [];
+  return values.length ? new Set(values.map(String)) : null;
+};
+const filterAllowedIds = (items, drink, field) => {
+  const allowed = allowedSet(drink, field);
+  if (!allowed) return items;
+  const filtered = items.filter((item) => allowed.has(item.id));
+  return filtered.length ? filtered : items;
+};
+const filterAllowedValues = (items, drink, field) => {
+  const allowed = allowedSet(drink, field);
+  if (!allowed) return items;
+  const filtered = items.filter((item) => allowed.has(item));
+  return filtered.length ? filtered : items;
+};
+const filterAllowedOptions = (items, drink) => {
+  const allowed = allowedSet(drink, "allowedOptions");
+  return items.filter((item) => item.id === "none" || !allowed || allowed.has(item.id));
+};
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
@@ -173,11 +193,15 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     drinks[0];
   const temperatures = selectedDrink?.temperatures?.length ? selectedDrink.temperatures : ["ICE"];
   const selectedTemperature = temperatures.includes(temperature) ? temperature : temperatures[0];
-  const iceOptions = selectedTemperature === "HOT" ? [menu.hotIce] : menu.ice;
+  const availableSizes = filterAllowedIds(menu.sizes, selectedDrink, "allowedSizes");
+  const selectedSize = findById(availableSizes, sizeId) || findById(availableSizes, "regular") || availableSizes[0];
+  const sweetnessOptions = filterAllowedValues(menu.sweetness, selectedDrink, "allowedSweetness");
+  const selectedSweetness = sweetnessOptions.includes(sweetness) ? sweetness : sweetnessOptions[0] || "";
+  const iceOptions = selectedTemperature === "HOT" ? [menu.hotIce] : filterAllowedValues(menu.ice, selectedDrink, "allowedIce");
   const selectedIce = iceOptions.includes(ice) ? ice : iceOptions[0];
-  const availableOptions = menu.options.filter((option) => option.id !== "decaf" || selectedDrink?.supportsDecaf);
+  const availableOptions = filterAllowedOptions(menu.options, selectedDrink);
   const selectedOption = availableOptions.find((option) => option.id === optionId) || availableOptions[0];
-  const availableToppings = menu.toppings.filter(
+  const availableToppings = filterAllowedIds(menu.toppings, selectedDrink, "allowedToppings").filter(
     (topping) =>
       !(topping.id === "no-tapioca" && menu.tapiocaFreeCategories.includes(category)) &&
       !(topping.id === "no-whip" && !menu.whippedCategories.includes(category)),
@@ -185,7 +209,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const selectedToppings = toppingIds
     .map((id) => availableToppings.find((topping) => topping.id === id))
     .filter(Boolean);
-  const selectedSize = findById(menu.sizes, sizeId) || menu.sizes[0];
   const total =
     (selectedDrink?.price || 0) +
     (selectedSize?.price || 0) +
@@ -196,25 +219,29 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   );
   const getReservationDrink = (item) =>
     menu.drinks.find((drink) => drink.id === item.drinkId) || menu.drinks.find((drink) => drink.name === item.drink);
-  const getReservationOptions = (drink) =>
-    menu.options.filter((option) => option.id !== "decaf" || drink?.supportsDecaf);
-  const getReservationToppings = (item) =>
-    menu.toppings.filter(
+  const getReservationSizes = (drink) => filterAllowedIds(menu.sizes, drink, "allowedSizes");
+  const getReservationSweetness = (drink) => filterAllowedValues(menu.sweetness, drink, "allowedSweetness");
+  const getReservationOptions = (drink) => filterAllowedOptions(menu.options, drink);
+  const getReservationToppings = (item, drink = getReservationDrink(item)) =>
+    filterAllowedIds(menu.toppings, drink, "allowedToppings").filter(
       (topping) =>
         !(topping.id === "no-tapioca" && menu.tapiocaFreeCategories.includes(item.category)) &&
         !(topping.id === "no-whip" && !menu.whippedCategories.includes(item.category)),
     );
-  const getReservationIceOptions = (item) => (item.temperature === "HOT" ? [menu.hotIce] : menu.ice);
+  const getReservationIceOptions = (item, drink = getReservationDrink(item)) =>
+    item.temperature === "HOT" ? [menu.hotIce] : filterAllowedValues(menu.ice, drink, "allowedIce");
   const normalizeReservationItem = (item) => {
     const drink = getReservationDrink(item);
-    const size = findById(menu.sizes, item.size) || findById(menu.sizes, "regular") || menu.sizes[0];
+    const sizeItems = getReservationSizes(drink);
+    const size = findById(sizeItems, item.size) || findById(sizeItems, "regular") || sizeItems[0];
     const temperatures = drink?.temperatures?.length ? drink.temperatures : ["ICE"];
     const itemTemperature = temperatures.includes(item.temperature) ? item.temperature : temperatures[0];
-    const iceOptions = itemTemperature === "HOT" ? [menu.hotIce] : menu.ice;
+    const iceOptions = itemTemperature === "HOT" ? [menu.hotIce] : filterAllowedValues(menu.ice, drink, "allowedIce");
     const itemIce = iceOptions.includes(item.ice) ? item.ice : iceOptions[0] || "";
     const optionItems = getReservationOptions(drink);
     const option = optionItems.find((optionItem) => optionItem.id === item.option) || optionItems[0];
-    const toppingItems = getReservationToppings({ ...item, category: drink?.category || item.category });
+    const sweetnessItems = getReservationSweetness(drink);
+    const toppingItems = getReservationToppings({ ...item, category: drink?.category || item.category }, drink);
     const toppings = (item.toppings || []).map((id) => toppingItems.find((topping) => topping.id === id)).filter(Boolean);
     const itemTotal =
       (drink?.price || 0) +
@@ -230,7 +257,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       size: size?.id || "",
       sizeLabel: size?.label || "",
       temperature: itemTemperature,
-      sweetness: menu.sweetness.includes(item.sweetness) ? item.sweetness : menu.sweetness[0] || "",
+      sweetness: sweetnessItems.includes(item.sweetness) ? item.sweetness : sweetnessItems[0] || "",
       ice: itemIce,
       option: option?.id || "",
       optionLabel: option?.label || "",
@@ -247,7 +274,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     drink,
     size = selectedSize,
     itemTemperature = selectedTemperature,
-    itemSweetness = sweetness,
+    itemSweetness = selectedSweetness,
     itemIce = selectedIce,
     option = selectedOption,
     toppings = selectedToppings,
@@ -496,7 +523,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
           <label className="reservation-size-field">
             <span>{t("サイズ")}</span>
             <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
-              {menu.sizes.map((size) => (
+              {availableSizes.map((size) => (
                 <option value={size.id} key={size.id}>
                   {t(size.label)} ({formatDelta(size.price)})
                 </option>
@@ -515,8 +542,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
           </label>
           <label>
             <span>{t("甘さ")}</span>
-            <select value={sweetness} onChange={(event) => setSweetness(event.target.value)}>
-              {menu.sweetness.map((item) => (
+            <select value={selectedSweetness} onChange={(event) => setSweetness(event.target.value)}>
+              {sweetnessOptions.map((item) => (
                 <option value={item} key={item}>
                   {t(item)}
                 </option>
@@ -598,9 +625,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                 {preparedReservationItems.map((item, index) => {
                   const drink = getReservationDrink(item);
                   const itemTemperatures = drink?.temperatures?.length ? drink.temperatures : ["ICE"];
-                  const itemIceOptions = getReservationIceOptions(item);
+                  const itemSizes = getReservationSizes(drink);
+                  const itemSweetnessOptions = getReservationSweetness(drink);
+                  const itemIceOptions = getReservationIceOptions(item, drink);
                   const itemOptions = getReservationOptions(drink);
-                  const itemToppings = getReservationToppings(item);
+                  const itemToppings = getReservationToppings(item, drink);
 
                   return (
                     <li className="reservation-item-card" key={item.id}>
@@ -633,7 +662,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                         <label>
                           <span>{t("サイズ")}</span>
                           <select value={item.size} onChange={(event) => updateReservationItem(item.id, { size: event.target.value })}>
-                            {menu.sizes.map((size) => (
+                            {itemSizes.map((size) => (
                               <option value={size.id} key={size.id}>
                                 {t(size.label)} ({formatDelta(size.price)})
                               </option>
@@ -661,7 +690,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                         <label>
                           <span>{t("甘さ")}</span>
                           <select value={item.sweetness} onChange={(event) => updateReservationItem(item.id, { sweetness: event.target.value })}>
-                            {menu.sweetness.map((sweetnessItem) => (
+                            {itemSweetnessOptions.map((sweetnessItem) => (
                               <option value={sweetnessItem} key={sweetnessItem}>
                                 {t(sweetnessItem)}
                               </option>
