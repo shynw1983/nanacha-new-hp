@@ -482,16 +482,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               )}
             </select>
           </label>
-          <label>
-            <span>{t("サイズ")}</span>
-            <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
-              {menu.sizes.map((size) => (
-                <option value={size.id} key={size.id}>
-                  {t(size.label)} ({formatDelta(size.price)})
-                </option>
-              ))}
-            </select>
-          </label>
           {selectedDrink?.imageUrl ? (
             <div className="reservation-drink-preview" aria-live="polite">
               <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={t(selectedDrink.name)} />
@@ -503,6 +493,16 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               </div>
             </div>
           ) : null}
+          <label className="reservation-size-field">
+            <span>{t("サイズ")}</span>
+            <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
+              {menu.sizes.map((size) => (
+                <option value={size.id} key={size.id}>
+                  {t(size.label)} ({formatDelta(size.price)})
+                </option>
+              ))}
+            </select>
+          </label>
           <label>
             <span>{t("温度")}</span>
             <select value={selectedTemperature} onChange={(event) => setTemperature(event.target.value)}>
