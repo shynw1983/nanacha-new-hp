@@ -1463,17 +1463,17 @@ h3 {
 .reservation-drink-preview img {
   width: 112px;
   height: 112px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 16px;
-  background: var(--soft);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .reservation-item-thumb {
   width: 72px;
   height: 72px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 12px;
-  background: var(--soft);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .reservation-drink-preview div {
