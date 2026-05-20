@@ -3086,6 +3086,14 @@ footer p {
   margin-top: 16px;
 }
 
+.order-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.order-status-actions a,
 .order-status-footer button {
   border: 1px solid var(--ink);
   border-radius: 999px;
@@ -3093,6 +3101,13 @@ footer p {
   color: white;
   padding: 10px 14px;
   font-weight: 800;
+  white-space: nowrap;
+}
+
+.order-status-actions a {
+  border-color: var(--line);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .order-status-footer button:disabled {

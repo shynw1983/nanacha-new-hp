@@ -20,6 +20,7 @@ export function OrderCompleteContent({
   const displayPickupCode = initialOrder?.pickupCode || pickupCode || "";
   const displayPickupDate = initialOrder?.pickupDate || pickupDate || "";
   const displayPickupTime = initialOrder?.pickupTime || pickupTime || "";
+  const receiptUrl = initialOrder?.paymentStatus === "paid" ? initialOrder?.squareReceiptUrl : "";
 
   return (
     <main className="order-complete-page">
@@ -45,6 +46,11 @@ export function OrderCompleteContent({
           <Link className="primary-button" href={homeHref}>
             ホームへ戻る
           </Link>
+          {receiptUrl ? (
+            <a className="ghost-button" href={receiptUrl} target="_blank" rel="noreferrer">
+              Square レシートを見る
+            </a>
+          ) : null}
           <a className="ghost-button" href="#pickup-guide">
             受け取り方法を確認
           </a>

@@ -6,6 +6,8 @@ import { useI18n } from "./i18n-provider";
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
 const findById = (items, id) => items.find((item) => item.id === id);
+const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
+const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
@@ -367,8 +369,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
         drink: drinkSummary,
         size: orderItems.length === 1 ? orderItems[0].sizeLabel : `${orderItems.length}点`,
         temperature: orderItems.length === 1 ? orderItems[0].temperature : "複数商品",
-        sweetness: orderItems.length === 1 ? orderItems[0].sweetness : "商品ごと",
-        ice: orderItems.length === 1 ? orderItems[0].ice : "商品ごと",
+        sweetness: orderItems.length === 1 ? formatSweetnessLabel(orderItems[0].sweetness) : "商品ごと",
+        ice: orderItems.length === 1 ? formatIceLabel(orderItems[0].ice) : "商品ごと",
         option: orderItems.length === 1 ? orderItems[0].optionLabel : "商品ごと",
         toppings: orderItems.length === 1 ? orderItems[0].toppingLabels : orderItems.map((item) => item.drink),
         total: orderTotal,

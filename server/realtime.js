@@ -37,6 +37,7 @@ const toPublicOrder = (order) => ({
   storeName: order.storeName,
   status: order.status,
   paymentStatus: order.paymentStatus,
+  squareReceiptUrl: order.squareReceiptUrl,
   drink: order.drink,
   size: order.size,
   temperature: order.temperature,

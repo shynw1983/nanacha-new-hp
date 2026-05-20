@@ -21,6 +21,10 @@ const statusLabels = {
 };
 
 const getStepIndex = (status) => statusSteps.findIndex((step) => step.id === status);
+const formatLabeledValue = (label, value) => {
+  if (!value) return "";
+  return String(value).includes(":") ? value : `${label}: ${value}`;
+};
 
 export function OrderStatusCard({
   orderId,
@@ -133,6 +137,7 @@ export function OrderStatusCard({
   const current = {
     pickupDate: order?.pickupDate || pickupDate,
     pickupTime: order?.pickupTime || pickupTime,
+    squareReceiptUrl: order?.squareReceiptUrl || initialOrder?.squareReceiptUrl || "",
     drink: order?.drink || drink,
     size: order?.size || size,
     temperature: order?.temperature || temperature,
@@ -144,6 +149,7 @@ export function OrderStatusCard({
   };
   const activeIndex = getStepIndex(status);
   const isProblem = ["cancelled", "payment_failed", "checkout_failed"].includes(status);
+  const canShowReceipt = order?.paymentStatus === "paid" && current.squareReceiptUrl;
 
   return (
     <>
@@ -172,9 +178,16 @@ export function OrderStatusCard({
             {connection === "connected" ? "状態は自動で更新されます。" : "状態を確認しています。"}
             {lastCheckedAt ? <span>最終確認 {lastCheckedAt}</span> : null}
           </p>
-          <button type="button" onClick={loadOrder} disabled={isRefreshing}>
-            {isRefreshing ? "更新中..." : "注文状況を更新"}
-          </button>
+          <div className="order-status-actions">
+            {canShowReceipt ? (
+              <a href={current.squareReceiptUrl} target="_blank" rel="noreferrer">
+                Square レシートを見る
+              </a>
+            ) : null}
+            <button type="button" onClick={loadOrder} disabled={isRefreshing}>
+              {isRefreshing ? "更新中..." : "注文状況を更新"}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -186,7 +199,11 @@ export function OrderStatusCard({
           <dt>サイズ</dt>
           <dd>{current.size || "—"}</dd>
           <dt>カスタム</dt>
-          <dd>{[current.temperature, current.sweetness, current.ice].filter(Boolean).join(" / ") || "—"}</dd>
+          <dd>
+            {[current.temperature, formatLabeledValue("甘さ", current.sweetness), formatLabeledValue("氷", current.ice)]
+              .filter(Boolean)
+              .join(" / ") || "—"}
+          </dd>
           <dt>オプション</dt>
           <dd>{current.option || "—"}</dd>
           <dt>トッピング</dt>

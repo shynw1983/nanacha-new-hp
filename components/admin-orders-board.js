@@ -29,6 +29,10 @@ const splitOrderLines = (value = "") =>
     .split(/\n+|\s\/\s(?=\d+\.\s)/)
     .map((item) => item.trim())
     .filter(Boolean);
+const formatLabeledValue = (label, value) => {
+  if (!value) return "";
+  return String(value).includes(":") ? value : `${label}: ${value}`;
+};
 const getOrderItemLines = (order) => {
   if (!order) return [];
   const sizeLines = splitOrderLines(order.size);
@@ -397,7 +401,16 @@ export function AdminOrdersBoard({ initialOrders }) {
                 ) : (
                   <>
                     <dt>内容</dt>
-                    <dd>{selectedOrder.size} / {selectedOrder.temperature} / {selectedOrder.sweetness} / {selectedOrder.ice}</dd>
+                    <dd>
+                      {[
+                        selectedOrder.size,
+                        selectedOrder.temperature,
+                        formatLabeledValue("甘さ", selectedOrder.sweetness),
+                        formatLabeledValue("氷", selectedOrder.ice),
+                      ]
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </dd>
                     <dt>オプション</dt>
                     <dd>{selectedOrder.option}</dd>
                     <dt>トッピング</dt>

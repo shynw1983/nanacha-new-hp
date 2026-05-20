@@ -36,6 +36,9 @@ const getBaseUrl = (request) => {
 
 const createPickupCode = () => `N-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 
+const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
+const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
+
 module.exports = async (request, response) => {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -210,11 +213,15 @@ module.exports = async (request, response) => {
   const itemSummaries = validatedItems.map((item, index) => {
     const toppingLabel = item.toppings.length ? item.toppings.map((topping) => topping.label).join(", ") : "トッピングなし";
     const optionLabel = item.option.id === "none" ? "オプションなし" : item.option.label;
+    const sweetnessLabel = formatSweetnessLabel(item.sweetness);
+    const iceLabel = formatIceLabel(item.ice);
     return {
       name: item.drink.name,
-      orderName: `${item.drink.name} / ${item.size.label} / ${item.temperature} / ${item.sweetness} / ${item.ice}`,
-      description: `${index + 1}. ${item.drink.name} / ${item.size.label} / ${item.temperature} / ${item.sweetness} / ${item.ice} / ${optionLabel} / ${toppingLabel}`,
+      orderName: `${item.drink.name} / ${item.size.label} / ${item.temperature} / ${sweetnessLabel} / ${iceLabel}`,
+      description: `${index + 1}. ${item.drink.name} / ${item.size.label} / ${item.temperature} / ${sweetnessLabel} / ${iceLabel} / ${optionLabel} / ${toppingLabel}`,
       sizeLabel: item.size.label,
+      sweetnessLabel,
+      iceLabel,
       optionLabel,
       toppingLabel,
     };
@@ -228,8 +235,8 @@ module.exports = async (request, response) => {
   const itemDetailLabel = itemSummaries.map((item) => item.description).join("\n");
   const sizeLabel = itemSummaries.length === 1 ? primarySummary.sizeLabel : itemDetailLabel;
   const temperatureLabel = itemSummaries.length === 1 ? primaryItem.temperature : "複数商品";
-  const sweetnessLabel = itemSummaries.length === 1 ? primaryItem.sweetness : "商品ごと";
-  const iceLabel = itemSummaries.length === 1 ? primaryItem.ice : "商品ごと";
+  const sweetnessLabel = itemSummaries.length === 1 ? primarySummary.sweetnessLabel : "商品ごと";
+  const iceLabel = itemSummaries.length === 1 ? primarySummary.iceLabel : "商品ごと";
   const optionLabel = itemSummaries.length === 1 ? primarySummary.optionLabel : "商品ごと";
   const toppingLabel = itemSummaries.length === 1 ? primarySummary.toppingLabel : "商品ごと";
   const pickupCode = createPickupCode();
