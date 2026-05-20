@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { localizeValue, useI18n } from "./i18n-provider";
 
-const RESERVATION_CART_KEY = "nanacha-reservation-cart";
-
 const categoryDecor = {
   frappe: "sparkle.png",
   milk: "tapioca-three.png",
@@ -21,10 +19,9 @@ const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
 
 export function MenuBrowser({ initialMenu }) {
-  const { language, t } = useI18n();
+  const { t } = useI18n();
   const [menu, setMenu] = useState(initialMenu || null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [reservationItems, setReservationItems] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -47,17 +44,6 @@ export function MenuBrowser({ initialMenu }) {
     };
   }, [initialMenu]);
 
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(window.localStorage.getItem(RESERVATION_CART_KEY) || "[]");
-      if (Array.isArray(stored)) {
-        setReservationItems(stored);
-      }
-    } catch {
-      setReservationItems([]);
-    }
-  }, []);
-
   const localizedMenu = useMemo(() => (menu ? localizeValue(menu, t) : null), [menu, t]);
   const visibleCategories = useMemo(() => {
     if (!localizedMenu) return [];
@@ -74,26 +60,6 @@ export function MenuBrowser({ initialMenu }) {
   if (!localizedMenu) {
     return <div data-react-menu-browser />;
   }
-
-  const persistReservationItems = (items) => {
-    setReservationItems(items);
-    try {
-      window.localStorage.setItem(RESERVATION_CART_KEY, JSON.stringify(items));
-    } catch {
-      // Continue without persistence.
-    }
-  };
-  const addReservationItem = (drink) => {
-    persistReservationItems([
-      ...reservationItems,
-      {
-        drinkId: drink.id,
-        drinkName: drink.name,
-        category: drink.category,
-      },
-    ]);
-  };
-  const reserveHref = language === "ja" ? "/#reserve" : `/${language}#reserve`;
 
   return (
     <div data-react-menu-browser>
@@ -144,10 +110,6 @@ export function MenuBrowser({ initialMenu }) {
                   </div>
                   <div className="product-item-actions">
                     <span>{formatPrice(drink.price)}</span>
-                    <button type="button" onClick={() => addReservationItem(drink)} aria-label={`${drink.name}を予約に追加`}>
-                      <span aria-hidden="true">+</span>
-                      <em>{t("予約")}</em>
-                    </button>
                   </div>
                 </article>
               ))}
@@ -155,22 +117,6 @@ export function MenuBrowser({ initialMenu }) {
           </article>
         ))}
       </section>
-      {reservationItems.length ? (
-        <aside className="reservation-dock" aria-live="polite">
-          <p>
-            <strong>{reservationItems.length}</strong>
-            {t("点を予約リストに追加済み")}
-          </p>
-          <div>
-            <button type="button" onClick={() => persistReservationItems([])}>
-              {t("クリア")}
-            </button>
-            <a className="primary-button" href={reserveHref}>
-              {t("予約へ進む")}
-            </a>
-          </div>
-        </aside>
-      ) : null}
     </div>
   );
 }

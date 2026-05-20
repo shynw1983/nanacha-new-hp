@@ -1323,8 +1323,6 @@ h3 {
   font-weight: 700;
 }
 
-.product-item-actions button,
-.reservation-dock button,
 .reservation-list button,
 .add-reservation-item-button {
   min-height: 36px;
@@ -1339,42 +1337,6 @@ h3 {
   cursor: pointer;
 }
 
-.product-item-actions button {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 38px;
-  padding: 0 14px 0 10px;
-  border-color: rgba(156, 175, 136, 0.42);
-  background: #f6faf2;
-  color: #4f653f;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
-  white-space: nowrap;
-}
-
-.product-item-actions button span {
-  width: 21px;
-  height: 21px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: var(--tea);
-  color: var(--paper);
-  font-size: 16px;
-  line-height: 1;
-}
-
-.product-item-actions button em {
-  font-style: normal;
-}
-
-.product-item-actions button:hover {
-  border-color: var(--tea);
-  background: #eef6e8;
-  transform: translateY(-1px);
-}
-
 .product-item.simple {
   min-height: 80px;
   align-items: center;
@@ -1382,48 +1344,6 @@ h3 {
 
 .product-item.simple h3 {
   margin-bottom: 0;
-}
-
-.reservation-dock {
-  position: fixed;
-  right: clamp(16px, 3vw, 36px);
-  bottom: clamp(16px, 3vw, 32px);
-  z-index: 9;
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  max-width: min(520px, calc(100vw - 32px));
-  padding: 12px 14px 12px 18px;
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-}
-
-.reservation-dock p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.reservation-dock p strong {
-  margin-right: 4px;
-  color: var(--ink);
-  font-size: 18px;
-}
-
-.reservation-dock div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.reservation-dock .primary-button {
-  min-height: 38px;
-  padding-inline: 15px;
-  font-size: 13px;
 }
 
 .customize-section {
@@ -2186,18 +2106,6 @@ footer p {
     grid-template-columns: 1fr auto;
     align-items: center;
     justify-items: start;
-  }
-
-  .reservation-dock {
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    justify-content: space-between;
-    border-radius: 22px;
-  }
-
-  .reservation-dock div {
-    flex: 0 0 auto;
   }
 
   .reservation-item-card-heading {

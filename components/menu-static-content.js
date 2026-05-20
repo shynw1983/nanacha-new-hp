@@ -16,7 +16,7 @@ export function MenuIntro() {
         <img className="title-decor" src="/assets/decor/sunglasses.png" alt="" aria-hidden="true" />
       </h1>
       <p>
-        {t("福岡清川店で楽しめるタピオカミルク、フラッペ、チーズティー、スムージー、ティー、コーヒーまで。 サイズ・甘さ・氷の量・トッピングを選んで、自分好みの一杯に。")}
+        {t("nanacha のタピオカミルク、フラッペ、チーズティー、スムージー、ティー、コーヒーまで。 サイズ・甘さ・氷の量・トッピングを選んで、自分好みの一杯に。")}
       </p>
     </section>
   );
