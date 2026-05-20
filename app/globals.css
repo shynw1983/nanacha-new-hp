@@ -2207,7 +2207,6 @@ footer p {
 .admin-sidebar p {
   margin: 0 0 4px;
   color: var(--muted);
-  text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 
