@@ -468,6 +468,16 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               ))}
             </select>
           </label>
+          {selectedDrink?.imageUrl ? (
+            <div className="reservation-drink-preview" aria-live="polite">
+              <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={t(selectedDrink.name)} />
+              <div>
+                <span>{t("選択中の商品")}</span>
+                <strong>{t(selectedDrink.name)}</strong>
+                <small>{formatPrice(selectedDrink.price)}</small>
+              </div>
+            </div>
+          ) : null}
           <label>
             <span>{t("ドリンク")}</span>
             <select value={selectedDrink?.name || ""} onChange={(event) => setDrinkName(event.target.value)}>
@@ -482,16 +492,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               )}
             </select>
           </label>
-          {selectedDrink?.imageUrl ? (
-            <div className="reservation-drink-preview" aria-live="polite">
-              <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={t(selectedDrink.name)} />
-              <div>
-                <span>{t("選択中の商品")}</span>
-                <strong>{t(selectedDrink.name)}</strong>
-                <small>{formatPrice(selectedDrink.price)}</small>
-              </div>
-            </div>
-          ) : null}
           <label>
             <span>{t("サイズ")}</span>
             <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
