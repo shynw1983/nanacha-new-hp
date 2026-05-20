@@ -30,6 +30,10 @@ export function HomeContent({ homepage, menu }) {
       <RevealOnScroll />
       <section className="hero" aria-labelledby="hero-title" data-react-homepage>
         <div className="hero-copy" data-reveal>
+          <div className="hero-brand-signature" aria-hidden="true">
+            <img src="/assets/nanacha-logo.png" alt="" />
+            <span>Fukuoka tea stand</span>
+          </div>
           <p className="eyebrow eyebrow-with-decor">
             <img src="/assets/decor/tapioca-three.png" alt="" aria-hidden="true" />
             {settings.heroEyebrow}
@@ -85,6 +89,9 @@ export function HomeContent({ homepage, menu }) {
         <div className="menu-grid reveal-group">
           {picks.map((drink, index) => (
             <article className={`drink-card${drink.isFeatured || index === 0 ? " featured" : ""}`} key={drink.id}>
+              {drink.isFeatured || index === 0 ? (
+                <img className="drink-card-brand" src="/assets/nanacha-logo.png" alt="" aria-hidden="true" />
+              ) : null}
               {drink.imageUrl ? <img className="drink-photo" src={normalizeAssetUrl(drink.imageUrl)} alt={drink.name} /> : null}
               <div>
                 <p className="drink-tag">{localizedMenu.categories.find((category) => category.id === drink.category)?.label}</p>

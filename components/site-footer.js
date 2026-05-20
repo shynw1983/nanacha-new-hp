@@ -9,7 +9,10 @@ export function SiteFooter() {
 
   return (
     <footer>
-      <p>{t("nanacha · tapioca & more...")}</p>
+      <div className="footer-brand">
+        <img src="/assets/nanacha-logo.png" alt="nanacha" />
+        <p>{t("nanacha · tapioca & more...")}</p>
+      </div>
       <div className="footer-links" aria-label="外部リンク">
         <a href={localizedPath(language, "/shops")}>{t("店舗一覧を見る")}</a>
         <a href={siteLinks.instagram} target="_blank" rel="noreferrer">
