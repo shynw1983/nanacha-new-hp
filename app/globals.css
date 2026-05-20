@@ -1172,7 +1172,7 @@ h3 {
 }
 
 .menu-hero p:not(.eyebrow) {
-  max-width: 560px;
+  max-width: none;
   color: var(--muted);
   font-size: var(--type-body-lg);
   line-height: var(--leading-body);
