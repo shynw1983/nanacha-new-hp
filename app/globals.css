@@ -2536,6 +2536,24 @@ footer p {
   margin-top: 16px;
 }
 
+.admin-report-orders table {
+  min-width: 940px;
+}
+
+.admin-report-orders th,
+.admin-report-orders td {
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.admin-report-orders .admin-report-product-cell {
+  min-width: 260px;
+  max-width: 360px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
 .admin-report-orders small {
   display: block;
   margin-top: 4px;
@@ -3169,6 +3187,35 @@ footer p {
     padding-top: 22px;
   }
 
+  .admin-report-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 12px;
+  }
+
+  .admin-report-toolbar label,
+  .admin-report-toolbar input,
+  .admin-report-toolbar select,
+  .admin-report-toolbar button,
+  .admin-report-toolbar .admin-secondary-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-report-toolbar .admin-error {
+    grid-column: 1 / -1;
+  }
+
+  .admin-report-orders {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-report-orders table {
+    width: max-content;
+  }
+
   .admin-metric-grid,
   .admin-inline-stats,
   .admin-two-column,
@@ -3188,6 +3235,30 @@ footer p {
 }
 
 @media (max-width: 640px) {
+  .admin-report-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-report-orders {
+    margin-inline: calc(clamp(20px, 3vw, 36px) * -1);
+    border-inline: 0;
+    border-radius: 0;
+  }
+
+  .admin-report-orders table {
+    min-width: 860px;
+  }
+
+  .admin-report-orders th,
+  .admin-report-orders td {
+    padding: 12px 14px;
+  }
+
+  .admin-report-orders .admin-report-product-cell {
+    min-width: 240px;
+    max-width: 300px;
+  }
+
   .order-complete-page {
     align-content: start;
     padding: 18px 16px 28px;

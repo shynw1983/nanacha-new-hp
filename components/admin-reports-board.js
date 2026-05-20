@@ -193,7 +193,7 @@ export function AdminReportsBoard({ initialReport, stores, canSelectStore }) {
                     <td>{order.pickupDate}<br />{order.pickupTime}</td>
                     <td>{order.pickupCode}</td>
                     <td>{order.storeName}</td>
-                    <td>{order.drink}</td>
+                    <td className="admin-report-product-cell">{order.drink}</td>
                     <td>{yen.format(order.amount)}</td>
                     <td>
                       <span className={`admin-report-state is-${state.tone}`}>{state.label}</span>
