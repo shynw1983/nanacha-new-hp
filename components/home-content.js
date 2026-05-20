@@ -30,10 +30,6 @@ export function HomeContent({ homepage, menu }) {
       <RevealOnScroll />
       <section className="hero" aria-labelledby="hero-title" data-react-homepage>
         <div className="hero-copy" data-reveal>
-          <div className="hero-brand-signature" aria-hidden="true">
-            <img src="/assets/nanacha-logo.png" alt="" />
-            <span>Fukuoka tea stand</span>
-          </div>
           <p className="eyebrow eyebrow-with-decor">
             <img src="/assets/decor/tapioca-three.png" alt="" aria-hidden="true" />
             {settings.heroEyebrow}

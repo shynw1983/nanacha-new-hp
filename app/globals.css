@@ -221,26 +221,6 @@ html.is-homepage-pending .hero-visual {
   z-index: 1;
 }
 
-.hero-brand-signature {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: var(--space-md);
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-brand-signature img {
-  width: auto;
-  height: clamp(44px, 5vw, 62px);
-  object-fit: contain;
-}
-
 .eyebrow {
   margin: 0 0 var(--space-sm);
   color: var(--tea);
