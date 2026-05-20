@@ -1448,19 +1448,26 @@ h3 {
 }
 
 .reservation-drink-preview {
-  grid-column: span 4;
-  min-height: 92px;
+  grid-column: 1 / -1;
+  min-height: 132px;
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-xs);
-  padding: 10px;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
   border: 1px solid var(--line-soft);
-  border-radius: 16px;
-  background: var(--paper);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 242, 235, 0.78));
 }
 
-.reservation-drink-preview img,
+.reservation-drink-preview img {
+  width: 112px;
+  height: 112px;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--soft);
+}
+
 .reservation-item-thumb {
   width: 72px;
   height: 72px;
@@ -1472,22 +1479,31 @@ h3 {
 .reservation-drink-preview div {
   min-width: 0;
   display: grid;
-  gap: 4px;
+  gap: 6px;
+  align-content: center;
 }
 
 .reservation-drink-preview strong {
-  overflow: hidden;
   color: var(--ink);
-  font-size: 15px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.25;
 }
 
 .reservation-drink-preview small {
   color: var(--price);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
+}
+
+.reservation-drink-preview p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .topping-field {
@@ -1994,7 +2010,6 @@ footer p {
 
   .reserve-form > label,
   .reserve-form > label:nth-of-type(2),
-  .reservation-drink-preview,
   .topping-field,
   .add-reservation-item-button,
   .checkout-button,
