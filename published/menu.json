@@ -71,6 +71,24 @@
         ],
         "isRecommended": false,
         "isFeatured": false,
+        "allowedSizes": [
+          "regular"
+        ],
+        "allowedSweetness": [
+          "ふつう",
+          "多め",
+          "少なめ",
+          "ゼロ"
+        ],
+        "allowedIce": [
+          "ふつう",
+          "氷少なめ",
+          "氷抜き"
+        ],
+        "allowedOptions": [
+          "premium",
+          "soy"
+        ],
         "isAvailable": true,
         "websiteEnabled": true
       },
@@ -992,6 +1010,24 @@
           ],
           "isRecommended": false,
           "isFeatured": false,
+          "allowedSizes": [
+            "regular"
+          ],
+          "allowedSweetness": [
+            "ふつう",
+            "多め",
+            "少なめ",
+            "ゼロ"
+          ],
+          "allowedIce": [
+            "ふつう",
+            "氷少なめ",
+            "氷抜き"
+          ],
+          "allowedOptions": [
+            "premium",
+            "soy"
+          ],
           "isAvailable": true,
           "websiteEnabled": true
         },
@@ -1841,5 +1877,5 @@
       "selectedStoreId": "kiyokawa"
     }
   },
-  "publishedAt": "2026-05-18T00:30:28.553Z"
+  "publishedAt": "2026-05-20T07:54:32.746Z"
 }
