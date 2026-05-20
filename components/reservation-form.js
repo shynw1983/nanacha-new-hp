@@ -8,6 +8,7 @@ const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}$
 const findById = (items, id) => items.find((item) => item.id === id);
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
+const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const getTokyoDateTimeParts = (date = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -163,7 +164,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       ),
     [category, menu.drinks],
   );
-  const selectedDrink = drinks.find((drink) => drink.name === drinkName) || drinks[0];
+  const selectedDrink =
+    drinks.find((drink) => drink.name === drinkName) ||
+    drinks.find((drink) => drink.name === DEFAULT_RESERVATION_DRINK_NAME) ||
+    drinks[0];
   const temperatures = selectedDrink?.temperatures?.length ? selectedDrink.temperatures : ["ICE"];
   const selectedTemperature = temperatures.includes(temperature) ? temperature : temperatures[0];
   const iceOptions = selectedTemperature === "HOT" ? [menu.hotIce] : menu.ice;
