@@ -651,16 +651,6 @@ h3 {
   background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 100%);
 }
 
-.drink-card-brand {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 76px;
-  height: auto;
-  opacity: 0.16;
-  pointer-events: none;
-}
-
 .drink-tag {
   margin-bottom: var(--space-md);
   color: var(--oolong);
@@ -2170,10 +2160,6 @@ footer p {
     width: 70px;
     height: 96px;
     margin: 0 auto;
-  }
-
-  .drink-card-brand {
-    display: none;
   }
 
   .menu-section .drink-tag {
