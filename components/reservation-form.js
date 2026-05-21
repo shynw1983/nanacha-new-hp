@@ -611,6 +611,14 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               onChange={(event) => setPickup(event.target.value)}
             />
           </label>
+          <button
+            className="add-reservation-item-button"
+            type="button"
+            disabled={!hasAvailableDrinks || !selectedDrink}
+            onClick={addSelectedReservationItem}
+          >
+            {t("この商品を予約リストに追加")}
+          </button>
           <div className="reservation-list">
             <div className="reservation-list-heading">
               <span>{t("予約リスト")}</span>
@@ -749,14 +757,6 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               <p>{t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}</p>
             )}
           </div>
-          <button
-            className="add-reservation-item-button"
-            type="button"
-            disabled={!hasAvailableDrinks || !selectedDrink}
-            onClick={addSelectedReservationItem}
-          >
-            {t("この商品を予約リストに追加")}
-          </button>
           <p className="order-total">{t("合計")} {formatPrice(displayTotal)}</p>
           <button className="checkout-button" type="submit" disabled={isSubmitting || !hasAvailableDrinks || !selectedDrink}>
             {isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
