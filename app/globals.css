@@ -1902,6 +1902,47 @@ footer p {
   .form-note {
     grid-column: 1 / -1;
   }
+
+  .store-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .store-card-media {
+    width: 100%;
+    max-width: none;
+    aspect-ratio: 4 / 3;
+  }
+
+  .store-photo,
+  .store-photo-placeholder {
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .store-card-copy {
+    display: grid;
+    grid-template-rows: auto;
+    gap: 8px;
+  }
+
+  .store-status,
+  .store-card h2,
+  .store-card h3,
+  .store-card p,
+  .store-card-copy p:not(.store-status),
+  .store-card-copy .text-link,
+  .store-link-spacer {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .store-card p {
+    max-width: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2124,7 +2165,7 @@ footer p {
   .store-card-media {
     grid-column: auto;
     grid-row: auto;
-    max-width: 180px;
+    max-width: none;
   }
 
   .store-card-copy {
