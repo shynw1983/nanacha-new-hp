@@ -16,15 +16,6 @@ const I18nContext = createContext({
   t: (value) => value,
 });
 
-const getStoredLanguage = () => {
-  try {
-    const language = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    return LANGUAGE_META[language] ? language : "ja";
-  } catch {
-    return "ja";
-  }
-};
-
 const translateText = (value, dictionary) => {
   if (typeof value !== "string" || !value) {
     return value;
@@ -49,12 +40,6 @@ const translateText = (value, dictionary) => {
 export function I18nProvider({ children, initialLanguage = "ja", initialDictionary = {} }) {
   const [language, setLanguage] = useState(initialLanguage);
   const [dictionary, setDictionary] = useState(initialDictionary);
-
-  useEffect(() => {
-    if (initialLanguage === "ja") {
-      setLanguage(getStoredLanguage());
-    }
-  }, [initialLanguage]);
 
   useEffect(() => {
     document.documentElement.lang = LANGUAGE_META[language]?.htmlLang || "ja";
