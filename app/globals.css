@@ -1710,14 +1710,15 @@ h3 {
 }
 
 .add-reservation-item-button {
-  grid-column: 1 / span 5;
-  width: 100%;
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 420px);
   min-height: 56px;
   font-size: 14px;
 }
 
 .order-total {
-  grid-column: 6 / span 2;
+  grid-column: 1 / -1;
   align-self: center;
   justify-self: center;
   margin: 0;
@@ -1729,14 +1730,16 @@ h3 {
 }
 
 .checkout-button {
-  grid-column: 8 / -1;
-  width: 100%;
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 420px);
   min-height: 56px;
 }
 
 .form-note {
-  grid-column: 8 / -1;
-  width: 100%;
+  grid-column: 1 / -1;
+  width: min(100%, 640px);
+  justify-self: center;
   margin: -2px 0 0;
   color: var(--muted);
   font-size: 13px;
