@@ -2387,6 +2387,10 @@ footer p {
   color: var(--ink);
 }
 
+.admin-sidebar > div {
+  width: fit-content;
+}
+
 .admin-sidebar .admin-brand-word {
   margin: 0 0 4px;
   color: var(--muted);
@@ -2404,6 +2408,7 @@ footer p {
   margin-top: 10px;
   color: var(--muted);
   line-height: 1.5;
+  text-align: right;
 }
 
 .admin-sidebar nav {
@@ -3325,10 +3330,8 @@ footer p {
   }
 
   .admin-sidebar > div {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-    gap: 12px;
+    display: block;
+    width: fit-content;
   }
 
   .admin-sidebar .admin-brand-word {
