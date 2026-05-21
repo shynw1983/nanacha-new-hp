@@ -1499,6 +1499,7 @@ h3 {
   grid-column: 2;
   grid-row: 2;
   align-self: start;
+  margin-right: clamp(12px, 1.4vw, 22px);
   color: var(--price);
   font-size: clamp(20px, 2.4vw, 28px);
   font-weight: 800;
@@ -2083,6 +2084,7 @@ footer p {
 
   .reservation-drink-preview small {
     justify-self: start;
+    margin-right: 0;
     font-size: 22px;
     transform: none;
   }
