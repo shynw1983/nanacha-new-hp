@@ -3114,6 +3114,18 @@ footer p {
   font: inherit;
 }
 
+.admin-product-editor input[type="checkbox"],
+.admin-choice-options input[type="checkbox"],
+.admin-product-flags input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: #1685f9;
+}
+
 .admin-product-editor textarea {
   resize: vertical;
 }
