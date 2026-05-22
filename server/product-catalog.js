@@ -217,7 +217,7 @@ const ensureCatalogSeeded = async (sql) => {
     `;
     await sql`
       insert into menu_settings (setting_type, item_id, label, sort_order, is_active)
-      values ('hotIce', 'default', ${menu.hotIce}, 1, true)
+      values ('hotIce', 'hotice', ${menu.hotIce}, 1, true)
       on conflict (setting_type, item_id) do nothing
     `;
   }
