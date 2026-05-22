@@ -39,6 +39,7 @@ export default async function AdminProductsPage() {
         initialProducts={selectedStoreId ? await listStoreProducts(selectedStoreId) : []}
         initialCatalogProducts={catalog.products}
         initialCategories={catalog.categories}
+        menuSettings={catalog.menuSettings}
         canEditCatalog={catalog.isEditable && canManageProductCatalog(session)}
       />
     </AdminShell>

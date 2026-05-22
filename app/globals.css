@@ -3108,6 +3108,62 @@ footer p {
   gap: 12px;
 }
 
+.admin-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-choice-group {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.admin-choice-group legend {
+  padding: 0;
+  font-weight: 800;
+}
+
+.admin-choice-group small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.admin-choice-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-choice-actions button {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.admin-choice-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-choice-options label {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  padding: 7px 10px;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
 .admin-product-flags {
   display: flex;
   flex-wrap: wrap;
@@ -3592,6 +3648,10 @@ footer p {
   }
 
   .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-choice-grid {
     grid-template-columns: 1fr;
   }
 }

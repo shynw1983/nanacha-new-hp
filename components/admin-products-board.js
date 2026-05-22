@@ -9,12 +9,12 @@ const emptyProduct = {
   price: "",
   description: "",
   imageUrl: "",
-  temperaturesText: "ICE",
-  allowedSizesText: "",
-  allowedSweetnessText: "",
-  allowedIceText: "",
-  allowedOptionsText: "",
-  allowedToppingsText: "",
+  temperatures: ["ICE"],
+  allowedSizes: [],
+  allowedSweetness: [],
+  allowedIce: [],
+  allowedOptions: [],
+  allowedToppings: [],
   sortOrder: 9999,
   isActive: true,
   isRecommended: false,
@@ -31,8 +31,7 @@ const emptyCategory = {
   isActive: true,
 };
 
-const toText = (value) => (Array.isArray(value) ? value.join(", ") : "");
-const toArray = (value) => String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+const toArray = (value) => (Array.isArray(value) ? value.map(String).filter(Boolean) : []);
 const normalizeAssetUrl = (url = "") => (url.startsWith("/") || url.startsWith("http") ? url : `/${url}`);
 const productToForm = (product) => ({
   drinkId: product.drinkId || product.id || "",
@@ -41,12 +40,12 @@ const productToForm = (product) => ({
   price: product.price ?? "",
   description: product.description || "",
   imageUrl: product.imageUrl || "",
-  temperaturesText: toText(product.temperatures) || "ICE",
-  allowedSizesText: toText(product.allowedSizes),
-  allowedSweetnessText: toText(product.allowedSweetness),
-  allowedIceText: toText(product.allowedIce),
-  allowedOptionsText: toText(product.allowedOptions),
-  allowedToppingsText: toText(product.allowedToppings),
+  temperatures: toArray(product.temperatures).length ? toArray(product.temperatures) : ["ICE"],
+  allowedSizes: toArray(product.allowedSizes),
+  allowedSweetness: toArray(product.allowedSweetness),
+  allowedIce: toArray(product.allowedIce),
+  allowedOptions: toArray(product.allowedOptions),
+  allowedToppings: toArray(product.allowedToppings),
   sortOrder: product.sortOrder || 9999,
   isActive: product.isActive !== false,
   isRecommended: product.isRecommended === true,
@@ -60,12 +59,12 @@ const formToProduct = (form) => ({
   price: Number(form.price),
   description: form.description,
   imageUrl: form.imageUrl,
-  temperatures: toArray(form.temperaturesText).length ? toArray(form.temperaturesText) : ["ICE"],
-  allowedSizes: toArray(form.allowedSizesText),
-  allowedSweetness: toArray(form.allowedSweetnessText),
-  allowedIce: toArray(form.allowedIceText),
-  allowedOptions: toArray(form.allowedOptionsText),
-  allowedToppings: toArray(form.allowedToppingsText),
+  temperatures: toArray(form.temperatures).length ? toArray(form.temperatures) : ["ICE"],
+  allowedSizes: toArray(form.allowedSizes),
+  allowedSweetness: toArray(form.allowedSweetness),
+  allowedIce: toArray(form.allowedIce),
+  allowedOptions: toArray(form.allowedOptions),
+  allowedToppings: toArray(form.allowedToppings),
   sortOrder: Number(form.sortOrder) || 9999,
   isActive: form.isActive,
   isRecommended: form.isRecommended,
@@ -80,12 +79,42 @@ const makeProductId = (name) =>
     .replace(/^-|-$/g, "")
     .slice(0, 40) || `drink-${Date.now()}`;
 
+function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll, onClear }) {
+  return (
+    <fieldset className="admin-choice-group">
+      <div>
+        <legend>{title}</legend>
+        {hint ? <small>{hint}</small> : null}
+      </div>
+      <div className="admin-choice-actions">
+        <button type="button" className="secondary" onClick={onSelectAll}>すべて</button>
+        <button type="button" className="secondary" onClick={onClear}>制限なし</button>
+      </div>
+      <div className="admin-choice-options">
+        {values.map((item) => {
+          const value = typeof item === "string" ? item : item.id;
+          const label = typeof item === "string" ? item : item.label;
+          const price = typeof item === "string" || !item.price ? "" : ` ${item.price > 0 ? "+" : ""}¥${item.price}`;
+
+          return (
+            <label key={value}>
+              <input type="checkbox" checked={selected.includes(value)} onChange={() => onToggle(value)} />
+              {label}{price}
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 export function AdminProductsBoard({
   initialStores,
   initialStoreId,
   initialProducts,
   initialCatalogProducts,
   initialCategories,
+  menuSettings,
   canEditCatalog,
 }) {
   const [stores] = useState(initialStores);
@@ -103,6 +132,28 @@ export function AdminProductsBoard({
   });
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [message, setMessage] = useState("");
+  const settings = menuSettings || {
+    temperatures: ["ICE", "HOT"],
+    sizes: [],
+    sweetness: [],
+    ice: [],
+    options: [],
+    toppings: [],
+  };
+
+  const toggleProductArrayValue = (field, value) => {
+    setProductForm((current) => {
+      const values = toArray(current[field]);
+      return {
+        ...current,
+        [field]: values.includes(value) ? values.filter((item) => item !== value) : [...values, value],
+      };
+    });
+  };
+
+  const setProductArrayValues = (field, values) => {
+    setProductForm((current) => ({ ...current, [field]: values }));
+  };
 
   const reloadStore = async (nextStoreId) => {
     setStoreId(nextStoreId);
@@ -442,32 +493,61 @@ export function AdminProductsBoard({
               画像URL
               <input value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} placeholder="assets/menu/drink-01.png" />
             </label>
-            <div className="admin-form-grid">
-              <label>
-                温度
-                <input value={productForm.temperaturesText} onChange={(event) => setProductForm({ ...productForm, temperaturesText: event.target.value })} />
-              </label>
-              <label>
-                サイズ制限
-                <input value={productForm.allowedSizesText} onChange={(event) => setProductForm({ ...productForm, allowedSizesText: event.target.value })} />
-              </label>
-              <label>
-                甘さ制限
-                <input value={productForm.allowedSweetnessText} onChange={(event) => setProductForm({ ...productForm, allowedSweetnessText: event.target.value })} />
-              </label>
-              <label>
-                氷制限
-                <input value={productForm.allowedIceText} onChange={(event) => setProductForm({ ...productForm, allowedIceText: event.target.value })} />
-              </label>
-              <label>
-                オプション制限
-                <input value={productForm.allowedOptionsText} onChange={(event) => setProductForm({ ...productForm, allowedOptionsText: event.target.value })} />
-              </label>
-              <label>
-                トッピング制限
-                <input value={productForm.allowedToppingsText} onChange={(event) => setProductForm({ ...productForm, allowedToppingsText: event.target.value })} />
-              </label>
-            </div>
+            <section className="admin-choice-grid">
+              <AdminChoiceGroup
+                title="温度"
+                values={settings.temperatures}
+                selected={productForm.temperatures}
+                onToggle={(value) => toggleProductArrayValue("temperatures", value)}
+                onSelectAll={() => setProductArrayValues("temperatures", settings.temperatures)}
+                onClear={() => setProductArrayValues("temperatures", ["ICE"])}
+              />
+              <AdminChoiceGroup
+                title="サイズ"
+                hint="空の場合は全サイズを選択できます。"
+                values={settings.sizes}
+                selected={productForm.allowedSizes}
+                onToggle={(value) => toggleProductArrayValue("allowedSizes", value)}
+                onSelectAll={() => setProductArrayValues("allowedSizes", settings.sizes.map((item) => item.id))}
+                onClear={() => setProductArrayValues("allowedSizes", [])}
+              />
+              <AdminChoiceGroup
+                title="甘さ"
+                hint="空の場合は全項目を選択できます。"
+                values={settings.sweetness}
+                selected={productForm.allowedSweetness}
+                onToggle={(value) => toggleProductArrayValue("allowedSweetness", value)}
+                onSelectAll={() => setProductArrayValues("allowedSweetness", settings.sweetness)}
+                onClear={() => setProductArrayValues("allowedSweetness", [])}
+              />
+              <AdminChoiceGroup
+                title="氷"
+                hint="空の場合は全項目を選択できます。"
+                values={settings.ice}
+                selected={productForm.allowedIce}
+                onToggle={(value) => toggleProductArrayValue("allowedIce", value)}
+                onSelectAll={() => setProductArrayValues("allowedIce", settings.ice)}
+                onClear={() => setProductArrayValues("allowedIce", [])}
+              />
+              <AdminChoiceGroup
+                title="オプション"
+                hint="空の場合は全オプションを選択できます。"
+                values={settings.options.filter((item) => item.id !== "none")}
+                selected={productForm.allowedOptions}
+                onToggle={(value) => toggleProductArrayValue("allowedOptions", value)}
+                onSelectAll={() => setProductArrayValues("allowedOptions", settings.options.filter((item) => item.id !== "none").map((item) => item.id))}
+                onClear={() => setProductArrayValues("allowedOptions", [])}
+              />
+              <AdminChoiceGroup
+                title="トッピング"
+                hint="空の場合は全トッピングを選択できます。"
+                values={settings.toppings}
+                selected={productForm.allowedToppings}
+                onToggle={(value) => toggleProductArrayValue("allowedToppings", value)}
+                onSelectAll={() => setProductArrayValues("allowedToppings", settings.toppings.map((item) => item.id))}
+                onClear={() => setProductArrayValues("allowedToppings", [])}
+              />
+            </section>
             <fieldset className="admin-product-flags">
               <label>
                 <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />

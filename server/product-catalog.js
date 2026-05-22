@@ -216,6 +216,14 @@ const getProductCatalogMenu = async () => {
 };
 
 const listProductCatalogForAdmin = async () => {
+  const menuSettings = {
+    sizes: basePublishedMenu.sizes,
+    sweetness: basePublishedMenu.sweetness,
+    ice: basePublishedMenu.ice,
+    options: basePublishedMenu.options,
+    toppings: basePublishedMenu.toppings,
+    temperatures: ["ICE", "HOT"],
+  };
   const readOnlyFallback = () => {
     const menu = fallbackMenu();
     return {
@@ -232,6 +240,7 @@ const listProductCatalogForAdmin = async () => {
         isActive: drink.isActive !== false,
       })),
       isEditable: false,
+      menuSettings,
     };
   };
 
@@ -255,6 +264,7 @@ const listProductCatalogForAdmin = async () => {
         categoryLabel: categoryMap.get(row.category_id) || row.category_id,
       })),
       isEditable: true,
+      menuSettings,
     };
   } catch (error) {
     console.error(error);

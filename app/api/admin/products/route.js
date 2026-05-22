@@ -35,6 +35,7 @@ export async function GET(request) {
     products: storeId ? await listStoreProducts(storeId) : [],
     catalogProducts: catalog.products,
     categories: catalog.categories,
+    menuSettings: catalog.menuSettings,
     canEditCatalog: catalog.isEditable && canManageProductCatalog(session),
   });
 }
