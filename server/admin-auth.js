@@ -56,6 +56,7 @@ const filterAccessibleStores = (session, stores = []) =>
   canAccessAllStores(session) ? stores : stores.filter((store) => session?.storeIds?.includes(store.id));
 
 const canManageProducts = (session) => ["owner", "manager", "staff"].includes(session?.role);
+const canManageProductCatalog = (session) => ["owner", "manager"].includes(session?.role);
 const canManageStores = (session) => ["owner", "manager"].includes(session?.role);
 const canManageStaff = (session) => session?.role === "owner";
 
@@ -71,6 +72,7 @@ module.exports = {
   hasStoreAccess,
   filterAccessibleStores,
   canManageProducts,
+  canManageProductCatalog,
   canManageStores,
   canManageStaff,
 };

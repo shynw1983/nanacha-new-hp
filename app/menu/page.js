@@ -5,6 +5,8 @@ import { SiteFooter } from "../../components/site-footer";
 import { SiteHeader } from "../../components/site-header";
 const { languageAlternates } = require("../../data/locales");
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "メニュー | nanacha 福岡清川店｜タピオカ・ミルクティー・スムージー",
   description:

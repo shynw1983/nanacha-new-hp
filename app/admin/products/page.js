@@ -5,7 +5,13 @@ import { AdminLogoutButton } from "../../../components/admin-logout-button";
 import { AdminProductsBoard } from "../../../components/admin-products-board";
 
 const { listActiveStores, listStoreProducts } = require("../../../server/store-products");
-const { getSessionFromCookieStore, filterAccessibleStores, canManageProducts } = require("../../../server/admin-auth");
+const { listProductCatalogForAdmin } = require("../../../server/product-catalog");
+const {
+  getSessionFromCookieStore,
+  filterAccessibleStores,
+  canManageProducts,
+  canManageProductCatalog,
+} = require("../../../server/admin-auth");
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +23,7 @@ export default async function AdminProductsPage() {
 
   const stores = filterAccessibleStores(session, await listActiveStores());
   const selectedStoreId = stores.find((store) => store.isPrimary)?.id || stores[0]?.id || "";
+  const catalog = await listProductCatalogForAdmin();
 
   return (
     <AdminShell
@@ -30,6 +37,9 @@ export default async function AdminProductsPage() {
         initialStores={stores}
         initialStoreId={selectedStoreId}
         initialProducts={selectedStoreId ? await listStoreProducts(selectedStoreId) : []}
+        initialCatalogProducts={catalog.products}
+        initialCategories={catalog.categories}
+        canEditCatalog={catalog.isEditable && canManageProductCatalog(session)}
       />
     </AdminShell>
   );

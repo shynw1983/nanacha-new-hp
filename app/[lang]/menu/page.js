@@ -7,6 +7,8 @@ import { SiteFooter } from "../../../components/site-footer";
 import { SiteHeader } from "../../../components/site-header";
 const { languageAlternates, translatedLocales, withLocalePath } = require("../../../data/locales");
 
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return translatedLocales.map((lang) => ({ lang }));
 }

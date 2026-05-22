@@ -28,6 +28,41 @@ create table if not exists orders (
 create index if not exists orders_pickup_idx on orders (pickup_date, pickup_time);
 create index if not exists orders_status_idx on orders (status, payment_status);
 
+create table if not exists product_categories (
+  category_id text primary key,
+  label text not null,
+  note text not null default '',
+  is_tapioca_free boolean not null default false,
+  has_whip_by_default boolean not null default false,
+  sort_order integer not null default 9999,
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists products (
+  drink_id text primary key,
+  name text not null,
+  category_id text not null references product_categories(category_id),
+  price integer not null,
+  description text not null default '',
+  image_url text not null default '',
+  temperatures jsonb not null default '["ICE"]'::jsonb,
+  is_recommended boolean not null default false,
+  is_featured boolean not null default false,
+  is_active boolean not null default true,
+  allowed_sizes jsonb,
+  allowed_sweetness jsonb,
+  allowed_ice jsonb,
+  allowed_options jsonb,
+  allowed_toppings jsonb,
+  sort_order integer not null default 9999,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists products_category_idx on products (category_id, sort_order);
+create index if not exists products_active_idx on products (is_active);
+
 create table if not exists store_products (
   store_id text not null,
   drink_id text not null,

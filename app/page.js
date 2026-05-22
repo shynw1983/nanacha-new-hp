@@ -8,6 +8,8 @@ import { SiteHeader } from "../components/site-header";
 import siteConfig from "../data/site-config";
 const { languageAlternates } = require("../data/locales");
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: siteConfig.title,
   description: siteConfig.description,

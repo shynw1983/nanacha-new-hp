@@ -2,6 +2,7 @@ const localMenu = require("../menu-data.js");
 const publishedMenu = require("../published/menu.json");
 const localDrinkDescriptions = require("../data/menu-descriptions.js");
 const localCategoryNotes = require("../data/category-notes.js");
+const { getProductCatalogMenu } = require("./product-catalog");
 const {
   cleanEnv,
   textValue,
@@ -283,7 +284,7 @@ const getLiveMenuData = async (storeId = "") => {
 };
 
 const getMenuData = async (storeId = "") => {
-  const baseMenu = publishedMenu.baseMenu || fallbackMenu;
+  const baseMenu = await getProductCatalogMenu();
 
   if (!storeId) {
     return baseMenu;

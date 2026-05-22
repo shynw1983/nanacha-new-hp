@@ -10,6 +10,8 @@ import { SiteHeader } from "../../components/site-header";
 import siteConfig from "../../data/site-config";
 const { languageAlternates, translatedLocales, withLocalePath } = require("../../data/locales");
 
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return translatedLocales.map((lang) => ({ lang }));
 }

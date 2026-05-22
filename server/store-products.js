@@ -1,5 +1,6 @@
 const publishedMenu = require("../published/menu.json");
 const { getHomepageData } = require("./homepage-source");
+const { getProductCatalogMenu } = require("./product-catalog");
 
 let sqlClientPromise;
 
@@ -15,12 +16,12 @@ const getSql = async () => {
   return sqlClientPromise;
 };
 
-const getBaseMenu = () => publishedMenu.baseMenu;
+const getBaseMenu = () => getProductCatalogMenu();
 
 const getPublishedStoreMenu = (storeId) => publishedMenu.storeMenus?.[storeId];
 
-const defaultAvailabilityByDrinkId = (storeId) => {
-  const baseMenu = getBaseMenu();
+const defaultAvailabilityByDrinkId = async (storeId) => {
+  const baseMenu = await getBaseMenu();
   const storeMenu = getPublishedStoreMenu(storeId);
   const sourceDrinks = storeMenu?.drinks?.length ? storeMenu.drinks : baseMenu.drinks;
   return new Map(
@@ -39,8 +40,8 @@ const defaultAvailabilityByDrinkId = (storeId) => {
 };
 
 const listStoreProducts = async (storeId) => {
-  const baseMenu = getBaseMenu();
-  const defaults = defaultAvailabilityByDrinkId(storeId);
+  const baseMenu = await getBaseMenu();
+  const defaults = await defaultAvailabilityByDrinkId(storeId);
   const sql = await getSql();
   const overrides = sql
     ? await sql`
@@ -104,13 +105,13 @@ const updateStoreProduct = async (storeId, drinkId, fields) => {
     throw new Error("DATABASE_URL is not configured.");
   }
 
-  const baseMenu = getBaseMenu();
+  const baseMenu = await getBaseMenu();
   const drink = baseMenu.drinks.find((item) => item.id === drinkId);
   if (!drink) {
     return null;
   }
 
-  const defaults = defaultAvailabilityByDrinkId(storeId).get(drinkId) || {
+  const defaults = (await defaultAvailabilityByDrinkId(storeId)).get(drinkId) || {
     isAvailable: false,
     websiteEnabled: false,
     priceOverride: null,

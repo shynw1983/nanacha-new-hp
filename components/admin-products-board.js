@@ -2,12 +2,107 @@
 
 import { useMemo, useState } from "react";
 
-export function AdminProductsBoard({ initialStores, initialStoreId, initialProducts }) {
+const emptyProduct = {
+  drinkId: "",
+  name: "",
+  category: "",
+  price: "",
+  description: "",
+  imageUrl: "",
+  temperaturesText: "ICE",
+  allowedSizesText: "",
+  allowedSweetnessText: "",
+  allowedIceText: "",
+  allowedOptionsText: "",
+  allowedToppingsText: "",
+  sortOrder: 9999,
+  isActive: true,
+  isRecommended: false,
+  isFeatured: false,
+};
+
+const emptyCategory = {
+  id: "",
+  label: "",
+  note: "",
+  sortOrder: 9999,
+  isTapiocaFree: false,
+  hasWhipByDefault: false,
+  isActive: true,
+};
+
+const toText = (value) => (Array.isArray(value) ? value.join(", ") : "");
+const toArray = (value) => String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+const normalizeAssetUrl = (url = "") => (url.startsWith("/") || url.startsWith("http") ? url : `/${url}`);
+const productToForm = (product) => ({
+  drinkId: product.drinkId || product.id || "",
+  name: product.name || "",
+  category: product.category || "",
+  price: product.price ?? "",
+  description: product.description || "",
+  imageUrl: product.imageUrl || "",
+  temperaturesText: toText(product.temperatures) || "ICE",
+  allowedSizesText: toText(product.allowedSizes),
+  allowedSweetnessText: toText(product.allowedSweetness),
+  allowedIceText: toText(product.allowedIce),
+  allowedOptionsText: toText(product.allowedOptions),
+  allowedToppingsText: toText(product.allowedToppings),
+  sortOrder: product.sortOrder || 9999,
+  isActive: product.isActive !== false,
+  isRecommended: product.isRecommended === true,
+  isFeatured: product.isFeatured === true,
+});
+
+const formToProduct = (form) => ({
+  drinkId: form.drinkId,
+  name: form.name,
+  category: form.category,
+  price: Number(form.price),
+  description: form.description,
+  imageUrl: form.imageUrl,
+  temperatures: toArray(form.temperaturesText).length ? toArray(form.temperaturesText) : ["ICE"],
+  allowedSizes: toArray(form.allowedSizesText),
+  allowedSweetness: toArray(form.allowedSweetnessText),
+  allowedIce: toArray(form.allowedIceText),
+  allowedOptions: toArray(form.allowedOptionsText),
+  allowedToppings: toArray(form.allowedToppingsText),
+  sortOrder: Number(form.sortOrder) || 9999,
+  isActive: form.isActive,
+  isRecommended: form.isRecommended,
+  isFeatured: form.isFeatured,
+});
+
+const makeProductId = (name) =>
+  String(name || "drink")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40) || `drink-${Date.now()}`;
+
+export function AdminProductsBoard({
+  initialStores,
+  initialStoreId,
+  initialProducts,
+  initialCatalogProducts,
+  initialCategories,
+  canEditCatalog,
+}) {
   const [stores] = useState(initialStores);
   const [storeId, setStoreId] = useState(initialStoreId);
   const [products, setProducts] = useState(initialProducts);
+  const [catalogProducts, setCatalogProducts] = useState(initialCatalogProducts);
+  const [categories, setCategories] = useState(initialCategories);
+  const [tab, setTab] = useState("store");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [editingId, setEditingId] = useState("");
+  const [productForm, setProductForm] = useState({
+    ...emptyProduct,
+    category: initialCategories[0]?.id || "",
+  });
+  const [categoryForm, setCategoryForm] = useState(emptyCategory);
+  const [message, setMessage] = useState("");
 
   const reloadStore = async (nextStoreId) => {
     setStoreId(nextStoreId);
@@ -15,6 +110,8 @@ export function AdminProductsBoard({ initialStores, initialStoreId, initialProdu
     if (response.ok) {
       const body = await response.json();
       setProducts(body.products || []);
+      setCatalogProducts(body.catalogProducts || []);
+      setCategories(body.categories || []);
     }
   };
 
@@ -30,6 +127,99 @@ export function AdminProductsBoard({ initialStores, initialStoreId, initialProdu
     }
   };
 
+  const startNewProduct = () => {
+    setEditingId("");
+    setMessage("");
+    setProductForm({
+      ...emptyProduct,
+      category: categories[0]?.id || "",
+      sortOrder: catalogProducts.length + 1,
+    });
+    setTab("catalog");
+  };
+
+  const startEditProduct = (product) => {
+    setEditingId(product.drinkId);
+    setMessage("");
+    setProductForm(productToForm(product));
+    setTab("catalog");
+  };
+
+  const saveProduct = async (event) => {
+    event.preventDefault();
+    setMessage("");
+    const payload = formToProduct({
+      ...productForm,
+      drinkId: productForm.drinkId || makeProductId(productForm.name),
+    });
+    const response = await fetch(editingId ? `/api/admin/products/${editingId}` : "/api/admin/products", {
+      method: editingId ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "保存できませんでした。");
+      return;
+    }
+
+    setCatalogProducts((current) =>
+      editingId
+        ? current.map((product) => (product.drinkId === editingId ? body.product : product))
+        : [...current, body.product],
+    );
+    setProducts((current) =>
+      editingId
+        ? current.map((product) =>
+            product.drinkId === editingId
+              ? { ...product, name: body.product.name, category: body.product.category, categoryLabel: body.product.categoryLabel, basePrice: body.product.price, imageUrl: body.product.imageUrl }
+              : product,
+          )
+        : current,
+    );
+    await reloadStore(storeId);
+    setEditingId(body.product.drinkId);
+    setProductForm(productToForm(body.product));
+    setMessage("保存しました。");
+  };
+
+  const removeProduct = async () => {
+    if (!editingId || !window.confirm("この商品を削除します。注文履歴は残りますが、メニューと店舗管理からは消えます。")) {
+      return;
+    }
+    const response = await fetch(`/api/admin/products/${editingId}`, { method: "DELETE" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "削除できませんでした。");
+      return;
+    }
+    setCatalogProducts((current) => current.filter((product) => product.drinkId !== editingId));
+    setProducts((current) => current.filter((product) => product.drinkId !== editingId));
+    await reloadStore(storeId);
+    setEditingId("");
+    setProductForm({ ...emptyProduct, category: categories[0]?.id || "" });
+    setMessage("削除しました。");
+  };
+
+  const createCategory = async (event) => {
+    event.preventDefault();
+    setMessage("");
+    const response = await fetch("/api/admin/product-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(categoryForm),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "カテゴリを作成できませんでした。");
+      return;
+    }
+    setCategories((current) => [...current, body.category]);
+    setProductForm((current) => ({ ...current, category: body.category.id }));
+    setCategoryForm(emptyCategory);
+    setMessage("カテゴリを追加しました。");
+  };
+
   const visibleProducts = useMemo(
     () =>
       products.filter((product) => {
@@ -43,6 +233,14 @@ export function AdminProductsBoard({ initialStores, initialStoreId, initialProdu
         return matchesQuery && matchesFilter;
       }),
     [products, query, filter],
+  );
+  const visibleCatalogProducts = useMemo(
+    () =>
+      catalogProducts.filter((product) => {
+        const text = `${product.name} ${product.drinkId} ${product.categoryLabel || product.category}`.toLowerCase();
+        return text.includes(query.toLowerCase());
+      }),
+    [catalogProducts, query],
   );
   const groupedProducts = useMemo(() => {
     const groups = [];
@@ -87,67 +285,255 @@ export function AdminProductsBoard({ initialStores, initialStoreId, initialProdu
         </article>
       </section>
 
-      <section className="admin-toolbar">
-        <select value={storeId} onChange={(event) => reloadStore(event.target.value)}>
-          {stores.map((store) => (
-            <option value={store.id} key={store.id}>{store.name}</option>
-          ))}
-        </select>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="商品名で検索" />
-        <select value={filter} onChange={(event) => setFilter(event.target.value)}>
-          <option value="all">すべて</option>
-          <option value="available">販売中</option>
-          <option value="stopped">停止中</option>
-        </select>
+      <section className="admin-toolbar admin-product-tabs">
+        <button type="button" className={tab === "store" ? "" : "secondary"} onClick={() => setTab("store")}>
+          店舗別販売
+        </button>
+        <button type="button" className={tab === "catalog" ? "" : "secondary"} onClick={() => setTab("catalog")}>
+          商品マスター
+        </button>
+        <button type="button" className={tab === "categories" ? "" : "secondary"} onClick={() => setTab("categories")}>
+          カテゴリ
+        </button>
       </section>
 
-      <section className="admin-product-groups">
-        {groupedProducts.map((group) => (
-          <section className="admin-product-group" key={group.id}>
-            <div className="admin-product-group-heading">
-              <div>
-                <span>{group.id}</span>
-                <h2>{group.label}</h2>
-              </div>
-              <strong>{group.products.length} 件</strong>
-            </div>
-            <div className="admin-product-grid">
-              {group.products.map((product) => (
-                <article className="admin-product-card" key={product.drinkId}>
-                  {product.imageUrl ? (
-                    <img src={product.imageUrl.startsWith("/") ? product.imageUrl : `/${product.imageUrl}`} alt="" />
-                  ) : null}
-                  <div>
-                    <h3>{product.name}</h3>
-                    <p>¥{product.effectivePrice}</p>
-                  </div>
-                  <strong className={`admin-product-state ${product.isAvailable && product.websiteEnabled ? "is-live" : "is-paused"}`}>
-                    {product.isAvailable ? (product.websiteEnabled ? "販売中" : "予約停止") : "売り切れ"}
-                  </strong>
-                  <div className="admin-product-switches">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={product.isAvailable}
-                        onChange={(event) => updateProduct(product.drinkId, { isAvailable: event.target.checked })}
-                      />
-                      在庫あり
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={product.websiteEnabled}
-                        onChange={(event) => updateProduct(product.drinkId, { websiteEnabled: event.target.checked })}
-                      />
-                      予約受付
-                    </label>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
+      <section className="admin-toolbar">
+        {tab === "store" ? (
+          <select value={storeId} onChange={(event) => reloadStore(event.target.value)}>
+            {stores.map((store) => (
+              <option value={store.id} key={store.id}>{store.name}</option>
+            ))}
+          </select>
+        ) : null}
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="商品名で検索" />
+        {tab === "store" ? (
+          <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+            <option value="all">すべて</option>
+            <option value="available">販売中</option>
+            <option value="stopped">停止中</option>
+          </select>
+        ) : null}
+        {tab === "catalog" && canEditCatalog ? (
+          <button type="button" onClick={startNewProduct}>商品を追加</button>
+        ) : null}
       </section>
+
+      {message ? <p className="admin-product-message">{message}</p> : null}
+      {!canEditCatalog && tab !== "store" ? (
+        <p className="admin-product-message">DATABASE_URL または権限が不足しているため、商品マスターは読み取り専用です。</p>
+      ) : null}
+
+      {tab === "store" ? (
+        <section className="admin-product-groups">
+          {groupedProducts.map((group) => (
+            <section className="admin-product-group" key={group.id}>
+              <div className="admin-product-group-heading">
+                <div>
+                  <span>{group.id}</span>
+                  <h2>{group.label}</h2>
+                </div>
+                <strong>{group.products.length} 件</strong>
+              </div>
+              <div className="admin-product-grid">
+                {group.products.map((product) => (
+                  <article className="admin-product-card" key={product.drinkId}>
+                    {product.imageUrl ? <img src={normalizeAssetUrl(product.imageUrl)} alt="" /> : null}
+                    <div>
+                      <h3>{product.name}</h3>
+                      <p>¥{product.effectivePrice}</p>
+                    </div>
+                    <strong className={`admin-product-state ${product.isAvailable && product.websiteEnabled ? "is-live" : "is-paused"}`}>
+                      {product.isAvailable ? (product.websiteEnabled ? "販売中" : "予約停止") : "売り切れ"}
+                    </strong>
+                    <div className="admin-product-switches">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={product.isAvailable}
+                          onChange={(event) => updateProduct(product.drinkId, { isAvailable: event.target.checked })}
+                        />
+                        在庫あり
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={product.websiteEnabled}
+                          onChange={(event) => updateProduct(product.drinkId, { websiteEnabled: event.target.checked })}
+                        />
+                        予約受付
+                      </label>
+                      <label>
+                        価格上書き
+                        <input
+                          type="number"
+                          value={product.priceOverride ?? ""}
+                          onChange={(event) => updateProduct(product.drinkId, { priceOverride: event.target.value })}
+                          placeholder={String(product.basePrice)}
+                        />
+                      </label>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </section>
+      ) : null}
+
+      {tab === "catalog" ? (
+        <section className="admin-catalog-layout">
+          <section className="admin-panel admin-catalog-list">
+            <h2>商品一覧</h2>
+            {visibleCatalogProducts.map((product) => (
+              <button
+                type="button"
+                className={editingId === product.drinkId ? "is-selected" : ""}
+                key={product.drinkId}
+                onClick={() => startEditProduct(product)}
+              >
+                <span>{product.categoryLabel || product.category}</span>
+                <strong>{product.name}</strong>
+                <small>{product.isActive ? `¥${product.price}` : "停止中"}</small>
+              </button>
+            ))}
+          </section>
+
+          <form className="admin-panel admin-product-editor" onSubmit={saveProduct}>
+            <div className="admin-product-editor-heading">
+              <h2>{editingId ? "商品を編集" : "商品を追加"}</h2>
+              {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}
+            </div>
+            <label>
+              商品ID
+              <input
+                value={productForm.drinkId}
+                onChange={(event) => setProductForm({ ...productForm, drinkId: event.target.value })}
+                disabled={Boolean(editingId)}
+                placeholder="例：matcha-latte"
+              />
+            </label>
+            <label>
+              商品名
+              <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required />
+            </label>
+            <div className="admin-form-grid">
+              <label>
+                カテゴリ
+                <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} required>
+                  {categories.filter((category) => category.isActive !== false).map((category) => (
+                    <option value={category.id} key={category.id}>{category.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                価格
+                <input type="number" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required />
+              </label>
+              <label>
+                並び順
+                <input type="number" value={productForm.sortOrder} onChange={(event) => setProductForm({ ...productForm, sortOrder: event.target.value })} />
+              </label>
+            </div>
+            <label>
+              説明
+              <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} rows={3} />
+            </label>
+            <label>
+              画像URL
+              <input value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} placeholder="assets/menu/drink-01.png" />
+            </label>
+            <div className="admin-form-grid">
+              <label>
+                温度
+                <input value={productForm.temperaturesText} onChange={(event) => setProductForm({ ...productForm, temperaturesText: event.target.value })} />
+              </label>
+              <label>
+                サイズ制限
+                <input value={productForm.allowedSizesText} onChange={(event) => setProductForm({ ...productForm, allowedSizesText: event.target.value })} />
+              </label>
+              <label>
+                甘さ制限
+                <input value={productForm.allowedSweetnessText} onChange={(event) => setProductForm({ ...productForm, allowedSweetnessText: event.target.value })} />
+              </label>
+              <label>
+                氷制限
+                <input value={productForm.allowedIceText} onChange={(event) => setProductForm({ ...productForm, allowedIceText: event.target.value })} />
+              </label>
+              <label>
+                オプション制限
+                <input value={productForm.allowedOptionsText} onChange={(event) => setProductForm({ ...productForm, allowedOptionsText: event.target.value })} />
+              </label>
+              <label>
+                トッピング制限
+                <input value={productForm.allowedToppingsText} onChange={(event) => setProductForm({ ...productForm, allowedToppingsText: event.target.value })} />
+              </label>
+            </div>
+            <fieldset className="admin-product-flags">
+              <label>
+                <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />
+                メニューに表示
+              </label>
+              <label>
+                <input type="checkbox" checked={productForm.isRecommended} onChange={(event) => setProductForm({ ...productForm, isRecommended: event.target.checked })} />
+                おすすめ
+              </label>
+              <label>
+                <input type="checkbox" checked={productForm.isFeatured} onChange={(event) => setProductForm({ ...productForm, isFeatured: event.target.checked })} />
+                トップ掲載
+              </label>
+            </fieldset>
+            <button type="submit" disabled={!canEditCatalog}>保存する</button>
+          </form>
+        </section>
+      ) : null}
+
+      {tab === "categories" ? (
+        <section className="admin-catalog-layout">
+          <section className="admin-panel admin-category-list">
+            <h2>カテゴリ一覧</h2>
+            {categories.map((category) => (
+              <article key={category.id}>
+                <div>
+                  <span>{category.id}</span>
+                  <strong>{category.label}</strong>
+                  {category.note ? <small>{category.note}</small> : null}
+                </div>
+                <small>{category.isActive ? "表示中" : "停止中"}</small>
+              </article>
+            ))}
+          </section>
+          <form className="admin-panel admin-product-editor" onSubmit={createCategory}>
+            <h2>カテゴリを追加</h2>
+            <label>
+              カテゴリID
+              <input value={categoryForm.id} onChange={(event) => setCategoryForm({ ...categoryForm, id: event.target.value })} required />
+            </label>
+            <label>
+              表示名
+              <input value={categoryForm.label} onChange={(event) => setCategoryForm({ ...categoryForm, label: event.target.value })} required />
+            </label>
+            <label>
+              説明
+              <textarea value={categoryForm.note} onChange={(event) => setCategoryForm({ ...categoryForm, note: event.target.value })} rows={3} />
+            </label>
+            <label>
+              並び順
+              <input type="number" value={categoryForm.sortOrder} onChange={(event) => setCategoryForm({ ...categoryForm, sortOrder: event.target.value })} />
+            </label>
+            <fieldset className="admin-product-flags">
+              <label>
+                <input type="checkbox" checked={categoryForm.isTapiocaFree} onChange={(event) => setCategoryForm({ ...categoryForm, isTapiocaFree: event.target.checked })} />
+                タピオカなしカテゴリ
+              </label>
+              <label>
+                <input type="checkbox" checked={categoryForm.hasWhipByDefault} onChange={(event) => setCategoryForm({ ...categoryForm, hasWhipByDefault: event.target.checked })} />
+                ホイップ標準
+              </label>
+            </fieldset>
+            <button type="submit" disabled={!canEditCatalog}>追加する</button>
+          </form>
+        </section>
+      ) : null}
     </>
   );
 }
