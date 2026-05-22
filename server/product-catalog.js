@@ -37,6 +37,7 @@ const optionalArray = (value) => {
 };
 
 const jsonParam = (value) => (Array.isArray(value) ? JSON.stringify(value) : value === null ? null : undefined);
+const settingTypes = new Set(["size", "sweetness", "ice", "hotIce", "option", "topping"]);
 
 const fallbackMenu = () => ({
   ...basePublishedMenu,
@@ -81,7 +82,55 @@ const toDrink = (row) => ({
   updatedAt: row.updated_at || "",
 });
 
-const publicMenuFromRows = (categoryRows, productRows) => {
+const defaultMenuSettings = () => ({
+  sizes: basePublishedMenu.sizes,
+  sweetness: basePublishedMenu.sweetness,
+  ice: basePublishedMenu.ice,
+  hotIce: basePublishedMenu.hotIce,
+  options: basePublishedMenu.options,
+  toppings: basePublishedMenu.toppings,
+  temperatures: ["ICE", "HOT"],
+});
+
+const toMenuSetting = (row) => ({
+  type: row.setting_type,
+  id: row.item_id,
+  label: row.label || row.item_id,
+  price: Number(row.price) || 0,
+  values: asArray(row.values_json),
+  sortOrder: row.sort_order,
+  isActive: row.is_active,
+});
+
+const buildMenuSettings = (rows = []) => {
+  const activeRows = rows.map(toMenuSetting).filter((item) => item.isActive);
+  const byType = (type) => activeRows.filter((item) => item.type === type);
+  const singleValues = (type) => byType(type)[0]?.values || [];
+  const hotIce = byType("hotIce")[0]?.label || singleValues("hotIce")[0] || basePublishedMenu.hotIce;
+
+  return {
+    sizes: byType("size").map(({ id, label, price }) => ({ id, label, price })),
+    sweetness: singleValues("sweetness"),
+    ice: singleValues("ice"),
+    hotIce,
+    options: byType("option").map(({ id, label, price }) => ({ id, label, price })),
+    toppings: byType("topping").map(({ id, label, price }) => ({ id, label, price })),
+    temperatures: ["ICE", "HOT"],
+  };
+};
+
+const normalizeMenuSettings = (settings = defaultMenuSettings()) => ({
+  ...settings,
+  sizes: settings.sizes?.length ? settings.sizes : basePublishedMenu.sizes,
+  sweetness: settings.sweetness?.length ? settings.sweetness : basePublishedMenu.sweetness,
+  ice: settings.ice?.length ? settings.ice : basePublishedMenu.ice,
+  hotIce: settings.hotIce || basePublishedMenu.hotIce,
+  options: settings.options?.length ? settings.options : basePublishedMenu.options,
+  toppings: settings.toppings?.length ? settings.toppings : basePublishedMenu.toppings,
+  temperatures: settings.temperatures?.length ? settings.temperatures : ["ICE", "HOT"],
+});
+
+const publicMenuFromRows = (categoryRows, productRows, settings = defaultMenuSettings()) => {
   const categories = categoryRows.map(toCategory).filter((category) => category.isActive);
   const activeCategoryIds = new Set(categories.map((category) => category.id));
   const drinks = productRows
@@ -91,6 +140,7 @@ const publicMenuFromRows = (categoryRows, productRows) => {
 
   return {
     ...basePublishedMenu,
+    ...normalizeMenuSettings(settings),
     categories: categories.map(({ sortOrder, isActive, ...category }) => category),
     drinks,
     tapiocaFreeCategories: categories.filter((category) => category.isTapiocaFree).map((category) => category.id),
@@ -99,7 +149,7 @@ const publicMenuFromRows = (categoryRows, productRows) => {
 };
 
 const readCatalogRows = async (sql) => {
-  const [categories, products] = await Promise.all([
+  const [categories, products, settings] = await Promise.all([
     sql`
       select *
       from product_categories
@@ -110,21 +160,68 @@ const readCatalogRows = async (sql) => {
       from products
       order by sort_order asc, name asc
     `,
+    sql`
+      select *
+      from menu_settings
+      order by setting_type asc, sort_order asc, label asc
+    `,
   ]);
 
-  return { categories, products };
+  return { categories, products, settings };
 };
 
 const hasCatalogTables = async (sql) => {
   const rows = await sql`
     select
       to_regclass('public.product_categories') is not null as has_categories,
-      to_regclass('public.products') is not null as has_products
+      to_regclass('public.products') is not null as has_products,
+      to_regclass('public.menu_settings') is not null as has_settings
   `;
-  return rows[0]?.has_categories && rows[0]?.has_products;
+  return rows[0]?.has_categories && rows[0]?.has_products && rows[0]?.has_settings;
 };
 
 const ensureCatalogSeeded = async (sql) => {
+  const settingRows = await sql`select count(*)::int as count from menu_settings`;
+  if (Number(settingRows[0]?.count || 0) === 0) {
+    const menu = fallbackMenu();
+    for (const [index, item] of menu.sizes.entries()) {
+      await sql`
+        insert into menu_settings (setting_type, item_id, label, price, sort_order, is_active)
+        values ('size', ${item.id}, ${item.label}, ${Number(item.price) || 0}, ${index + 1}, true)
+        on conflict (setting_type, item_id) do nothing
+      `;
+    }
+    for (const [index, item] of menu.options.entries()) {
+      await sql`
+        insert into menu_settings (setting_type, item_id, label, price, sort_order, is_active)
+        values ('option', ${item.id}, ${item.label}, ${Number(item.price) || 0}, ${index + 1}, true)
+        on conflict (setting_type, item_id) do nothing
+      `;
+    }
+    for (const [index, item] of menu.toppings.entries()) {
+      await sql`
+        insert into menu_settings (setting_type, item_id, label, price, sort_order, is_active)
+        values ('topping', ${item.id}, ${item.label}, ${Number(item.price) || 0}, ${index + 1}, true)
+        on conflict (setting_type, item_id) do nothing
+      `;
+    }
+    await sql`
+      insert into menu_settings (setting_type, item_id, label, values_json, sort_order, is_active)
+      values ('sweetness', 'default', '甘さ', ${JSON.stringify(menu.sweetness)}, 1, true)
+      on conflict (setting_type, item_id) do nothing
+    `;
+    await sql`
+      insert into menu_settings (setting_type, item_id, label, values_json, sort_order, is_active)
+      values ('ice', 'default', '氷', ${JSON.stringify(menu.ice)}, 1, true)
+      on conflict (setting_type, item_id) do nothing
+    `;
+    await sql`
+      insert into menu_settings (setting_type, item_id, label, sort_order, is_active)
+      values ('hotIce', 'default', ${menu.hotIce}, 1, true)
+      on conflict (setting_type, item_id) do nothing
+    `;
+  }
+
   const rows = await sql`select count(*)::int as count from product_categories`;
   if (Number(rows[0]?.count || 0) > 0) {
     return;
@@ -204,11 +301,12 @@ const getProductCatalogMenu = async () => {
     if (!(await hasCatalogTables(sql))) {
       return fallbackMenu();
     }
+    await ensureCatalogSeeded(sql);
     const rows = await readCatalogRows(sql);
     if (!rows.categories.length || !rows.products.length) {
       return fallbackMenu();
     }
-    return publicMenuFromRows(rows.categories, rows.products);
+    return publicMenuFromRows(rows.categories, rows.products, buildMenuSettings(rows.settings));
   } catch (error) {
     console.error(error);
     return fallbackMenu();
@@ -216,14 +314,7 @@ const getProductCatalogMenu = async () => {
 };
 
 const listProductCatalogForAdmin = async () => {
-  const menuSettings = {
-    sizes: basePublishedMenu.sizes,
-    sweetness: basePublishedMenu.sweetness,
-    ice: basePublishedMenu.ice,
-    options: basePublishedMenu.options,
-    toppings: basePublishedMenu.toppings,
-    temperatures: ["ICE", "HOT"],
-  };
+  const menuSettings = defaultMenuSettings();
   const readOnlyFallback = () => {
     const menu = fallbackMenu();
     return {
@@ -241,6 +332,7 @@ const listProductCatalogForAdmin = async () => {
       })),
       isEditable: false,
       menuSettings,
+      settingItems: [],
     };
   };
 
@@ -256,6 +348,7 @@ const listProductCatalogForAdmin = async () => {
     await ensureCatalogSeeded(sql);
     const rows = await readCatalogRows(sql);
     const categoryMap = new Map(rows.categories.map((row) => [row.category_id, row.label]));
+    const databaseMenuSettings = normalizeMenuSettings(buildMenuSettings(rows.settings));
     return {
       categories: rows.categories.map(toCategory),
       products: rows.products.map((row) => ({
@@ -264,7 +357,8 @@ const listProductCatalogForAdmin = async () => {
         categoryLabel: categoryMap.get(row.category_id) || row.category_id,
       })),
       isEditable: true,
-      menuSettings,
+      menuSettings: databaseMenuSettings,
+      settingItems: rows.settings.map(toMenuSetting),
     };
   } catch (error) {
     console.error(error);
@@ -428,6 +522,67 @@ const createCategory = async (body) => {
   return (await listProductCatalogForAdmin()).categories.find((item) => item.id === category.id) || null;
 };
 
+const normalizeSettingInput = (body = {}) => {
+  const type = String(body.type || body.settingType || "").trim();
+  const id = String(body.id || body.itemId || "").trim();
+  const label = String(body.label || "").trim();
+  const values = optionalArray(body.values);
+
+  return {
+    type,
+    id,
+    label,
+    price: Number(body.price) || 0,
+    values,
+    sortOrder: Number(body.sortOrder) || 9999,
+    isActive: body.isActive !== false,
+  };
+};
+
+const createMenuSetting = async (body) => {
+  const sql = await getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureCatalogSeeded(sql);
+
+  const setting = normalizeSettingInput(body);
+  if (!settingTypes.has(setting.type)) {
+    throw new Error("設定タイプが正しくありません。");
+  }
+  if (!setting.id) {
+    throw new Error("IDは必須です。");
+  }
+  if (["size", "option", "topping", "hotIce"].includes(setting.type) && !setting.label) {
+    throw new Error("表示名は必須です。");
+  }
+  if (["sweetness", "ice"].includes(setting.type) && !setting.values?.length) {
+    throw new Error("項目は1つ以上必要です。");
+  }
+
+  await sql`
+    insert into menu_settings (
+      setting_type,
+      item_id,
+      label,
+      price,
+      values_json,
+      sort_order,
+      is_active
+    ) values (
+      ${setting.type},
+      ${setting.id},
+      ${setting.label},
+      ${setting.price},
+      ${jsonParam(setting.values)},
+      ${setting.sortOrder},
+      ${setting.isActive}
+    )
+  `;
+
+  return (await listProductCatalogForAdmin()).settingItems.find(
+    (item) => item.type === setting.type && item.id === setting.id,
+  ) || null;
+};
+
 module.exports = {
   getProductCatalogMenu,
   listProductCatalogForAdmin,
@@ -435,4 +590,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   createCategory,
+  createMenuSetting,
 };

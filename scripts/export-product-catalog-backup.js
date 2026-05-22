@@ -70,6 +70,19 @@ const main = async () => {
     ]),
   ]);
 
+  writeCsv("menu-settings-backup.csv", [
+    ["type", "id", "label", "price", "values", "sortOrder", "isActive"],
+    ...(catalog.settingItems || []).map((item) => [
+      item.type,
+      item.id,
+      item.label,
+      item.price,
+      item.values,
+      item.sortOrder,
+      item.isActive,
+    ]),
+  ]);
+
   console.log(`Exported product catalog backup CSV files to ${path.relative(root, outputDir)}/`);
 };
 

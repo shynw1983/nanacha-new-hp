@@ -36,6 +36,7 @@ export async function GET(request) {
     catalogProducts: catalog.products,
     categories: catalog.categories,
     menuSettings: catalog.menuSettings,
+    settingItems: catalog.settingItems,
     canEditCatalog: catalog.isEditable && canManageProductCatalog(session),
   });
 }

@@ -40,6 +40,7 @@ export default async function AdminProductsPage() {
         initialCatalogProducts={catalog.products}
         initialCategories={catalog.categories}
         menuSettings={catalog.menuSettings}
+        initialSettingItems={catalog.settingItems}
         canEditCatalog={catalog.isEditable && canManageProductCatalog(session)}
       />
     </AdminShell>

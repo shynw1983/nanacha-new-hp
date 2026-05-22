@@ -63,6 +63,20 @@ create table if not exists products (
 create index if not exists products_category_idx on products (category_id, sort_order);
 create index if not exists products_active_idx on products (is_active);
 
+create table if not exists menu_settings (
+  setting_type text not null,
+  item_id text not null,
+  label text not null default '',
+  price integer not null default 0,
+  values_json jsonb,
+  sort_order integer not null default 9999,
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now(),
+  primary key (setting_type, item_id)
+);
+
+create index if not exists menu_settings_type_idx on menu_settings (setting_type, sort_order);
+
 create table if not exists store_products (
   store_id text not null,
   drink_id text not null,

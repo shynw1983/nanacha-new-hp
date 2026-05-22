@@ -31,7 +31,26 @@ const emptyCategory = {
   isActive: true,
 };
 
+const emptySettingForm = {
+  type: "topping",
+  id: "",
+  label: "",
+  price: 0,
+  valuesText: "",
+  sortOrder: 9999,
+};
+
+const settingTypeLabels = {
+  size: "サイズ",
+  sweetness: "甘さ",
+  ice: "氷",
+  hotIce: "HOT氷表示",
+  option: "オプション",
+  topping: "トッピング",
+};
+
 const toArray = (value) => (Array.isArray(value) ? value.map(String).filter(Boolean) : []);
+const toTextArray = (value) => String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
 const normalizeAssetUrl = (url = "") => (url.startsWith("/") || url.startsWith("http") ? url : `/${url}`);
 const productToForm = (product) => ({
   drinkId: product.drinkId || product.id || "",
@@ -246,6 +265,7 @@ export function AdminProductsBoard({
   initialCatalogProducts,
   initialCategories,
   menuSettings,
+  initialSettingItems,
   canEditCatalog,
 }) {
   const [stores] = useState(initialStores);
@@ -253,6 +273,8 @@ export function AdminProductsBoard({
   const [products, setProducts] = useState(initialProducts);
   const [catalogProducts, setCatalogProducts] = useState(initialCatalogProducts);
   const [categories, setCategories] = useState(initialCategories);
+  const [settingItems, setSettingItems] = useState(initialSettingItems || []);
+  const [currentMenuSettings, setCurrentMenuSettings] = useState(menuSettings);
   const [tab, setTab] = useState("store");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -263,8 +285,9 @@ export function AdminProductsBoard({
     category: initialCategories[0]?.id || "",
   });
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
+  const [settingForm, setSettingForm] = useState(emptySettingForm);
   const [message, setMessage] = useState("");
-  const settings = menuSettings || {
+  const settings = currentMenuSettings || {
     temperatures: ["ICE", "HOT"],
     sizes: [],
     sweetness: [],
@@ -295,6 +318,8 @@ export function AdminProductsBoard({
       setProducts(body.products || []);
       setCatalogProducts(body.catalogProducts || []);
       setCategories(body.categories || []);
+      setCurrentMenuSettings(body.menuSettings || currentMenuSettings);
+      setSettingItems(body.settingItems || settingItems);
     }
   };
 
@@ -407,6 +432,32 @@ export function AdminProductsBoard({
     setMessage("カテゴリを追加しました。");
   };
 
+  const createSetting = async (event) => {
+    event.preventDefault();
+    setMessage("");
+    const response = await fetch("/api/admin/menu-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: settingForm.type,
+        id: settingForm.id,
+        label: settingForm.label,
+        price: settingForm.price,
+        values: toTextArray(settingForm.valuesText),
+        sortOrder: settingForm.sortOrder,
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "設定項目を作成できませんでした。");
+      return;
+    }
+    setCurrentMenuSettings(body.menuSettings || currentMenuSettings);
+    setSettingItems(body.settingItems || settingItems);
+    setSettingForm({ ...emptySettingForm, type: settingForm.type });
+    setMessage("設定項目を追加しました。");
+  };
+
   const visibleProducts = useMemo(
     () =>
       products.filter((product) => {
@@ -481,6 +532,9 @@ export function AdminProductsBoard({
         </button>
         <button type="button" className={tab === "categories" ? "" : "secondary"} onClick={() => setTab("categories")}>
           カテゴリ
+        </button>
+        <button type="button" className={tab === "settings" ? "" : "secondary"} onClick={() => setTab("settings")}>
+          カスタム項目
         </button>
       </section>
 
@@ -780,6 +834,64 @@ export function AdminProductsBoard({
                 ホイップ標準
               </label>
             </fieldset>
+            <button type="submit" disabled={!canEditCatalog}>追加する</button>
+          </form>
+        </section>
+      ) : null}
+
+      {tab === "settings" ? (
+        <section className="admin-catalog-layout">
+          <section className="admin-panel admin-category-list">
+            <h2>カスタム項目一覧</h2>
+            {settingItems.map((item) => (
+              <article key={`${item.type}-${item.id}`}>
+                <div>
+                  <span>{settingTypeLabels[item.type] || item.type} / {item.id}</span>
+                  <strong>{item.values?.length ? item.values.join(", ") : item.label}</strong>
+                  {["size", "option", "topping"].includes(item.type) ? <small>¥{item.price}</small> : null}
+                </div>
+                <small>{item.isActive ? "表示中" : "停止中"}</small>
+              </article>
+            ))}
+          </section>
+          <form className="admin-panel admin-product-editor" onSubmit={createSetting}>
+            <h2>項目を追加</h2>
+            <label>
+              種類
+              <select value={settingForm.type} onChange={(event) => setSettingForm({ ...settingForm, type: event.target.value })}>
+                <option value="topping">トッピング</option>
+                <option value="option">オプション</option>
+                <option value="size">サイズ</option>
+                <option value="sweetness">甘さセット</option>
+                <option value="ice">氷セット</option>
+                <option value="hotIce">HOT氷表示</option>
+              </select>
+            </label>
+            <label>
+              ID
+              <input value={settingForm.id} onChange={(event) => setSettingForm({ ...settingForm, id: event.target.value })} placeholder="例：extra-pudding" required />
+            </label>
+            {["sweetness", "ice"].includes(settingForm.type) ? (
+              <label>
+                項目
+                <input value={settingForm.valuesText} onChange={(event) => setSettingForm({ ...settingForm, valuesText: event.target.value })} placeholder="ふつう, 多め, 少なめ" required />
+              </label>
+            ) : (
+              <label>
+                表示名
+                <input value={settingForm.label} onChange={(event) => setSettingForm({ ...settingForm, label: event.target.value })} placeholder="プリン追加" required />
+              </label>
+            )}
+            {["size", "option", "topping"].includes(settingForm.type) ? (
+              <label>
+                価格
+                <input type="number" value={settingForm.price} onChange={(event) => setSettingForm({ ...settingForm, price: event.target.value })} />
+              </label>
+            ) : null}
+            <label>
+              並び順
+              <input type="number" value={settingForm.sortOrder} onChange={(event) => setSettingForm({ ...settingForm, sortOrder: event.target.value })} />
+            </label>
             <button type="submit" disabled={!canEditCatalog}>追加する</button>
           </form>
         </section>
