@@ -72,6 +72,16 @@ const productToForm = (product) => ({
   isFeatured: product.isFeatured === true,
 });
 
+const categoryToForm = (category) => ({
+  id: category.id || "",
+  label: category.label || "",
+  note: category.note || "",
+  sortOrder: category.sortOrder || 9999,
+  isTapiocaFree: category.isTapiocaFree === true,
+  hasWhipByDefault: category.hasWhipByDefault === true,
+  isActive: category.isActive !== false,
+});
+
 const formToProduct = (form) => ({
   drinkId: form.drinkId,
   name: form.name,
@@ -269,6 +279,60 @@ function ProductEditor({
   );
 }
 
+function CategoryEditor({
+  canEditCatalog,
+  editingCategoryId,
+  categoryForm,
+  setCategoryForm,
+  saveCategory,
+  removeCategory,
+}) {
+  return (
+    <form className="admin-panel admin-product-editor" onSubmit={saveCategory}>
+      <div className="admin-product-editor-heading">
+        <h2>{editingCategoryId ? "カテゴリを編集" : "カテゴリを追加"}</h2>
+        {editingCategoryId ? <button type="button" className="secondary" onClick={removeCategory}>削除</button> : null}
+      </div>
+      <label>
+        カテゴリID
+        <input
+          value={categoryForm.id}
+          onChange={(event) => setCategoryForm({ ...categoryForm, id: event.target.value })}
+          disabled={Boolean(editingCategoryId)}
+          required
+        />
+      </label>
+      <label>
+        表示名
+        <input value={categoryForm.label} onChange={(event) => setCategoryForm({ ...categoryForm, label: event.target.value })} required />
+      </label>
+      <label>
+        説明
+        <textarea value={categoryForm.note} onChange={(event) => setCategoryForm({ ...categoryForm, note: event.target.value })} rows={3} />
+      </label>
+      <label>
+        並び順
+        <input type="number" value={categoryForm.sortOrder} onChange={(event) => setCategoryForm({ ...categoryForm, sortOrder: event.target.value })} />
+      </label>
+      <fieldset className="admin-product-flags">
+        <label>
+          <input type="checkbox" checked={categoryForm.isActive} onChange={(event) => setCategoryForm({ ...categoryForm, isActive: event.target.checked })} />
+          表示中
+        </label>
+        <label>
+          <input type="checkbox" checked={categoryForm.isTapiocaFree} onChange={(event) => setCategoryForm({ ...categoryForm, isTapiocaFree: event.target.checked })} />
+          タピオカなしカテゴリ
+        </label>
+        <label>
+          <input type="checkbox" checked={categoryForm.hasWhipByDefault} onChange={(event) => setCategoryForm({ ...categoryForm, hasWhipByDefault: event.target.checked })} />
+          ホイップ標準
+        </label>
+      </fieldset>
+      <button type="submit" disabled={!canEditCatalog}>{editingCategoryId ? "保存する" : "追加する"}</button>
+    </form>
+  );
+}
+
 function SettingEditor({
   canEditCatalog,
   editingSettingKey,
@@ -367,6 +431,7 @@ export function AdminProductsBoard({
     category: initialCategories[0]?.id || "",
   });
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
+  const [editingCategoryId, setEditingCategoryId] = useState("");
   const [settingForm, setSettingForm] = useState(emptySettingForm);
   const [editingSettingKey, setEditingSettingKey] = useState("");
   const [message, setMessage] = useState("");
@@ -496,11 +561,24 @@ export function AdminProductsBoard({
     setMessage("削除しました。");
   };
 
-  const createCategory = async (event) => {
+  const startNewCategory = () => {
+    setEditingCategoryId("");
+    setCategoryForm(emptyCategory);
+    setMessage("");
+  };
+
+  const startEditCategory = (category) => {
+    setEditingCategoryId(category.id);
+    setCategoryForm(categoryToForm(category));
+    setMessage("");
+  };
+
+  const saveCategory = async (event) => {
     event.preventDefault();
     setMessage("");
-    const response = await fetch("/api/admin/product-categories", {
-      method: "POST",
+    const isEditing = Boolean(editingCategoryId);
+    const response = await fetch(isEditing ? `/api/admin/product-categories/${encodeURIComponent(editingCategoryId)}` : "/api/admin/product-categories", {
+      method: isEditing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(categoryForm),
     });
@@ -509,10 +587,33 @@ export function AdminProductsBoard({
       setMessage(body.error || "カテゴリを作成できませんでした。");
       return;
     }
-    setCategories((current) => [...current, body.category]);
+    setCategories((current) =>
+      isEditing
+        ? current.map((category) => (category.id === editingCategoryId ? body.category : category))
+        : [...current, body.category],
+    );
     setProductForm((current) => ({ ...current, category: body.category.id }));
+    setEditingCategoryId(body.category.id);
+    setCategoryForm(categoryToForm(body.category));
+    setMessage(isEditing ? "カテゴリを保存しました。" : "カテゴリを追加しました。");
+  };
+
+  const removeCategory = async () => {
+    if (!editingCategoryId || !window.confirm("このカテゴリを削除します。商品が残っているカテゴリは削除できません。")) {
+      return;
+    }
+    const response = await fetch(`/api/admin/product-categories/${encodeURIComponent(editingCategoryId)}`, {
+      method: "DELETE",
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "カテゴリを削除できませんでした。");
+      return;
+    }
+    setCategories((current) => current.filter((category) => category.id !== editingCategoryId));
+    setEditingCategoryId("");
     setCategoryForm(emptyCategory);
-    setMessage("カテゴリを追加しました。");
+    setMessage("カテゴリを削除しました。");
   };
 
   const startNewSetting = () => {
@@ -917,48 +1018,48 @@ export function AdminProductsBoard({
       {tab === "categories" ? (
         <section className="admin-catalog-layout">
           <section className="admin-panel admin-category-list">
-            <h2>カテゴリ一覧</h2>
+            <div className="admin-product-editor-heading">
+              <h2>カテゴリ一覧</h2>
+              <button type="button" className="secondary" onClick={startNewCategory}>新規</button>
+            </div>
             {categories.map((category) => (
-              <article key={category.id}>
-                <div>
-                  <span>{category.id}</span>
-                  <strong>{category.label}</strong>
-                  {category.note ? <small>{category.note}</small> : null}
-                </div>
-                <small>{category.isActive ? "表示中" : "停止中"}</small>
-              </article>
+              <div className="admin-setting-list-item" key={category.id}>
+                <article
+                  className={editingCategoryId === category.id ? "is-selected" : ""}
+                  onClick={() => startEditCategory(category)}
+                >
+                  <div>
+                    <span>{category.id}</span>
+                    <strong>{category.label}</strong>
+                    {category.note ? <small>{category.note}</small> : null}
+                  </div>
+                  <small>{category.isActive ? "表示中" : "停止中"}</small>
+                </article>
+                {editingCategoryId === category.id ? (
+                  <div className="admin-catalog-inline-editor">
+                    <CategoryEditor
+                      canEditCatalog={canEditCatalog}
+                      editingCategoryId={editingCategoryId}
+                      categoryForm={categoryForm}
+                      setCategoryForm={setCategoryForm}
+                      saveCategory={saveCategory}
+                      removeCategory={removeCategory}
+                    />
+                  </div>
+                ) : null}
+              </div>
             ))}
           </section>
-          <form className="admin-panel admin-product-editor" onSubmit={createCategory}>
-            <h2>カテゴリを追加</h2>
-            <label>
-              カテゴリID
-              <input value={categoryForm.id} onChange={(event) => setCategoryForm({ ...categoryForm, id: event.target.value })} required />
-            </label>
-            <label>
-              表示名
-              <input value={categoryForm.label} onChange={(event) => setCategoryForm({ ...categoryForm, label: event.target.value })} required />
-            </label>
-            <label>
-              説明
-              <textarea value={categoryForm.note} onChange={(event) => setCategoryForm({ ...categoryForm, note: event.target.value })} rows={3} />
-            </label>
-            <label>
-              並び順
-              <input type="number" value={categoryForm.sortOrder} onChange={(event) => setCategoryForm({ ...categoryForm, sortOrder: event.target.value })} />
-            </label>
-            <fieldset className="admin-product-flags">
-              <label>
-                <input type="checkbox" checked={categoryForm.isTapiocaFree} onChange={(event) => setCategoryForm({ ...categoryForm, isTapiocaFree: event.target.checked })} />
-                タピオカなしカテゴリ
-              </label>
-              <label>
-                <input type="checkbox" checked={categoryForm.hasWhipByDefault} onChange={(event) => setCategoryForm({ ...categoryForm, hasWhipByDefault: event.target.checked })} />
-                ホイップ標準
-              </label>
-            </fieldset>
-            <button type="submit" disabled={!canEditCatalog}>追加する</button>
-          </form>
+          <div className="admin-product-editor-side">
+            <CategoryEditor
+              canEditCatalog={canEditCatalog}
+              editingCategoryId={editingCategoryId}
+              categoryForm={categoryForm}
+              setCategoryForm={setCategoryForm}
+              saveCategory={saveCategory}
+              removeCategory={removeCategory}
+            />
+          </div>
         </section>
       ) : null}
 

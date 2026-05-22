@@ -522,6 +522,44 @@ const createCategory = async (body) => {
   return (await listProductCatalogForAdmin()).categories.find((item) => item.id === category.id) || null;
 };
 
+const updateCategory = async (categoryId, body) => {
+  const sql = await getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureCatalogSeeded(sql);
+
+  const category = normalizeCategoryInput({ ...body, id: categoryId });
+  if (!category.label) {
+    throw new Error("表示名は必須です。");
+  }
+
+  await sql`
+    update product_categories
+    set
+      label = ${category.label},
+      note = ${category.note},
+      is_tapioca_free = ${category.isTapiocaFree},
+      has_whip_by_default = ${category.hasWhipByDefault},
+      sort_order = ${category.sortOrder},
+      is_active = ${category.isActive},
+      updated_at = now()
+    where category_id = ${categoryId}
+  `;
+
+  return (await listProductCatalogForAdmin()).categories.find((item) => item.id === categoryId) || null;
+};
+
+const deleteCategory = async (categoryId) => {
+  const sql = await getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+
+  const rows = await sql`select count(*)::int as count from products where category_id = ${categoryId}`;
+  if (Number(rows[0]?.count || 0) > 0) {
+    throw new Error("このカテゴリを使っている商品があります。先に商品カテゴリを変更してください。");
+  }
+
+  await sql`delete from product_categories where category_id = ${categoryId}`;
+};
+
 const normalizeSettingInput = (body = {}) => {
   const type = String(body.type || body.settingType || "").trim();
   const id = String(body.id || body.itemId || "").trim();
@@ -633,6 +671,8 @@ module.exports = {
   updateProduct,
   deleteProduct,
   createCategory,
+  updateCategory,
+  deleteCategory,
   createMenuSetting,
   updateMenuSetting,
   deleteMenuSetting,
