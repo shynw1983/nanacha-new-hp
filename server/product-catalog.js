@@ -207,7 +207,7 @@ const ensureCatalogSeeded = async (sql) => {
     }
     await sql`
       insert into menu_settings (setting_type, item_id, label, values_json, sort_order, is_active)
-      values ('sweetness', 'default', '甘さ', ${JSON.stringify(menu.sweetness)}, 1, true)
+      values ('sweetness', 'sweet', '甘さ', ${JSON.stringify(menu.sweetness)}, 1, true)
       on conflict (setting_type, item_id) do nothing
     `;
     await sql`
