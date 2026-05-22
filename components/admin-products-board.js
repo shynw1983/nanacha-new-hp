@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import { useMemo, useState } from "react";
 
 const emptyProduct = {
@@ -160,6 +161,29 @@ function ProductEditor({
   toggleProductArrayValue,
   setProductArrayValues,
 }) {
+  const [uploadState, setUploadState] = useState("");
+  const imagePreviewUrl = productForm.imageUrl ? normalizeAssetUrl(productForm.imageUrl) : "";
+
+  const uploadProductImage = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadState("アップロード中...");
+    try {
+      const safeName = `${productForm.drinkId || productForm.name || "product"}-${file.name}`.replace(/[^a-zA-Z0-9._-]+/g, "-");
+      const blob = await upload(`product-images/${safeName}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/product-images/upload",
+      });
+      setProductForm({ ...productForm, imageUrl: blob.url });
+      setUploadState("アップロードしました。");
+    } catch (error) {
+      setUploadState(error.message || "アップロードできませんでした。");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   return (
     <form className="admin-panel admin-product-editor" onSubmit={saveProduct}>
       <div className="admin-product-editor-heading">
@@ -205,6 +229,14 @@ function ProductEditor({
         画像URL
         <input value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} placeholder="assets/menu/drink-01.png" />
       </label>
+      <div className="admin-image-editor">
+        {imagePreviewUrl ? <img src={imagePreviewUrl} alt="" /> : <div className="admin-image-placeholder">No image</div>}
+        <label>
+          画像をアップロード
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadProductImage} />
+        </label>
+        {uploadState ? <small>{uploadState}</small> : null}
+      </div>
       <section className="admin-choice-grid">
         <AdminChoiceGroup
           title="温度"

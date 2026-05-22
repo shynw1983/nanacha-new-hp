@@ -3135,6 +3135,36 @@ footer p {
   resize: vertical;
 }
 
+.admin-image-editor {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.admin-image-editor img,
+.admin-image-placeholder {
+  width: 120px;
+  height: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--soft);
+}
+
+.admin-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.admin-image-editor small {
+  color: var(--muted);
+}
+
 .admin-form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3711,6 +3741,16 @@ footer p {
 
   .admin-choice-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-image-editor {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .admin-image-editor img,
+  .admin-image-placeholder {
+    width: 96px;
+    height: 120px;
   }
 }
 
