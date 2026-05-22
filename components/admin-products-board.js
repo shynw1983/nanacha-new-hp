@@ -38,6 +38,7 @@ const emptySettingForm = {
   price: 0,
   valuesText: "",
   sortOrder: 9999,
+  isActive: true,
 };
 
 const settingTypeLabels = {
@@ -97,6 +98,16 @@ const makeProductId = (name) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40) || `drink-${Date.now()}`;
+
+const settingToForm = (item) => ({
+  type: item.type || "topping",
+  id: item.id || "",
+  label: item.label || "",
+  price: item.price ?? 0,
+  valuesText: Array.isArray(item.values) ? item.values.join(", ") : "",
+  sortOrder: item.sortOrder || 9999,
+  isActive: item.isActive !== false,
+});
 
 function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll, onClear }) {
   return (
@@ -286,6 +297,7 @@ export function AdminProductsBoard({
   });
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [settingForm, setSettingForm] = useState(emptySettingForm);
+  const [editingSettingKey, setEditingSettingKey] = useState("");
   const [message, setMessage] = useState("");
   const settings = currentMenuSettings || {
     temperatures: ["ICE", "HOT"],
@@ -432,30 +444,70 @@ export function AdminProductsBoard({
     setMessage("カテゴリを追加しました。");
   };
 
-  const createSetting = async (event) => {
+  const startNewSetting = () => {
+    setEditingSettingKey("");
+    setSettingForm(emptySettingForm);
+    setMessage("");
+  };
+
+  const startEditSetting = (item) => {
+    setEditingSettingKey(`${item.type}/${item.id}`);
+    setSettingForm(settingToForm(item));
+    setMessage("");
+  };
+
+  const saveSetting = async (event) => {
     event.preventDefault();
     setMessage("");
-    const response = await fetch("/api/admin/menu-settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: settingForm.type,
-        id: settingForm.id,
-        label: settingForm.label,
-        price: settingForm.price,
-        values: toTextArray(settingForm.valuesText),
-        sortOrder: settingForm.sortOrder,
-      }),
-    });
+    const isEditing = Boolean(editingSettingKey);
+    const response = await fetch(
+      isEditing
+        ? `/api/admin/menu-settings/${encodeURIComponent(settingForm.type)}/${encodeURIComponent(settingForm.id)}`
+        : "/api/admin/menu-settings",
+      {
+        method: isEditing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: settingForm.type,
+          id: settingForm.id,
+          label: settingForm.label,
+          price: settingForm.price,
+          values: toTextArray(settingForm.valuesText),
+          sortOrder: settingForm.sortOrder,
+          isActive: settingForm.isActive,
+        }),
+      },
+    );
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setMessage(body.error || "設定項目を作成できませんでした。");
+      setMessage(body.error || "設定項目を保存できませんでした。");
       return;
     }
     setCurrentMenuSettings(body.menuSettings || currentMenuSettings);
     setSettingItems(body.settingItems || settingItems);
-    setSettingForm({ ...emptySettingForm, type: settingForm.type });
-    setMessage("設定項目を追加しました。");
+    setEditingSettingKey(`${body.setting?.type || settingForm.type}/${body.setting?.id || settingForm.id}`);
+    setSettingForm(settingToForm(body.setting || settingForm));
+    setMessage("設定項目を保存しました。");
+  };
+
+  const removeSetting = async () => {
+    if (!editingSettingKey || !window.confirm("この設定項目を削除します。商品側で選択済みの場合は、該当商品の制限も見直してください。")) {
+      return;
+    }
+    const response = await fetch(`/api/admin/menu-settings/${encodeURIComponent(settingForm.type)}/${encodeURIComponent(settingForm.id)}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setMessage(body.error || "設定項目を削除できませんでした。");
+      return;
+    }
+    setCurrentMenuSettings(body.menuSettings || currentMenuSettings);
+    setSettingItems(body.settingItems || settingItems);
+    setEditingSettingKey("");
+    setSettingForm(emptySettingForm);
+    setMessage("設定項目を削除しました。");
   };
 
   const visibleProducts = useMemo(
@@ -842,9 +894,16 @@ export function AdminProductsBoard({
       {tab === "settings" ? (
         <section className="admin-catalog-layout">
           <section className="admin-panel admin-category-list">
-            <h2>カスタム項目一覧</h2>
+            <div className="admin-product-editor-heading">
+              <h2>カスタム項目一覧</h2>
+              <button type="button" className="secondary" onClick={startNewSetting}>新規</button>
+            </div>
             {settingItems.map((item) => (
-              <article key={`${item.type}-${item.id}`}>
+              <article
+                className={editingSettingKey === `${item.type}/${item.id}` ? "is-selected" : ""}
+                key={`${item.type}-${item.id}`}
+                onClick={() => startEditSetting(item)}
+              >
                 <div>
                   <span>{settingTypeLabels[item.type] || item.type} / {item.id}</span>
                   <strong>{item.values?.length ? item.values.join(", ") : item.label}</strong>
@@ -854,11 +913,18 @@ export function AdminProductsBoard({
               </article>
             ))}
           </section>
-          <form className="admin-panel admin-product-editor" onSubmit={createSetting}>
-            <h2>項目を追加</h2>
+          <form className="admin-panel admin-product-editor" onSubmit={saveSetting}>
+            <div className="admin-product-editor-heading">
+              <h2>{editingSettingKey ? "項目を編集" : "項目を追加"}</h2>
+              {editingSettingKey ? <button type="button" className="secondary" onClick={removeSetting}>削除</button> : null}
+            </div>
             <label>
               種類
-              <select value={settingForm.type} onChange={(event) => setSettingForm({ ...settingForm, type: event.target.value })}>
+              <select
+                value={settingForm.type}
+                onChange={(event) => setSettingForm({ ...settingForm, type: event.target.value })}
+                disabled={Boolean(editingSettingKey)}
+              >
                 <option value="topping">トッピング</option>
                 <option value="option">オプション</option>
                 <option value="size">サイズ</option>
@@ -869,7 +935,13 @@ export function AdminProductsBoard({
             </label>
             <label>
               ID
-              <input value={settingForm.id} onChange={(event) => setSettingForm({ ...settingForm, id: event.target.value })} placeholder="例：extra-pudding" required />
+              <input
+                value={settingForm.id}
+                onChange={(event) => setSettingForm({ ...settingForm, id: event.target.value })}
+                placeholder="例：extra-pudding"
+                disabled={Boolean(editingSettingKey)}
+                required
+              />
             </label>
             {["sweetness", "ice"].includes(settingForm.type) ? (
               <label>
@@ -892,7 +964,13 @@ export function AdminProductsBoard({
               並び順
               <input type="number" value={settingForm.sortOrder} onChange={(event) => setSettingForm({ ...settingForm, sortOrder: event.target.value })} />
             </label>
-            <button type="submit" disabled={!canEditCatalog}>追加する</button>
+            <fieldset className="admin-product-flags">
+              <label>
+                <input type="checkbox" checked={settingForm.isActive} onChange={(event) => setSettingForm({ ...settingForm, isActive: event.target.checked })} />
+                表示中
+              </label>
+            </fieldset>
+            <button type="submit" disabled={!canEditCatalog}>{editingSettingKey ? "保存する" : "追加する"}</button>
           </form>
         </section>
       ) : null}

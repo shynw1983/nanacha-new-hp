@@ -583,6 +583,49 @@ const createMenuSetting = async (body) => {
   ) || null;
 };
 
+const updateMenuSetting = async (type, id, body) => {
+  const sql = await getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureCatalogSeeded(sql);
+
+  const setting = normalizeSettingInput({ ...body, type, id });
+  if (!settingTypes.has(setting.type)) {
+    throw new Error("設定タイプが正しくありません。");
+  }
+  if (["size", "option", "topping", "hotIce"].includes(setting.type) && !setting.label) {
+    throw new Error("表示名は必須です。");
+  }
+  if (["sweetness", "ice"].includes(setting.type) && !setting.values?.length) {
+    throw new Error("項目は1つ以上必要です。");
+  }
+
+  await sql`
+    update menu_settings
+    set
+      label = ${setting.label},
+      price = ${setting.price},
+      values_json = ${jsonParam(setting.values)},
+      sort_order = ${setting.sortOrder},
+      is_active = ${setting.isActive},
+      updated_at = now()
+    where setting_type = ${setting.type} and item_id = ${setting.id}
+  `;
+
+  return (await listProductCatalogForAdmin()).settingItems.find(
+    (item) => item.type === setting.type && item.id === setting.id,
+  ) || null;
+};
+
+const deleteMenuSetting = async (type, id) => {
+  const sql = await getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+
+  await sql`
+    delete from menu_settings
+    where setting_type = ${type} and item_id = ${id}
+  `;
+};
+
 module.exports = {
   getProductCatalogMenu,
   listProductCatalogForAdmin,
@@ -591,4 +634,6 @@ module.exports = {
   deleteProduct,
   createCategory,
   createMenuSetting,
+  updateMenuSetting,
+  deleteMenuSetting,
 };

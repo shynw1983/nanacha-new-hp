@@ -3233,11 +3233,18 @@ footer p {
   justify-content: space-between;
   gap: 12px;
   border-top: 1px solid var(--line-soft);
-  padding-top: 12px;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
 }
 
 .admin-category-list article:first-of-type {
   border-top: 0;
+}
+
+.admin-category-list article:hover,
+.admin-category-list article.is-selected {
+  background: var(--soft);
 }
 
 .admin-store-grid {
