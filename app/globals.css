@@ -3046,6 +3046,11 @@ footer p {
   gap: 10px;
 }
 
+.admin-setting-list-item {
+  display: grid;
+  gap: 10px;
+}
+
 .admin-catalog-list button {
   display: grid;
   gap: 5px;

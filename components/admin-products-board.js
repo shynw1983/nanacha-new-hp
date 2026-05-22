@@ -269,6 +269,77 @@ function ProductEditor({
   );
 }
 
+function SettingEditor({
+  canEditCatalog,
+  editingSettingKey,
+  settingForm,
+  setSettingForm,
+  saveSetting,
+  removeSetting,
+}) {
+  return (
+    <form className="admin-panel admin-product-editor" onSubmit={saveSetting}>
+      <div className="admin-product-editor-heading">
+        <h2>{editingSettingKey ? "項目を編集" : "項目を追加"}</h2>
+        {editingSettingKey ? <button type="button" className="secondary" onClick={removeSetting}>削除</button> : null}
+      </div>
+      <label>
+        種類
+        <select
+          value={settingForm.type}
+          onChange={(event) => setSettingForm({ ...settingForm, type: event.target.value })}
+          disabled={Boolean(editingSettingKey)}
+        >
+          <option value="topping">トッピング</option>
+          <option value="option">オプション</option>
+          <option value="size">サイズ</option>
+          <option value="sweetness">甘さセット</option>
+          <option value="ice">氷セット</option>
+          <option value="hotIce">HOT氷表示</option>
+        </select>
+      </label>
+      <label>
+        ID
+        <input
+          value={settingForm.id}
+          onChange={(event) => setSettingForm({ ...settingForm, id: event.target.value })}
+          placeholder="例：extra-pudding"
+          disabled={Boolean(editingSettingKey)}
+          required
+        />
+      </label>
+      {["sweetness", "ice"].includes(settingForm.type) ? (
+        <label>
+          項目
+          <input value={settingForm.valuesText} onChange={(event) => setSettingForm({ ...settingForm, valuesText: event.target.value })} placeholder="ふつう, 多め, 少なめ" required />
+        </label>
+      ) : (
+        <label>
+          表示名
+          <input value={settingForm.label} onChange={(event) => setSettingForm({ ...settingForm, label: event.target.value })} placeholder="プリン追加" required />
+        </label>
+      )}
+      {["size", "option", "topping"].includes(settingForm.type) ? (
+        <label>
+          価格
+          <input type="number" value={settingForm.price} onChange={(event) => setSettingForm({ ...settingForm, price: event.target.value })} />
+        </label>
+      ) : null}
+      <label>
+        並び順
+        <input type="number" value={settingForm.sortOrder} onChange={(event) => setSettingForm({ ...settingForm, sortOrder: event.target.value })} />
+      </label>
+      <fieldset className="admin-product-flags">
+        <label>
+          <input type="checkbox" checked={settingForm.isActive} onChange={(event) => setSettingForm({ ...settingForm, isActive: event.target.checked })} />
+          表示中
+        </label>
+      </fieldset>
+      <button type="submit" disabled={!canEditCatalog}>{editingSettingKey ? "保存する" : "追加する"}</button>
+    </form>
+  );
+}
+
 export function AdminProductsBoard({
   initialStores,
   initialStoreId,
@@ -899,79 +970,43 @@ export function AdminProductsBoard({
               <button type="button" className="secondary" onClick={startNewSetting}>新規</button>
             </div>
             {settingItems.map((item) => (
-              <article
-                className={editingSettingKey === `${item.type}/${item.id}` ? "is-selected" : ""}
-                key={`${item.type}-${item.id}`}
-                onClick={() => startEditSetting(item)}
-              >
-                <div>
-                  <span>{settingTypeLabels[item.type] || item.type} / {item.id}</span>
-                  <strong>{item.values?.length ? item.values.join(", ") : item.label}</strong>
-                  {["size", "option", "topping"].includes(item.type) ? <small>¥{item.price}</small> : null}
-                </div>
-                <small>{item.isActive ? "表示中" : "停止中"}</small>
-              </article>
+              <div className="admin-setting-list-item" key={`${item.type}-${item.id}`}>
+                <article
+                  className={editingSettingKey === `${item.type}/${item.id}` ? "is-selected" : ""}
+                  onClick={() => startEditSetting(item)}
+                >
+                  <div>
+                    <span>{settingTypeLabels[item.type] || item.type} / {item.id}</span>
+                    <strong>{item.values?.length ? item.values.join(", ") : item.label}</strong>
+                    {["size", "option", "topping"].includes(item.type) ? <small>¥{item.price}</small> : null}
+                  </div>
+                  <small>{item.isActive ? "表示中" : "停止中"}</small>
+                </article>
+                {editingSettingKey === `${item.type}/${item.id}` ? (
+                  <div className="admin-catalog-inline-editor">
+                    <SettingEditor
+                      canEditCatalog={canEditCatalog}
+                      editingSettingKey={editingSettingKey}
+                      settingForm={settingForm}
+                      setSettingForm={setSettingForm}
+                      saveSetting={saveSetting}
+                      removeSetting={removeSetting}
+                    />
+                  </div>
+                ) : null}
+              </div>
             ))}
           </section>
-          <form className="admin-panel admin-product-editor" onSubmit={saveSetting}>
-            <div className="admin-product-editor-heading">
-              <h2>{editingSettingKey ? "項目を編集" : "項目を追加"}</h2>
-              {editingSettingKey ? <button type="button" className="secondary" onClick={removeSetting}>削除</button> : null}
-            </div>
-            <label>
-              種類
-              <select
-                value={settingForm.type}
-                onChange={(event) => setSettingForm({ ...settingForm, type: event.target.value })}
-                disabled={Boolean(editingSettingKey)}
-              >
-                <option value="topping">トッピング</option>
-                <option value="option">オプション</option>
-                <option value="size">サイズ</option>
-                <option value="sweetness">甘さセット</option>
-                <option value="ice">氷セット</option>
-                <option value="hotIce">HOT氷表示</option>
-              </select>
-            </label>
-            <label>
-              ID
-              <input
-                value={settingForm.id}
-                onChange={(event) => setSettingForm({ ...settingForm, id: event.target.value })}
-                placeholder="例：extra-pudding"
-                disabled={Boolean(editingSettingKey)}
-                required
-              />
-            </label>
-            {["sweetness", "ice"].includes(settingForm.type) ? (
-              <label>
-                項目
-                <input value={settingForm.valuesText} onChange={(event) => setSettingForm({ ...settingForm, valuesText: event.target.value })} placeholder="ふつう, 多め, 少なめ" required />
-              </label>
-            ) : (
-              <label>
-                表示名
-                <input value={settingForm.label} onChange={(event) => setSettingForm({ ...settingForm, label: event.target.value })} placeholder="プリン追加" required />
-              </label>
-            )}
-            {["size", "option", "topping"].includes(settingForm.type) ? (
-              <label>
-                価格
-                <input type="number" value={settingForm.price} onChange={(event) => setSettingForm({ ...settingForm, price: event.target.value })} />
-              </label>
-            ) : null}
-            <label>
-              並び順
-              <input type="number" value={settingForm.sortOrder} onChange={(event) => setSettingForm({ ...settingForm, sortOrder: event.target.value })} />
-            </label>
-            <fieldset className="admin-product-flags">
-              <label>
-                <input type="checkbox" checked={settingForm.isActive} onChange={(event) => setSettingForm({ ...settingForm, isActive: event.target.checked })} />
-                表示中
-              </label>
-            </fieldset>
-            <button type="submit" disabled={!canEditCatalog}>{editingSettingKey ? "保存する" : "追加する"}</button>
-          </form>
+          <div className="admin-product-editor-side">
+            <SettingEditor
+              canEditCatalog={canEditCatalog}
+              editingSettingKey={editingSettingKey}
+              settingForm={settingForm}
+              setSettingForm={setSettingForm}
+              saveSetting={saveSetting}
+              removeSetting={removeSetting}
+            />
+          </div>
         </section>
       ) : null}
     </>
