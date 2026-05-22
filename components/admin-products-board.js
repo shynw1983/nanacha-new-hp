@@ -108,6 +108,137 @@ function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll
   );
 }
 
+function ProductEditor({
+  editingId,
+  canEditCatalog,
+  productForm,
+  setProductForm,
+  categories,
+  settings,
+  saveProduct,
+  removeProduct,
+  toggleProductArrayValue,
+  setProductArrayValues,
+}) {
+  return (
+    <form className="admin-panel admin-product-editor" onSubmit={saveProduct}>
+      <div className="admin-product-editor-heading">
+        <h2>{editingId ? "商品を編集" : "商品を追加"}</h2>
+        {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}
+      </div>
+      <label>
+        商品ID
+        <input
+          value={productForm.drinkId}
+          onChange={(event) => setProductForm({ ...productForm, drinkId: event.target.value })}
+          disabled={Boolean(editingId)}
+          placeholder="例：matcha-latte"
+        />
+      </label>
+      <label>
+        商品名
+        <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required />
+      </label>
+      <div className="admin-form-grid">
+        <label>
+          カテゴリ
+          <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} required>
+            {categories.filter((category) => category.isActive !== false).map((category) => (
+              <option value={category.id} key={category.id}>{category.label}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          価格
+          <input type="number" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required />
+        </label>
+        <label>
+          並び順
+          <input type="number" value={productForm.sortOrder} onChange={(event) => setProductForm({ ...productForm, sortOrder: event.target.value })} />
+        </label>
+      </div>
+      <label>
+        説明
+        <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} rows={3} />
+      </label>
+      <label>
+        画像URL
+        <input value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} placeholder="assets/menu/drink-01.png" />
+      </label>
+      <section className="admin-choice-grid">
+        <AdminChoiceGroup
+          title="温度"
+          values={settings.temperatures}
+          selected={productForm.temperatures}
+          onToggle={(value) => toggleProductArrayValue("temperatures", value)}
+          onSelectAll={() => setProductArrayValues("temperatures", settings.temperatures)}
+          onClear={() => setProductArrayValues("temperatures", ["ICE"])}
+        />
+        <AdminChoiceGroup
+          title="サイズ"
+          hint="空の場合は全サイズを選択できます。"
+          values={settings.sizes}
+          selected={productForm.allowedSizes}
+          onToggle={(value) => toggleProductArrayValue("allowedSizes", value)}
+          onSelectAll={() => setProductArrayValues("allowedSizes", settings.sizes.map((item) => item.id))}
+          onClear={() => setProductArrayValues("allowedSizes", [])}
+        />
+        <AdminChoiceGroup
+          title="甘さ"
+          hint="空の場合は全項目を選択できます。"
+          values={settings.sweetness}
+          selected={productForm.allowedSweetness}
+          onToggle={(value) => toggleProductArrayValue("allowedSweetness", value)}
+          onSelectAll={() => setProductArrayValues("allowedSweetness", settings.sweetness)}
+          onClear={() => setProductArrayValues("allowedSweetness", [])}
+        />
+        <AdminChoiceGroup
+          title="氷"
+          hint="空の場合は全項目を選択できます。"
+          values={settings.ice}
+          selected={productForm.allowedIce}
+          onToggle={(value) => toggleProductArrayValue("allowedIce", value)}
+          onSelectAll={() => setProductArrayValues("allowedIce", settings.ice)}
+          onClear={() => setProductArrayValues("allowedIce", [])}
+        />
+        <AdminChoiceGroup
+          title="オプション"
+          hint="空の場合は全オプションを選択できます。"
+          values={settings.options.filter((item) => item.id !== "none")}
+          selected={productForm.allowedOptions}
+          onToggle={(value) => toggleProductArrayValue("allowedOptions", value)}
+          onSelectAll={() => setProductArrayValues("allowedOptions", settings.options.filter((item) => item.id !== "none").map((item) => item.id))}
+          onClear={() => setProductArrayValues("allowedOptions", [])}
+        />
+        <AdminChoiceGroup
+          title="トッピング"
+          hint="空の場合は全トッピングを選択できます。"
+          values={settings.toppings}
+          selected={productForm.allowedToppings}
+          onToggle={(value) => toggleProductArrayValue("allowedToppings", value)}
+          onSelectAll={() => setProductArrayValues("allowedToppings", settings.toppings.map((item) => item.id))}
+          onClear={() => setProductArrayValues("allowedToppings", [])}
+        />
+      </section>
+      <fieldset className="admin-product-flags">
+        <label>
+          <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />
+          メニューに表示
+        </label>
+        <label>
+          <input type="checkbox" checked={productForm.isRecommended} onChange={(event) => setProductForm({ ...productForm, isRecommended: event.target.checked })} />
+          おすすめ
+        </label>
+        <label>
+          <input type="checkbox" checked={productForm.isFeatured} onChange={(event) => setProductForm({ ...productForm, isFeatured: event.target.checked })} />
+          トップ掲載
+        </label>
+      </fieldset>
+      <button type="submit" disabled={!canEditCatalog}>保存する</button>
+    </form>
+  );
+}
+
 export function AdminProductsBoard({
   initialStores,
   initialStoreId,
@@ -126,6 +257,7 @@ export function AdminProductsBoard({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState("");
+  const [isEditingNewProduct, setIsEditingNewProduct] = useState(false);
   const [productForm, setProductForm] = useState({
     ...emptyProduct,
     category: initialCategories[0]?.id || "",
@@ -180,6 +312,7 @@ export function AdminProductsBoard({
 
   const startNewProduct = () => {
     setEditingId("");
+    setIsEditingNewProduct(true);
     setMessage("");
     setProductForm({
       ...emptyProduct,
@@ -191,6 +324,7 @@ export function AdminProductsBoard({
 
   const startEditProduct = (product) => {
     setEditingId(product.drinkId);
+    setIsEditingNewProduct(false);
     setMessage("");
     setProductForm(productToForm(product));
     setTab("catalog");
@@ -230,6 +364,7 @@ export function AdminProductsBoard({
     );
     await reloadStore(storeId);
     setEditingId(body.product.drinkId);
+    setIsEditingNewProduct(false);
     setProductForm(productToForm(body.product));
     setMessage("保存しました。");
   };
@@ -248,6 +383,7 @@ export function AdminProductsBoard({
     setProducts((current) => current.filter((product) => product.drinkId !== editingId));
     await reloadStore(storeId);
     setEditingId("");
+    setIsEditingNewProduct(false);
     setProductForm({ ...emptyProduct, category: categories[0]?.id || "" });
     setMessage("削除しました。");
   };
@@ -436,20 +572,54 @@ export function AdminProductsBoard({
           <section className="admin-panel admin-catalog-list">
             <h2>商品一覧</h2>
             {visibleCatalogProducts.map((product) => (
-              <button
-                type="button"
-                className={editingId === product.drinkId ? "is-selected" : ""}
-                key={product.drinkId}
-                onClick={() => startEditProduct(product)}
-              >
-                <span>{product.categoryLabel || product.category}</span>
-                <strong>{product.name}</strong>
-                <small>{product.isActive ? `¥${product.price}` : "停止中"}</small>
-              </button>
+              <div className="admin-catalog-list-item" key={product.drinkId}>
+                <button
+                  type="button"
+                  className={editingId === product.drinkId ? "is-selected" : ""}
+                  onClick={() => startEditProduct(product)}
+                >
+                  <span>{product.categoryLabel || product.category}</span>
+                  <strong>{product.name}</strong>
+                  <small>{product.isActive ? `¥${product.price}` : "停止中"}</small>
+                </button>
+                {editingId === product.drinkId ? (
+                  <div className="admin-catalog-inline-editor">
+                    <ProductEditor
+                      editingId={editingId}
+                      canEditCatalog={canEditCatalog}
+                      productForm={productForm}
+                      setProductForm={setProductForm}
+                      categories={categories}
+                      settings={settings}
+                      saveProduct={saveProduct}
+                      removeProduct={removeProduct}
+                      toggleProductArrayValue={toggleProductArrayValue}
+                      setProductArrayValues={setProductArrayValues}
+                    />
+                  </div>
+                ) : null}
+              </div>
             ))}
           </section>
 
-          <form className="admin-panel admin-product-editor" onSubmit={saveProduct}>
+          {isEditingNewProduct ? (
+            <div className="admin-catalog-inline-editor is-new">
+              <ProductEditor
+                editingId={editingId}
+                canEditCatalog={canEditCatalog}
+                productForm={productForm}
+                setProductForm={setProductForm}
+                categories={categories}
+                settings={settings}
+                saveProduct={saveProduct}
+                removeProduct={removeProduct}
+                toggleProductArrayValue={toggleProductArrayValue}
+                setProductArrayValues={setProductArrayValues}
+              />
+            </div>
+          ) : null}
+
+          <form className="admin-panel admin-product-editor admin-product-editor-side" onSubmit={saveProduct}>
             <div className="admin-product-editor-heading">
               <h2>{editingId ? "商品を編集" : "商品を追加"}</h2>
               {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}

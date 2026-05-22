@@ -3041,6 +3041,11 @@ footer p {
   overflow: auto;
 }
 
+.admin-catalog-list-item {
+  display: grid;
+  gap: 10px;
+}
+
 .admin-catalog-list button {
   display: grid;
   gap: 5px;
@@ -3056,6 +3061,17 @@ footer p {
 .admin-catalog-list button.is-selected,
 .admin-catalog-list button:hover {
   background: var(--soft);
+}
+
+.admin-product-editor-side {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.admin-catalog-inline-editor {
+  display: none;
 }
 
 .admin-catalog-list span,
@@ -3645,6 +3661,24 @@ footer p {
 
   .admin-toolbar {
     flex-wrap: wrap;
+  }
+
+  .admin-catalog-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .admin-product-editor-side {
+    display: none;
+  }
+
+  .admin-catalog-inline-editor {
+    display: block;
+  }
+
+  .admin-catalog-inline-editor .admin-product-editor {
+    border: 1px solid var(--line-soft);
+    background: var(--soft);
   }
 
   .admin-form-grid {
