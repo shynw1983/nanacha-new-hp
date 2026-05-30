@@ -54,6 +54,8 @@ const settingTypeLabels = {
 const toArray = (value) => (Array.isArray(value) ? value.map(String).filter(Boolean) : []);
 const toTextArray = (value) => String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
 const normalizeAssetUrl = (url = "") => (url.startsWith("/") || url.startsWith("http") ? url : `/${url}`);
+const categoryAccentIndex = (categoryId = "") =>
+  Array.from(String(categoryId)).reduce((total, character) => total + character.charCodeAt(0), 0) % 6;
 const productToForm = (product) => ({
   drinkId: product.drinkId || product.id || "",
   name: product.name || "",
@@ -120,7 +122,7 @@ const settingToForm = (item) => ({
   isActive: item.isActive !== false,
 });
 
-function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll, onClear }) {
+function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll }) {
   return (
     <fieldset className="admin-choice-group">
       <div>
@@ -128,8 +130,7 @@ function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll
         {hint ? <small>{hint}</small> : null}
       </div>
       <div className="admin-choice-actions">
-        <button type="button" className="secondary" onClick={onSelectAll}>すべて</button>
-        <button type="button" className="secondary" onClick={onClear}>制限なし</button>
+        <button type="button" className="secondary" onClick={onSelectAll}>すべて選択</button>
       </div>
       <div className="admin-choice-options">
         {values.map((item) => {
@@ -152,17 +153,20 @@ function AdminChoiceGroup({ title, hint, values, selected, onToggle, onSelectAll
 function ProductEditor({
   editingId,
   canEditCatalog,
+  productSaveStatus,
   productForm,
   setProductForm,
   categories,
   settings,
   saveProduct,
   removeProduct,
+  closeProductEditor,
   toggleProductArrayValue,
   setProductArrayValues,
 }) {
   const [uploadState, setUploadState] = useState("");
   const imagePreviewUrl = productForm.imageUrl ? normalizeAssetUrl(productForm.imageUrl) : "";
+  const saveButtonLabel = productSaveStatus === "saving" ? "保存中..." : productSaveStatus === "done" ? "保存完了" : "保存する";
 
   const uploadProductImage = async (event) => {
     const file = event.target.files?.[0];
@@ -188,7 +192,10 @@ function ProductEditor({
     <form className="admin-panel admin-product-editor" onSubmit={saveProduct}>
       <div className="admin-product-editor-heading">
         <h2>{editingId ? "商品を編集" : "商品を追加"}</h2>
-        {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}
+        <div className="admin-product-editor-heading-actions">
+          <button type="button" className="secondary" onClick={closeProductEditor}>閉じる</button>
+          {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}
+        </div>
       </div>
       <label>
         商品ID
@@ -231,8 +238,9 @@ function ProductEditor({
       </label>
       <div className="admin-image-editor">
         {imagePreviewUrl ? <img src={imagePreviewUrl} alt="" /> : <div className="admin-image-placeholder">No image</div>}
-        <label>
-          画像をアップロード
+        <label className="admin-file-upload-control">
+          <span>画像をアップロード</span>
+          <strong>ファイルを選択</strong>
           <input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadProductImage} />
         </label>
         {uploadState ? <small>{uploadState}</small> : null}
@@ -244,7 +252,6 @@ function ProductEditor({
           selected={productForm.temperatures}
           onToggle={(value) => toggleProductArrayValue("temperatures", value)}
           onSelectAll={() => setProductArrayValues("temperatures", settings.temperatures)}
-          onClear={() => setProductArrayValues("temperatures", ["ICE"])}
         />
         <AdminChoiceGroup
           title="サイズ"
@@ -253,7 +260,6 @@ function ProductEditor({
           selected={productForm.allowedSizes}
           onToggle={(value) => toggleProductArrayValue("allowedSizes", value)}
           onSelectAll={() => setProductArrayValues("allowedSizes", settings.sizes.map((item) => item.id))}
-          onClear={() => setProductArrayValues("allowedSizes", [])}
         />
         <AdminChoiceGroup
           title="甘さ"
@@ -262,7 +268,6 @@ function ProductEditor({
           selected={productForm.allowedSweetness}
           onToggle={(value) => toggleProductArrayValue("allowedSweetness", value)}
           onSelectAll={() => setProductArrayValues("allowedSweetness", settings.sweetness)}
-          onClear={() => setProductArrayValues("allowedSweetness", [])}
         />
         <AdminChoiceGroup
           title="氷"
@@ -271,7 +276,6 @@ function ProductEditor({
           selected={productForm.allowedIce}
           onToggle={(value) => toggleProductArrayValue("allowedIce", value)}
           onSelectAll={() => setProductArrayValues("allowedIce", settings.ice)}
-          onClear={() => setProductArrayValues("allowedIce", [])}
         />
         <AdminChoiceGroup
           title="オプション"
@@ -280,7 +284,6 @@ function ProductEditor({
           selected={productForm.allowedOptions}
           onToggle={(value) => toggleProductArrayValue("allowedOptions", value)}
           onSelectAll={() => setProductArrayValues("allowedOptions", settings.options.filter((item) => item.id !== "none").map((item) => item.id))}
-          onClear={() => setProductArrayValues("allowedOptions", [])}
         />
         <AdminChoiceGroup
           title="トッピング"
@@ -289,7 +292,6 @@ function ProductEditor({
           selected={productForm.allowedToppings}
           onToggle={(value) => toggleProductArrayValue("allowedToppings", value)}
           onSelectAll={() => setProductArrayValues("allowedToppings", settings.toppings.map((item) => item.id))}
-          onClear={() => setProductArrayValues("allowedToppings", [])}
         />
       </section>
       <fieldset className="admin-product-flags">
@@ -306,7 +308,7 @@ function ProductEditor({
           トップ掲載
         </label>
       </fieldset>
-      <button type="submit" disabled={!canEditCatalog}>保存する</button>
+      <button type="submit" disabled={!canEditCatalog || productSaveStatus === "saving"}>{saveButtonLabel}</button>
     </form>
   );
 }
@@ -440,6 +442,7 @@ export function AdminProductsBoard({
   initialStores,
   initialStoreId,
   initialProducts,
+  initialStoreMenuItems,
   initialCatalogProducts,
   initialCategories,
   menuSettings,
@@ -449,6 +452,7 @@ export function AdminProductsBoard({
   const [stores] = useState(initialStores);
   const [storeId, setStoreId] = useState(initialStoreId);
   const [products, setProducts] = useState(initialProducts);
+  const [storeMenuItems, setStoreMenuItems] = useState(initialStoreMenuItems || []);
   const [catalogProducts, setCatalogProducts] = useState(initialCatalogProducts);
   const [categories, setCategories] = useState(initialCategories);
   const [settingItems, setSettingItems] = useState(initialSettingItems || []);
@@ -458,6 +462,7 @@ export function AdminProductsBoard({
   const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState("");
   const [isEditingNewProduct, setIsEditingNewProduct] = useState(false);
+  const [productSaveStatus, setProductSaveStatus] = useState("idle");
   const [productForm, setProductForm] = useState({
     ...emptyProduct,
     category: initialCategories[0]?.id || "",
@@ -466,6 +471,10 @@ export function AdminProductsBoard({
   const [editingCategoryId, setEditingCategoryId] = useState("");
   const [settingForm, setSettingForm] = useState(emptySettingForm);
   const [editingSettingKey, setEditingSettingKey] = useState("");
+  const [draggingProductId, setDraggingProductId] = useState("");
+  const [isSavingProductOrder, setIsSavingProductOrder] = useState(false);
+  const [savingStoreProductIds, setSavingStoreProductIds] = useState([]);
+  const [savingStoreMenuItemKeys, setSavingStoreMenuItemKeys] = useState([]);
   const [message, setMessage] = useState("");
   const settings = currentMenuSettings || {
     temperatures: ["ICE", "HOT"],
@@ -496,6 +505,7 @@ export function AdminProductsBoard({
     if (response.ok) {
       const body = await response.json();
       setProducts(body.products || []);
+      setStoreMenuItems(body.storeMenuItems || []);
       setCatalogProducts(body.catalogProducts || []);
       setCategories(body.categories || []);
       setCurrentMenuSettings(body.menuSettings || currentMenuSettings);
@@ -504,20 +514,137 @@ export function AdminProductsBoard({
   };
 
   const updateProduct = async (drinkId, patch) => {
-    const response = await fetch(`/api/admin/products/${drinkId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ storeId, ...patch }),
-    });
-    if (response.ok) {
-      const body = await response.json();
+    const isStatusPatch = Object.prototype.hasOwnProperty.call(patch, "isAvailable") || Object.prototype.hasOwnProperty.call(patch, "websiteEnabled");
+    if (isStatusPatch && savingStoreProductIds.includes(drinkId)) {
+      return;
+    }
+
+    const previousProduct = products.find((product) => product.drinkId === drinkId);
+    if (!previousProduct) {
+      return;
+    }
+
+    const nextPriceOverride =
+      patch.priceOverride === undefined
+        ? previousProduct.priceOverride
+        : patch.priceOverride === ""
+          ? null
+          : Number(patch.priceOverride);
+    const nextProduct = {
+      ...previousProduct,
+      ...patch,
+      priceOverride: Number.isFinite(nextPriceOverride) ? nextPriceOverride : null,
+      effectivePrice: Number.isFinite(nextPriceOverride) ? nextPriceOverride : previousProduct.basePrice,
+    };
+
+    setProducts((current) => current.map((product) => (product.drinkId === drinkId ? nextProduct : product)));
+    if (isStatusPatch) {
+      setSavingStoreProductIds((current) => (current.includes(drinkId) ? current : [...current, drinkId]));
+    }
+    setMessage("保存中...");
+
+    try {
+      const response = await fetch(`/api/admin/products/${drinkId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeId, ...patch }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error || "保存できませんでした。");
+      }
       setProducts((current) => current.map((product) => (product.drinkId === drinkId ? body.product : product)));
+      setMessage("保存完了");
+    } catch (error) {
+      setProducts((current) => current.map((product) => (product.drinkId === drinkId ? previousProduct : product)));
+      setMessage(error.message || "保存できませんでした。");
+    } finally {
+      if (isStatusPatch) {
+        setSavingStoreProductIds((current) => current.filter((id) => id !== drinkId));
+      }
+    }
+  };
+
+  const setProductGroupAvailability = async (categoryId, isAvailable) => {
+    const groupProducts = products.filter((product) => product.category === categoryId);
+    const targetProducts = groupProducts.filter((product) =>
+      isAvailable ? !product.isAvailable || !product.websiteEnabled : product.isAvailable || product.websiteEnabled,
+    );
+    if (!targetProducts.length || targetProducts.some((product) => savingStoreProductIds.includes(product.drinkId))) {
+      return;
+    }
+
+    const targetIds = targetProducts.map((product) => product.drinkId);
+    const previousProducts = products;
+    setSavingStoreProductIds((current) => Array.from(new Set([...current, ...targetIds])));
+    setProducts((current) =>
+      current.map((product) => (targetIds.includes(product.drinkId) ? { ...product, isAvailable, websiteEnabled: isAvailable } : product)),
+    );
+    setMessage(isAvailable ? "系列を販売中に戻しています..." : "系列を停止しています...");
+
+    try {
+      const responses = await Promise.all(
+        targetProducts.map((product) =>
+          fetch(`/api/admin/products/${product.drinkId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ storeId, isAvailable, websiteEnabled: isAvailable }),
+          }).then(async (response) => {
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(body.error || (isAvailable ? "系列を販売中に戻せませんでした。" : "系列を停止できませんでした。"));
+            }
+            return body.product;
+          }),
+        ),
+      );
+      const updatedById = new Map(responses.map((product) => [product.drinkId, product]));
+      setProducts((current) => current.map((product) => updatedById.get(product.drinkId) || product));
+      setMessage(isAvailable ? "系列を販売中に戻しました。" : "系列を停止しました。");
+    } catch (error) {
+      setProducts(previousProducts);
+      setMessage(error.message || (isAvailable ? "系列を販売中に戻せませんでした。" : "系列を停止できませんでした。"));
+    } finally {
+      setSavingStoreProductIds((current) => current.filter((id) => !targetIds.includes(id)));
+    }
+  };
+
+  const updateStoreMenuItem = async (item, isAvailable) => {
+    const key = `${item.type}/${item.id}`;
+    if (savingStoreMenuItemKeys.includes(key)) {
+      return;
+    }
+
+    const previousItems = storeMenuItems;
+    const nextItem = { ...item, isAvailable };
+    setSavingStoreMenuItemKeys((current) => (current.includes(key) ? current : [...current, key]));
+    setStoreMenuItems((current) => current.map((entry) => (`${entry.type}/${entry.id}` === key ? nextItem : entry)));
+    setMessage("保存中...");
+
+    try {
+      const response = await fetch(`/api/admin/store-menu-items/${encodeURIComponent(item.type)}/${encodeURIComponent(item.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeId, isAvailable }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error || "保存できませんでした。");
+      }
+      setStoreMenuItems((current) => current.map((entry) => (`${entry.type}/${entry.id}` === key ? body.item : entry)));
+      setMessage("保存完了");
+    } catch (error) {
+      setStoreMenuItems(previousItems);
+      setMessage(error.message || "保存できませんでした。");
+    } finally {
+      setSavingStoreMenuItemKeys((current) => current.filter((entry) => entry !== key));
     }
   };
 
   const startNewProduct = () => {
     setEditingId("");
     setIsEditingNewProduct(true);
+    setProductSaveStatus("idle");
     setMessage("");
     setProductForm({
       ...emptyProduct,
@@ -530,6 +657,7 @@ export function AdminProductsBoard({
   const startEditProduct = (product) => {
     setEditingId(product.drinkId);
     setIsEditingNewProduct(false);
+    setProductSaveStatus("idle");
     setMessage("");
     setProductForm(productToForm(product));
     setTab("catalog");
@@ -537,41 +665,55 @@ export function AdminProductsBoard({
 
   const saveProduct = async (event) => {
     event.preventDefault();
-    setMessage("");
+    if (productSaveStatus === "saving") {
+      return;
+    }
+    setProductSaveStatus("saving");
+    setMessage("保存中...");
     const payload = formToProduct({
       ...productForm,
       drinkId: productForm.drinkId || makeProductId(productForm.name),
     });
-    const response = await fetch(editingId ? `/api/admin/products/${editingId}` : "/api/admin/products", {
-      method: editingId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setMessage(body.error || "保存できませんでした。");
-      return;
-    }
+    try {
+      const response = await fetch(editingId ? `/api/admin/products/${editingId}` : "/api/admin/products", {
+        method: editingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setProductSaveStatus("idle");
+        setMessage(body.error || "保存できませんでした。");
+        return;
+      }
 
-    setCatalogProducts((current) =>
-      editingId
-        ? current.map((product) => (product.drinkId === editingId ? body.product : product))
-        : [...current, body.product],
-    );
-    setProducts((current) =>
-      editingId
-        ? current.map((product) =>
-            product.drinkId === editingId
-              ? { ...product, name: body.product.name, category: body.product.category, categoryLabel: body.product.categoryLabel, basePrice: body.product.price, imageUrl: body.product.imageUrl }
-              : product,
-          )
-        : current,
-    );
-    await reloadStore(storeId);
-    setEditingId(body.product.drinkId);
-    setIsEditingNewProduct(false);
-    setProductForm(productToForm(body.product));
-    setMessage("保存しました。");
+      setCatalogProducts((current) =>
+        editingId
+          ? current.map((product) => (product.drinkId === editingId ? body.product : product))
+          : [...current, body.product],
+      );
+      setProducts((current) =>
+        editingId
+          ? current.map((product) =>
+              product.drinkId === editingId
+                ? { ...product, name: body.product.name, category: body.product.category, categoryLabel: body.product.categoryLabel, basePrice: body.product.price, imageUrl: body.product.imageUrl }
+                : product,
+            )
+          : current,
+      );
+      await reloadStore(storeId);
+      setProductSaveStatus("done");
+      setMessage("保存完了");
+      window.setTimeout(() => {
+        setEditingId("");
+        setIsEditingNewProduct(false);
+        setProductForm({ ...emptyProduct, category: categories[0]?.id || "" });
+        setProductSaveStatus("idle");
+      }, 800);
+    } catch (error) {
+      setProductSaveStatus("idle");
+      setMessage(error.message || "保存できませんでした。");
+    }
   };
 
   const removeProduct = async () => {
@@ -591,6 +733,87 @@ export function AdminProductsBoard({
     setIsEditingNewProduct(false);
     setProductForm({ ...emptyProduct, category: categories[0]?.id || "" });
     setMessage("削除しました。");
+  };
+
+  const closeProductEditor = () => {
+    setEditingId("");
+    setIsEditingNewProduct(false);
+    setProductSaveStatus("idle");
+    setProductForm({ ...emptyProduct, category: categories[0]?.id || "" });
+    setMessage("");
+  };
+
+  const reorderCatalogProducts = async (sourceId, targetId) => {
+    if (!canEditCatalog || query.trim() || isSavingProductOrder || sourceId === targetId) {
+      return;
+    }
+
+    const previousProducts = catalogProducts;
+    const sourceIndex = previousProducts.findIndex((product) => product.drinkId === sourceId);
+    const targetIndex = previousProducts.findIndex((product) => product.drinkId === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return;
+    }
+    if (previousProducts[sourceIndex].category !== previousProducts[targetIndex].category) {
+      setMessage("同じカテゴリ内でのみ並び替えできます。");
+      return;
+    }
+
+    const nextProducts = [...previousProducts];
+    const [movedProduct] = nextProducts.splice(sourceIndex, 1);
+    nextProducts.splice(targetIndex, 0, movedProduct);
+    const orderedProducts = nextProducts.map((product, index) => ({ ...product, sortOrder: index + 1 }));
+
+    setCatalogProducts(orderedProducts);
+    setIsSavingProductOrder(true);
+    setMessage("並び順を保存しています...");
+
+    try {
+      const changedProducts = orderedProducts.filter((product) => {
+        const previous = previousProducts.find((item) => item.drinkId === product.drinkId);
+        return previous && previous.sortOrder !== product.sortOrder;
+      });
+
+      const responses = await Promise.all(
+        changedProducts.map((product) =>
+          fetch(`/api/admin/products/${product.drinkId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formToProduct(productToForm(product))),
+          }),
+        ),
+      );
+
+      if (responses.some((response) => !response.ok)) {
+        throw new Error("並び順を保存できませんでした。");
+      }
+
+      await reloadStore(storeId);
+      setMessage("並び順を保存しました。");
+    } catch (error) {
+      setCatalogProducts(previousProducts);
+      setMessage(error.message || "並び順を保存できませんでした。");
+    } finally {
+      setIsSavingProductOrder(false);
+      setDraggingProductId("");
+    }
+  };
+
+  const selectCatalogMoveSource = (product) => {
+    if (!canReorderCatalog) {
+      return;
+    }
+    if (draggingProductId === product.drinkId) {
+      clearCatalogDrag();
+      setMessage("");
+      return;
+    }
+    setDraggingProductId(product.drinkId);
+    setMessage(`${product.name} の移動先を同じカテゴリ内で選んでください。`);
+  };
+
+  const clearCatalogDrag = () => {
+    setDraggingProductId("");
   };
 
   const startNewCategory = () => {
@@ -756,11 +979,27 @@ export function AdminProductsBoard({
 
     return groups;
   }, [visibleProducts]);
+  const groupedStoreMenuItems = useMemo(
+    () => [
+      {
+        id: "option",
+        label: "オプション",
+        items: storeMenuItems.filter((item) => item.type === "option" && item.id !== "none"),
+      },
+      {
+        id: "topping",
+        label: "トッピング",
+        items: storeMenuItems.filter((item) => item.type === "topping"),
+      },
+    ].filter((group) => group.items.length),
+    [storeMenuItems],
+  );
   const summary = {
     active: products.filter((product) => product.isAvailable && product.websiteEnabled).length,
-    soldOut: products.filter((product) => !product.isAvailable).length,
-    paused: products.filter((product) => product.isAvailable && !product.websiteEnabled).length,
+    stopped: products.filter((product) => !product.isAvailable || !product.websiteEnabled).length,
+    optionStopped: storeMenuItems.filter((item) => item.id !== "none" && !item.isAvailable).length,
   };
+  const canReorderCatalog = canEditCatalog && !query.trim() && !isSavingProductOrder;
 
   return (
     <>
@@ -770,12 +1009,12 @@ export function AdminProductsBoard({
           <strong>{summary.active}</strong>
         </article>
         <article>
-          <span>売り切れ</span>
-          <strong>{summary.soldOut}</strong>
+          <span>商品停止</span>
+          <strong>{summary.stopped}</strong>
         </article>
         <article>
-          <span>予約停止</span>
-          <strong>{summary.paused}</strong>
+          <span>選択項目停止</span>
+          <strong>{summary.optionStopped}</strong>
         </article>
       </section>
 
@@ -824,53 +1063,107 @@ export function AdminProductsBoard({
         <section className="admin-product-groups">
           {groupedProducts.map((group) => (
             <section className="admin-product-group" key={group.id}>
+              {(() => {
+                const fullGroupProducts = products.filter((product) => product.category === group.id);
+                const hasSellingProducts = fullGroupProducts.some((product) => product.isAvailable && product.websiteEnabled);
+                const hasPendingProducts = fullGroupProducts.some((product) => savingStoreProductIds.includes(product.drinkId));
+
+                return (
               <div className="admin-product-group-heading">
                 <div>
                   <span>{group.id}</span>
                   <h2>{group.label}</h2>
                 </div>
-                <strong>{group.products.length} 件</strong>
+                <div className="admin-product-group-actions">
+                  <strong>{group.products.length} 件</strong>
+                  <button
+                    type="button"
+                    onClick={() => setProductGroupAvailability(group.id, !hasSellingProducts)}
+                    disabled={hasPendingProducts}
+                  >
+                    {hasSellingProducts ? "系列を不販売" : "系列を販売中に戻す"}
+                  </button>
+                </div>
               </div>
+                );
+              })()}
               <div className="admin-product-grid">
-                {group.products.map((product) => (
-                  <article className="admin-product-card" key={product.drinkId}>
-                    {product.imageUrl ? <img src={normalizeAssetUrl(product.imageUrl)} alt="" /> : null}
-                    <div>
-                      <h3>{product.name}</h3>
-                      <p>¥{product.effectivePrice}</p>
-                    </div>
-                    <strong className={`admin-product-state ${product.isAvailable && product.websiteEnabled ? "is-live" : "is-paused"}`}>
-                      {product.isAvailable ? (product.websiteEnabled ? "販売中" : "予約停止") : "売り切れ"}
-                    </strong>
-                    <div className="admin-product-switches">
+                {group.products.map((product) => {
+                  const isSavingStoreProduct = savingStoreProductIds.includes(product.drinkId);
+
+                  return (
+                    <article className="admin-product-card" key={product.drinkId}>
+                      {product.imageUrl ? <img src={normalizeAssetUrl(product.imageUrl)} alt="" /> : null}
+                      <div className="admin-product-card-info">
+                        <h3>{product.name}</h3>
+                        <p>¥{product.effectivePrice}</p>
+                      </div>
+                      <strong className={`admin-product-state ${product.isAvailable && product.websiteEnabled ? "is-live" : "is-paused"} ${isSavingStoreProduct ? "is-saving" : ""}`}>
+                        {isSavingStoreProduct ? "保存中..." : product.isAvailable && product.websiteEnabled ? "販売中" : "不販売"}
+                      </strong>
+                      <div className="admin-product-switches">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={product.isAvailable && product.websiteEnabled}
+                            disabled={isSavingStoreProduct}
+                            onChange={(event) => updateProduct(product.drinkId, { isAvailable: event.target.checked, websiteEnabled: event.target.checked })}
+                          />
+                          販売中
+                        </label>
+                        <label>
+                          価格上書き
+                          <input
+                            type="number"
+                            value={product.priceOverride ?? ""}
+                            onChange={(event) => updateProduct(product.drinkId, { priceOverride: event.target.value })}
+                            placeholder={String(product.basePrice)}
+                          />
+                        </label>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+          {groupedStoreMenuItems.map((group) => (
+            <section className="admin-product-group" key={`store-menu-${group.id}`}>
+              <div className="admin-product-group-heading">
+                <div>
+                  <span>{group.id}</span>
+                  <h2>{group.label}</h2>
+                </div>
+                <div className="admin-product-group-actions">
+                  <strong>{group.items.length} 件</strong>
+                </div>
+              </div>
+              <div className="admin-store-menu-item-grid">
+                {group.items.map((item) => {
+                  const itemKey = `${item.type}/${item.id}`;
+                  const isSavingItem = savingStoreMenuItemKeys.includes(itemKey);
+
+                  return (
+                    <article className="admin-store-menu-item-card" key={itemKey}>
+                      <div>
+                        <h3>{item.label}</h3>
+                        <p>{item.price ? `${item.price > 0 ? "+" : ""}¥${item.price}` : "追加料金なし"}</p>
+                      </div>
+                      <strong className={`admin-product-state ${item.isAvailable ? "is-live" : "is-paused"} ${isSavingItem ? "is-saving" : ""}`}>
+                        {isSavingItem ? "保存中..." : item.isAvailable ? "販売中" : "不販売"}
+                      </strong>
                       <label>
                         <input
                           type="checkbox"
-                          checked={product.isAvailable}
-                          onChange={(event) => updateProduct(product.drinkId, { isAvailable: event.target.checked })}
+                          checked={item.isAvailable}
+                          disabled={isSavingItem}
+                          onChange={(event) => updateStoreMenuItem(item, event.target.checked)}
                         />
-                        在庫あり
+                        販売中
                       </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={product.websiteEnabled}
-                          onChange={(event) => updateProduct(product.drinkId, { websiteEnabled: event.target.checked })}
-                        />
-                        予約受付
-                      </label>
-                      <label>
-                        価格上書き
-                        <input
-                          type="number"
-                          value={product.priceOverride ?? ""}
-                          onChange={(event) => updateProduct(product.drinkId, { priceOverride: event.target.value })}
-                          placeholder={String(product.basePrice)}
-                        />
-                      </label>
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             </section>
           ))}
@@ -880,29 +1173,69 @@ export function AdminProductsBoard({
       {tab === "catalog" ? (
         <section className="admin-catalog-layout">
           <section className="admin-panel admin-catalog-list">
-            <h2>商品一覧</h2>
+            <div className="admin-catalog-list-heading">
+              <h2>商品一覧</h2>
+              {canEditCatalog ? <small>{query.trim() ? "検索中は並び替えできません" : ":: を押して移動先を選択"}</small> : null}
+            </div>
             {visibleCatalogProducts.map((product) => (
-              <div className="admin-catalog-list-item" key={product.drinkId}>
+              <div
+                className={`admin-catalog-list-item ${draggingProductId === product.drinkId ? "is-dragging" : ""} ${product.isActive ? "" : "is-inactive"}`}
+                key={product.drinkId}
+                data-catalog-product-id={product.drinkId}
+              >
                 <button
                   type="button"
-                  className={editingId === product.drinkId ? "is-selected" : ""}
-                  onClick={() => startEditProduct(product)}
+                  className={`admin-catalog-drag-handle ${draggingProductId === product.drinkId ? "is-selected" : ""}`}
+                  aria-label={`${product.name} を移動`}
+                  disabled={!canReorderCatalog}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectCatalogMoveSource(product);
+                  }}
                 >
-                  <span>{product.categoryLabel || product.category}</span>
-                  <strong>{product.name}</strong>
-                  <small>{product.isActive ? `¥${product.price}` : "停止中"}</small>
+                  ::
+                </button>
+                <button
+                  type="button"
+                  className={`admin-catalog-select ${editingId === product.drinkId ? "is-selected" : ""}`}
+                  onClick={() => {
+                    if (draggingProductId && draggingProductId !== product.drinkId) {
+                      reorderCatalogProducts(draggingProductId, product.drinkId);
+                      return;
+                    }
+                    if (draggingProductId === product.drinkId) {
+                      clearCatalogDrag();
+                      setMessage("");
+                      return;
+                    }
+                    startEditProduct(product);
+                  }}
+                >
+                  <span className="admin-catalog-thumb">
+                    {product.imageUrl ? <img src={normalizeAssetUrl(product.imageUrl)} alt="" /> : <span>No image</span>}
+                  </span>
+                  <span className="admin-catalog-meta">
+                    <span className={`admin-catalog-category admin-catalog-category-${categoryAccentIndex(product.category)}`}>
+                      {product.categoryLabel || product.category}
+                    </span>
+                    <strong>{product.name}</strong>
+                    <small>{product.isActive ? `¥${product.price}` : "非表示"}</small>
+                  </span>
                 </button>
                 {editingId === product.drinkId ? (
                   <div className="admin-catalog-inline-editor">
                     <ProductEditor
                       editingId={editingId}
                       canEditCatalog={canEditCatalog}
+                      productSaveStatus={productSaveStatus}
                       productForm={productForm}
                       setProductForm={setProductForm}
                       categories={categories}
                       settings={settings}
                       saveProduct={saveProduct}
                       removeProduct={removeProduct}
+                      closeProductEditor={closeProductEditor}
                       toggleProductArrayValue={toggleProductArrayValue}
                       setProductArrayValues={setProductArrayValues}
                     />
@@ -917,133 +1250,43 @@ export function AdminProductsBoard({
               <ProductEditor
                 editingId={editingId}
                 canEditCatalog={canEditCatalog}
+                productSaveStatus={productSaveStatus}
                 productForm={productForm}
                 setProductForm={setProductForm}
                 categories={categories}
                 settings={settings}
                 saveProduct={saveProduct}
                 removeProduct={removeProduct}
+                closeProductEditor={closeProductEditor}
                 toggleProductArrayValue={toggleProductArrayValue}
                 setProductArrayValues={setProductArrayValues}
               />
             </div>
           ) : null}
 
-          <form className="admin-panel admin-product-editor admin-product-editor-side" onSubmit={saveProduct}>
-            <div className="admin-product-editor-heading">
-              <h2>{editingId ? "商品を編集" : "商品を追加"}</h2>
-              {canEditCatalog && editingId ? <button type="button" className="secondary" onClick={removeProduct}>削除</button> : null}
-            </div>
-            <label>
-              商品ID
-              <input
-                value={productForm.drinkId}
-                onChange={(event) => setProductForm({ ...productForm, drinkId: event.target.value })}
-                disabled={Boolean(editingId)}
-                placeholder="例：matcha-latte"
+          <div className="admin-product-editor-side">
+            {editingId || isEditingNewProduct ? (
+              <ProductEditor
+                editingId={editingId}
+                canEditCatalog={canEditCatalog}
+                productSaveStatus={productSaveStatus}
+                productForm={productForm}
+                setProductForm={setProductForm}
+                categories={categories}
+                settings={settings}
+                saveProduct={saveProduct}
+                removeProduct={removeProduct}
+                closeProductEditor={closeProductEditor}
+                toggleProductArrayValue={toggleProductArrayValue}
+                setProductArrayValues={setProductArrayValues}
               />
-            </label>
-            <label>
-              商品名
-              <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required />
-            </label>
-            <div className="admin-form-grid">
-              <label>
-                カテゴリ
-                <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} required>
-                  {categories.filter((category) => category.isActive !== false).map((category) => (
-                    <option value={category.id} key={category.id}>{category.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                価格
-                <input type="number" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required />
-              </label>
-              <label>
-                並び順
-                <input type="number" value={productForm.sortOrder} onChange={(event) => setProductForm({ ...productForm, sortOrder: event.target.value })} />
-              </label>
-            </div>
-            <label>
-              説明
-              <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} rows={3} />
-            </label>
-            <label>
-              画像URL
-              <input value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} placeholder="assets/menu/drink-01.png" />
-            </label>
-            <section className="admin-choice-grid">
-              <AdminChoiceGroup
-                title="温度"
-                values={settings.temperatures}
-                selected={productForm.temperatures}
-                onToggle={(value) => toggleProductArrayValue("temperatures", value)}
-                onSelectAll={() => setProductArrayValues("temperatures", settings.temperatures)}
-                onClear={() => setProductArrayValues("temperatures", ["ICE"])}
-              />
-              <AdminChoiceGroup
-                title="サイズ"
-                hint="空の場合は全サイズを選択できます。"
-                values={settings.sizes}
-                selected={productForm.allowedSizes}
-                onToggle={(value) => toggleProductArrayValue("allowedSizes", value)}
-                onSelectAll={() => setProductArrayValues("allowedSizes", settings.sizes.map((item) => item.id))}
-                onClear={() => setProductArrayValues("allowedSizes", [])}
-              />
-              <AdminChoiceGroup
-                title="甘さ"
-                hint="空の場合は全項目を選択できます。"
-                values={settings.sweetness}
-                selected={productForm.allowedSweetness}
-                onToggle={(value) => toggleProductArrayValue("allowedSweetness", value)}
-                onSelectAll={() => setProductArrayValues("allowedSweetness", settings.sweetness)}
-                onClear={() => setProductArrayValues("allowedSweetness", [])}
-              />
-              <AdminChoiceGroup
-                title="氷"
-                hint="空の場合は全項目を選択できます。"
-                values={settings.ice}
-                selected={productForm.allowedIce}
-                onToggle={(value) => toggleProductArrayValue("allowedIce", value)}
-                onSelectAll={() => setProductArrayValues("allowedIce", settings.ice)}
-                onClear={() => setProductArrayValues("allowedIce", [])}
-              />
-              <AdminChoiceGroup
-                title="オプション"
-                hint="空の場合は全オプションを選択できます。"
-                values={settings.options.filter((item) => item.id !== "none")}
-                selected={productForm.allowedOptions}
-                onToggle={(value) => toggleProductArrayValue("allowedOptions", value)}
-                onSelectAll={() => setProductArrayValues("allowedOptions", settings.options.filter((item) => item.id !== "none").map((item) => item.id))}
-                onClear={() => setProductArrayValues("allowedOptions", [])}
-              />
-              <AdminChoiceGroup
-                title="トッピング"
-                hint="空の場合は全トッピングを選択できます。"
-                values={settings.toppings}
-                selected={productForm.allowedToppings}
-                onToggle={(value) => toggleProductArrayValue("allowedToppings", value)}
-                onSelectAll={() => setProductArrayValues("allowedToppings", settings.toppings.map((item) => item.id))}
-                onClear={() => setProductArrayValues("allowedToppings", [])}
-              />
-            </section>
-            <fieldset className="admin-product-flags">
-              <label>
-                <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />
-                メニューに表示
-              </label>
-              <label>
-                <input type="checkbox" checked={productForm.isRecommended} onChange={(event) => setProductForm({ ...productForm, isRecommended: event.target.checked })} />
-                おすすめ
-              </label>
-              <label>
-                <input type="checkbox" checked={productForm.isFeatured} onChange={(event) => setProductForm({ ...productForm, isFeatured: event.target.checked })} />
-                トップ掲載
-              </label>
-            </fieldset>
-            <button type="submit" disabled={!canEditCatalog}>保存する</button>
-          </form>
+            ) : (
+              <div className="admin-panel admin-product-editor-empty">
+                <h2>商品を選択</h2>
+                <p>一覧から商品を選ぶか、「商品を追加」から編集を開始してください。</p>
+              </div>
+            )}
+          </div>
         </section>
       ) : null}
 
@@ -1057,7 +1300,7 @@ export function AdminProductsBoard({
             {categories.map((category) => (
               <div className="admin-setting-list-item" key={category.id}>
                 <article
-                  className={editingCategoryId === category.id ? "is-selected" : ""}
+                  className={`${editingCategoryId === category.id ? "is-selected" : ""} ${category.isActive ? "" : "is-inactive"}`}
                   onClick={() => startEditCategory(category)}
                 >
                   <div>
@@ -1065,7 +1308,7 @@ export function AdminProductsBoard({
                     <strong>{category.label}</strong>
                     {category.note ? <small>{category.note}</small> : null}
                   </div>
-                  <small>{category.isActive ? "表示中" : "停止中"}</small>
+                  <small>{category.isActive ? "表示中" : "非表示"}</small>
                 </article>
                 {editingCategoryId === category.id ? (
                   <div className="admin-catalog-inline-editor">
@@ -1105,7 +1348,7 @@ export function AdminProductsBoard({
             {settingItems.map((item) => (
               <div className="admin-setting-list-item" key={`${item.type}-${item.id}`}>
                 <article
-                  className={editingSettingKey === `${item.type}/${item.id}` ? "is-selected" : ""}
+                  className={`${editingSettingKey === `${item.type}/${item.id}` ? "is-selected" : ""} ${item.isActive ? "" : "is-inactive"}`}
                   onClick={() => startEditSetting(item)}
                 >
                   <div>
@@ -1113,7 +1356,7 @@ export function AdminProductsBoard({
                     <strong>{item.values?.length ? item.values.join(", ") : item.label}</strong>
                     {["size", "option", "topping"].includes(item.type) ? <small>¥{item.price}</small> : null}
                   </div>
-                  <small>{item.isActive ? "表示中" : "停止中"}</small>
+                  <small>{item.isActive ? "表示中" : "非表示"}</small>
                 </article>
                 {editingSettingKey === `${item.type}/${item.id}` ? (
                   <div className="admin-catalog-inline-editor">

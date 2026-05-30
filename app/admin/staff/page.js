@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../../../components/admin-shell";
-import { AdminLogoutButton } from "../../../components/admin-logout-button";
 import { AdminStaffBoard } from "../../../components/admin-staff-board";
 
 const { listActiveStores } = require("../../../server/store-products");
@@ -17,7 +16,7 @@ export default async function AdminStaffPage() {
   if (!canManageStaff(session)) redirect("/admin/orders");
 
   return (
-    <AdminShell eyebrow="staff" title="スタッフ管理" activePath="/admin/staff" actions={<AdminLogoutButton />} currentUser={session}>
+    <AdminShell eyebrow="staff" title="スタッフ管理" activePath="/admin/staff" currentUser={session}>
       <AdminStaffBoard initialUsers={await listAdminUsers()} stores={await listActiveStores()} />
     </AdminShell>
   );

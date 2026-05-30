@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../../../components/admin-shell";
-import { AdminLogoutButton } from "../../../components/admin-logout-button";
 
 const { listOrders } = require("../../../server/orders");
 const { listActiveStores, listStoreProducts } = require("../../../server/store-products");
@@ -36,7 +35,6 @@ export default async function AdminDashboardPage() {
       eyebrow="overview"
       title="ダッシュボード"
       activePath="/admin/dashboard"
-      actions={<AdminLogoutButton />}
       currentUser={session}
     >
       <section className="admin-hero-panel">
