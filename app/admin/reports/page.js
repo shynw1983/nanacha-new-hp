@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../../../components/admin-shell";
-import { AdminLogoutButton } from "../../../components/admin-logout-button";
 import { AdminReportsBoard } from "../../../components/admin-reports-board";
 
 const { getReportData } = require("../../../server/reports");
@@ -26,7 +25,7 @@ export default async function AdminReportsPage({ searchParams }) {
   });
 
   return (
-    <AdminShell eyebrow="reports" title="レポート" activePath="/admin/reports" actions={<AdminLogoutButton />} currentUser={session}>
+    <AdminShell eyebrow="reports" title="レポート" activePath="/admin/reports" currentUser={session}>
       <AdminReportsBoard initialReport={report} stores={stores} canSelectStore={canAccessAllStores(session)} />
     </AdminShell>
   );

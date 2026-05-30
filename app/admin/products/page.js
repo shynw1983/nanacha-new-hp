@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../../../components/admin-shell";
-import { AdminLogoutButton } from "../../../components/admin-logout-button";
 import { AdminProductsBoard } from "../../../components/admin-products-board";
 
-const { listActiveStores, listStoreProducts } = require("../../../server/store-products");
+const { listActiveStores, listStoreMenuItems, listStoreProducts } = require("../../../server/store-products");
 const { listProductCatalogForAdmin } = require("../../../server/product-catalog");
 const {
   getSessionFromCookieStore,
@@ -30,13 +29,13 @@ export default async function AdminProductsPage() {
       eyebrow="catalog"
       title="商品管理"
       activePath="/admin/products"
-      actions={<AdminLogoutButton />}
       currentUser={session}
     >
       <AdminProductsBoard
         initialStores={stores}
         initialStoreId={selectedStoreId}
         initialProducts={selectedStoreId ? await listStoreProducts(selectedStoreId) : []}
+        initialStoreMenuItems={selectedStoreId ? await listStoreMenuItems(selectedStoreId, catalog.menuSettings) : []}
         initialCatalogProducts={catalog.products}
         initialCategories={catalog.categories}
         menuSettings={catalog.menuSettings}

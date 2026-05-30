@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminLogoutButton } from "./admin-logout-button";
 
 const navItems = [
   { href: "/admin/dashboard", label: "ダッシュボード" },
@@ -24,13 +25,6 @@ export function AdminShell({ title, eyebrow, activePath, children, actions, curr
         <div>
           <p className="admin-brand-word">nanacha</p>
           <strong>Admin</strong>
-          {currentUser ? (
-            <small>
-              {currentUser.displayName}
-              <br />
-              {roleLabels[currentUser.role] || currentUser.role}
-            </small>
-          ) : null}
         </div>
         <nav aria-label="管理メニュー">
           {visibleNavItems.map((item) => (
@@ -46,7 +40,18 @@ export function AdminShell({ title, eyebrow, activePath, children, actions, curr
             <p>{eyebrow}</p>
             <h1>{title}</h1>
           </div>
-          {actions ? <div className="admin-page-actions">{actions}</div> : null}
+          <div className="admin-page-actions">
+            {actions}
+            {currentUser ? (
+              <div className="admin-header-user">
+                <span>
+                  <strong>{currentUser.displayName}</strong>
+                  <small>{roleLabels[currentUser.role] || currentUser.role}</small>
+                </span>
+                <AdminLogoutButton />
+              </div>
+            ) : null}
+          </div>
         </header>
         {children}
       </section>

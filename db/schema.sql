@@ -89,6 +89,17 @@ create table if not exists store_products (
 
 create index if not exists store_products_store_idx on store_products (store_id);
 
+create table if not exists store_menu_items (
+  store_id text not null,
+  setting_type text not null check (setting_type in ('option', 'topping')),
+  item_id text not null,
+  is_available boolean not null default true,
+  updated_at timestamptz not null default now(),
+  primary key (store_id, setting_type, item_id)
+);
+
+create index if not exists store_menu_items_store_idx on store_menu_items (store_id, setting_type);
+
 create table if not exists store_operations (
   store_id text primary key,
   reservations_enabled boolean not null default true,

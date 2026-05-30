@@ -20,6 +20,23 @@ const getBaseMenu = () => getProductCatalogMenu();
 
 const getPublishedStoreMenu = (storeId) => publishedMenu.storeMenus?.[storeId];
 
+const ensureStoreMenuItemsTable = async (sql) => {
+  await sql`
+    create table if not exists store_menu_items (
+      store_id text not null,
+      setting_type text not null check (setting_type in ('option', 'topping')),
+      item_id text not null,
+      is_available boolean not null default true,
+      updated_at timestamptz not null default now(),
+      primary key (store_id, setting_type, item_id)
+    )
+  `;
+  await sql`
+    create index if not exists store_menu_items_store_idx
+    on store_menu_items (store_id, setting_type)
+  `;
+};
+
 const defaultAvailabilityByDrinkId = async (storeId) => {
   const baseMenu = await getBaseMenu();
   const storeMenu = getPublishedStoreMenu(storeId);
@@ -76,15 +93,56 @@ const listStoreProducts = async (storeId) => {
   });
 };
 
+const listStoreMenuItems = async (storeId, menuSettings = {}) => {
+  const sql = await getSql();
+  if (sql) {
+    await ensureStoreMenuItemsTable(sql);
+  }
+  const overrides = sql
+    ? await sql`
+        select *
+        from store_menu_items
+        where store_id = ${storeId}
+      `
+    : [];
+  const overrideMap = new Map(overrides.map((row) => [`${row.setting_type}/${row.item_id}`, row]));
+  const toStoreItem = (type, item) => {
+    const override = overrideMap.get(`${type}/${item.id}`);
+    return {
+      type,
+      id: item.id,
+      label: item.label,
+      price: Number(item.price) || 0,
+      isAvailable: item.id === "none" ? true : override ? override.is_available : true,
+      updatedAt: override?.updated_at || "",
+    };
+  };
+
+  return [
+    ...(menuSettings.options || []).map((item) => toStoreItem("option", item)),
+    ...(menuSettings.toppings || []).map((item) => toStoreItem("topping", item)),
+  ];
+};
+
 const applyStoreProductAvailability = async (menu, storeId) => {
   if (!storeId) return menu;
 
-  const products = await listStoreProducts(storeId);
+  const [products, storeMenuItems] = await Promise.all([
+    listStoreProducts(storeId),
+    listStoreMenuItems(storeId, menu),
+  ]);
   const byDrinkId = new Map(products.map((product) => [product.drinkId, product]));
+  const availableItemKeys = new Set(
+    storeMenuItems
+      .filter((item) => item.isAvailable)
+      .map((item) => `${item.type}/${item.id}`),
+  );
 
   return {
     ...menu,
     selectedStoreId: storeId,
+    options: menu.options.filter((item) => item.id === "none" || availableItemKeys.has(`option/${item.id}`)),
+    toppings: menu.toppings.filter((item) => availableItemKeys.has(`topping/${item.id}`)),
     drinks: menu.drinks
       .map((drink) => {
         const product = byDrinkId.get(drink.id);
@@ -147,7 +205,84 @@ const updateStoreProduct = async (storeId, drinkId, fields) => {
       updated_at = now()
   `;
 
-  return (await listStoreProducts(storeId)).find((product) => product.drinkId === drinkId) || null;
+  const rows = await sql`
+    select *
+    from store_products
+    where store_id = ${storeId}
+      and drink_id = ${drinkId}
+    limit 1
+  `;
+  const override = rows[0];
+
+  return {
+    drinkId: drink.id,
+    name: drink.name,
+    category: drink.category,
+    categoryLabel: baseMenu.categories.find((category) => category.id === drink.category)?.label || drink.category,
+    basePrice: drink.price,
+    imageUrl: drink.imageUrl,
+    isAvailable: override ? override.is_available : isAvailable,
+    websiteEnabled: override ? override.website_enabled : websiteEnabled,
+    priceOverride: override?.price_override ?? (Number.isFinite(priceOverride) ? priceOverride : null),
+    effectivePrice: override?.price_override ?? (Number.isFinite(priceOverride) ? priceOverride : null) ?? drink.price,
+    updatedAt: override?.updated_at || "",
+  };
+};
+
+const updateStoreMenuItem = async (storeId, type, itemId, fields) => {
+  if (!["option", "topping"].includes(type)) {
+    return null;
+  }
+  const sql = await getSql();
+  if (!sql) {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+  await ensureStoreMenuItemsTable(sql);
+
+  const baseMenu = await getBaseMenu();
+  const items = type === "option" ? baseMenu.options : baseMenu.toppings;
+  const item = items.find((entry) => entry.id === itemId);
+  if (!item) {
+    return null;
+  }
+  const isAvailable = item.id === "none" ? true : fields.isAvailable !== false;
+
+  await sql`
+    insert into store_menu_items (
+      store_id,
+      setting_type,
+      item_id,
+      is_available
+    ) values (
+      ${storeId},
+      ${type},
+      ${itemId},
+      ${isAvailable}
+    )
+    on conflict (store_id, setting_type, item_id)
+    do update set
+      is_available = excluded.is_available,
+      updated_at = now()
+  `;
+
+  const rows = await sql`
+    select *
+    from store_menu_items
+    where store_id = ${storeId}
+      and setting_type = ${type}
+      and item_id = ${itemId}
+    limit 1
+  `;
+  const override = rows[0];
+
+  return {
+    type,
+    id: item.id,
+    label: item.label,
+    price: Number(item.price) || 0,
+    isAvailable: item.id === "none" ? true : override ? override.is_available : isAvailable,
+    updatedAt: override?.updated_at || "",
+  };
 };
 
 const listActiveStores = async () =>
@@ -161,7 +296,9 @@ const listActiveStores = async () =>
 
 module.exports = {
   listActiveStores,
+  listStoreMenuItems,
   listStoreProducts,
   applyStoreProductAvailability,
+  updateStoreMenuItem,
   updateStoreProduct,
 };

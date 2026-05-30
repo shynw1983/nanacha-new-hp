@@ -17,6 +17,7 @@ const getSql = async () => {
 };
 
 const basePublishedMenu = publishedMenu.baseMenu;
+const defaultOsMenuApiUrl = "https://foundr1.jp/api/public/menus/nanacha-compatible";
 
 const asArray = (value) => {
   if (Array.isArray(value)) return value.map(String).filter(Boolean);
@@ -146,6 +147,66 @@ const publicMenuFromRows = (categoryRows, productRows, settings = defaultMenuSet
     tapiocaFreeCategories: categories.filter((category) => category.isTapiocaFree).map((category) => category.id),
     whippedCategories: categories.filter((category) => category.hasWhipByDefault).map((category) => category.id),
   };
+};
+
+const normalizeOsMenu = (payload) => {
+  const menu = payload?.baseMenu;
+  if (!menu || !Array.isArray(menu.categories) || !Array.isArray(menu.drinks) || !menu.categories.length || !menu.drinks.length) {
+    return null;
+  }
+
+  return {
+    ...basePublishedMenu,
+    ...menu,
+    categories: menu.categories.map((category) => ({
+      ...category,
+      note: category.note || localCategoryNotes[category.id] || "",
+    })),
+    drinks: menu.drinks.map((drink) => ({
+      ...drink,
+      description: drink.description || localDrinkDescriptions[drink.name] || "",
+      temperatures: asArray(drink.temperatures).length ? asArray(drink.temperatures) : ["ICE"],
+      isActive: drink.isActive !== false,
+    })),
+    sizes: Array.isArray(menu.sizes) && menu.sizes.length ? menu.sizes : basePublishedMenu.sizes,
+    sweetness: Array.isArray(menu.sweetness) && menu.sweetness.length ? menu.sweetness : basePublishedMenu.sweetness,
+    ice: Array.isArray(menu.ice) && menu.ice.length ? menu.ice : basePublishedMenu.ice,
+    hotIce: menu.hotIce || basePublishedMenu.hotIce,
+    options: Array.isArray(menu.options) && menu.options.length ? menu.options : basePublishedMenu.options,
+    toppings: Array.isArray(menu.toppings) && menu.toppings.length ? menu.toppings : basePublishedMenu.toppings,
+    tapiocaFreeCategories: Array.isArray(menu.tapiocaFreeCategories)
+      ? menu.tapiocaFreeCategories
+      : basePublishedMenu.tapiocaFreeCategories,
+    whippedCategories: Array.isArray(menu.whippedCategories)
+      ? menu.whippedCategories
+      : basePublishedMenu.whippedCategories,
+    stores: basePublishedMenu.stores,
+    selectedStoreId: basePublishedMenu.selectedStoreId,
+  };
+};
+
+const fetchOsMenu = async () => {
+  const url = process.env.FOUNDR1_OS_MENU_API_URL || defaultOsMenuApiUrl;
+  if (!url || url === "off") return null;
+
+  try {
+    const headers = { Accept: "application/json" };
+    if (process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET) {
+      headers["x-vercel-protection-bypass"] = process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET;
+    }
+
+    const response = await fetch(url, {
+      headers,
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) {
+      throw new Error(`Foundr1 OS menu returned ${response.status}`);
+    }
+    return normalizeOsMenu(await response.json());
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 const readCatalogRows = async (sql) => {
@@ -294,6 +355,9 @@ const ensureCatalogSeeded = async (sql) => {
 };
 
 const getProductCatalogMenu = async () => {
+  const osMenu = await fetchOsMenu();
+  if (osMenu) return osMenu;
+
   const sql = await getSql();
   if (!sql) return fallbackMenu();
 

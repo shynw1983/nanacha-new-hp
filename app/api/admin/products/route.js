@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-const { listActiveStores, listStoreProducts } = require("../../../../server/store-products");
+const { listActiveStores, listStoreMenuItems, listStoreProducts } = require("../../../../server/store-products");
 const { listProductCatalogForAdmin, createProduct } = require("../../../../server/product-catalog");
 const {
   getSessionFromCookieStore,
@@ -33,6 +33,7 @@ export async function GET(request) {
     stores,
     selectedStoreId: storeId,
     products: storeId ? await listStoreProducts(storeId) : [],
+    storeMenuItems: storeId ? await listStoreMenuItems(storeId, catalog.menuSettings) : [],
     catalogProducts: catalog.products,
     categories: catalog.categories,
     menuSettings: catalog.menuSettings,
