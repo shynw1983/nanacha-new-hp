@@ -190,8 +190,13 @@ const fetchOsMenu = async () => {
   if (!url || url === "off") return null;
 
   try {
+    const headers = { Accept: "application/json" };
+    if (process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET) {
+      headers["x-vercel-protection-bypass"] = process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET;
+    }
+
     const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+      headers,
       next: { revalidate: 60 },
     });
     if (!response.ok) {

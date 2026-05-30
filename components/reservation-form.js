@@ -8,7 +8,8 @@ const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}$
 const findById = (items, id) => items.find((item) => item.id === id);
 const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
 const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
-const normalizeAssetUrl = (url = "") => (url && url.startsWith("/") ? url : `/${url}`);
+const normalizeAssetUrl = (url = "") =>
+  url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
 const allowedSet = (drink, field) => {
   const values = Array.isArray(drink?.[field]) ? drink[field].filter(Boolean) : [];
   return values.length ? new Set(values.map(String)) : null;
