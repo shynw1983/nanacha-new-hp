@@ -84,13 +84,13 @@ export function OrderStatusCard({
     let active = true;
 
     loadOrder();
-    const interval = window.setInterval(loadOrder, 15000);
+    const interval = window.setInterval(loadOrder, connection === "connected" ? 60000 : 15000);
 
     return () => {
       active = false;
       window.clearInterval(interval);
     };
-  }, [orderId, pickupCode, pickupDate, resolvedOrderId]);
+  }, [orderId, pickupCode, pickupDate, resolvedOrderId, connection]);
 
   useEffect(() => {
     if (!resolvedOrderId) return undefined;
