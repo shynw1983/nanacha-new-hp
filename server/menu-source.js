@@ -284,10 +284,18 @@ const getLiveMenuData = async (storeId = "") => {
 };
 
 const getMenuData = async (storeId = "") => {
-  const baseMenu = await getProductCatalogMenu();
+  const baseMenu = await getProductCatalogMenu(storeId);
 
   if (!storeId) {
     return baseMenu;
+  }
+
+  if (baseMenu.source === "foundr1-os") {
+    return {
+      ...baseMenu,
+      selectedStoreId: storeId,
+      drinks: baseMenu.drinks.filter((drink) => drink.websiteEnabled !== false && drink.isAvailable !== false),
+    };
   }
 
   try {

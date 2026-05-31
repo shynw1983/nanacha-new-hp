@@ -158,6 +158,7 @@ const normalizeOsMenu = (payload) => {
   return {
     ...basePublishedMenu,
     ...menu,
+    source: "foundr1-os",
     categories: menu.categories.map((category) => ({
       ...category,
       note: category.note || localCategoryNotes[category.id] || "",
@@ -180,22 +181,24 @@ const normalizeOsMenu = (payload) => {
     whippedCategories: Array.isArray(menu.whippedCategories)
       ? menu.whippedCategories
       : basePublishedMenu.whippedCategories,
-    stores: basePublishedMenu.stores,
-    selectedStoreId: basePublishedMenu.selectedStoreId,
+    stores: Array.isArray(menu.stores) && menu.stores.length ? menu.stores : basePublishedMenu.stores,
+    selectedStoreId: menu.selectedStoreId || basePublishedMenu.selectedStoreId,
   };
 };
 
-const fetchOsMenu = async () => {
-  const url = process.env.FOUNDR1_OS_MENU_API_URL || defaultOsMenuApiUrl;
-  if (!url || url === "off") return null;
+const fetchOsMenu = async (storeId = "") => {
+  const baseUrl = process.env.FOUNDR1_OS_MENU_API_URL || defaultOsMenuApiUrl;
+  if (!baseUrl || baseUrl === "off") return null;
 
   try {
+    const url = new URL(baseUrl);
+    if (storeId) url.searchParams.set("store", storeId);
     const headers = { Accept: "application/json" };
     if (process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET) {
       headers["x-vercel-protection-bypass"] = process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET;
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(url.toString(), {
       headers,
       next: { revalidate: 60 },
     });
@@ -354,8 +357,8 @@ const ensureCatalogSeeded = async (sql) => {
   }
 };
 
-const getProductCatalogMenu = async () => {
-  const osMenu = await fetchOsMenu();
+const getProductCatalogMenu = async (storeId = "") => {
+  const osMenu = await fetchOsMenu(storeId);
   if (osMenu) return osMenu;
 
   const sql = await getSql();
