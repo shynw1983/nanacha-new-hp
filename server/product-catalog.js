@@ -198,10 +198,9 @@ const fetchOsMenu = async (storeId = "") => {
       headers["x-vercel-protection-bypass"] = process.env.FOUNDR1_OS_MENU_API_BYPASS_SECRET;
     }
 
-    const response = await fetch(url.toString(), {
-      headers,
-      next: { revalidate: 60 },
-    });
+    const response = await fetch(url.toString(), storeId
+      ? { headers, cache: "no-store" }
+      : { headers, next: { revalidate: 60 } });
     if (!response.ok) {
       throw new Error(`Foundr1 OS menu returned ${response.status}`);
     }
