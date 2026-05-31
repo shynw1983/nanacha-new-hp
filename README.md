@@ -7,8 +7,8 @@ Next.js website for nanacha Fukuoka Kiyokawa.
 - Next.js App Router
 - React
 - Vercel Route Handlers
-- Lark Base as CMS source when configured
-- Square Checkout for pickup orders
+- Lark Base for homepage content when publishing snapshots
+- Foundr1 OS for menu, store availability, checkout, orders, staff, reports, and payments
 - Static locale dictionaries in `public/locales/`
 
 ## Local Development
@@ -27,85 +27,34 @@ http://localhost:3000
 
 - `/` homepage
 - `/menu` full menu
+- `/shops` store list
+- `/shops/[slug]` store detail
 - `/api/homepage`
 - `/api/menu`
 - `/api/create-checkout`
 - `/api/menu-image`
 - `/api/lark-image`
 
-## Project Structure
-
-```text
-app/                  Next.js routes and route handlers
-components/           React UI components
-server/               Shared server-side data/business modules
-data/                 Local fallback descriptions and category notes
-public/assets/        Static images
-public/locales/       Translation dictionaries
-scripts/              Maintenance scripts for i18n and Lark sync
-```
+The old local admin routes under `/admin/*` redirect to Foundr1 OS.
 
 ## Data Sources
 
-Homepage content and the base menu are served from published snapshots:
+Homepage content and fallback menu content are served from published snapshots:
 
 - `published/homepage.json`
 - `published/menu.json`
 
-Lark is the editing system. Run `npm run lark:publish` to pull current Lark content into those published snapshots before deployment.
+The live menu is fetched from Foundr1 OS via `FOUNDR1_OS_MENU_API_URL`. If that API is unavailable, the site falls back to the published menu snapshot.
 
-Runtime store operations are managed by the website admin system:
+Checkout and order status are proxied to Foundr1 OS:
 
-- Lark remains the editing source for publishable brand/menu content.
-- `/api/menu?store=...` starts from the published base menu, then applies store-specific availability from the admin database.
-- `/api/create-checkout` validates against the same admin-managed store availability before creating a Square checkout link.
-- If no database override exists for a drink, the site falls back to the last published store snapshot.
-
-## Square Checkout
-
-The pickup form creates a Square-hosted checkout link through `/api/create-checkout`.
-
-Required environment variables:
-
-- `SQUARE_ACCESS_TOKEN`
-- `SQUARE_LOCATION_ID`
-- `SQUARE_ENVIRONMENT`: `production` or `sandbox`
-
-The browser never receives the Square access token. Prices and customizations are validated on the server before checkout is created.
-
-## Admin Operations
-
-The staff-facing admin area is available under:
-
-- `/admin/dashboard`
-- `/admin/orders`
-- `/admin/products`
-
-The admin system owns runtime operations:
-
-- pickup order queue and fulfillment status
-- paid-order synchronization from Square webhooks
-- store-level product availability and reservation toggles
-
-Required runtime environment variables:
-
-- `DATABASE_URL`
-- `ADMIN_PASSWORD`
-- `ADMIN_SESSION_SECRET`
-- `SQUARE_WEBHOOK_SIGNATURE_KEY`
-- `SQUARE_WEBHOOK_NOTIFICATION_URL`
-
-Initialize the database with `db/schema.sql` before using admin features.
+- `FOUNDR1_OS_CHECKOUT_API_URL`
+- `FOUNDR1_OS_ORDER_STATUS_API_URL`
+- `FOUNDR1_OS_ORDER_REALTIME_API_URL`
 
 ## Lark CMS
 
-Shared menu Base tables:
-
-- `Categories`
-- `Drinks`
-- `Menu Settings`
-
-Homepage Base tables:
+Lark is still used for homepage publishing:
 
 - `Homepage Settings`
 - `Homepage Slides`
@@ -113,53 +62,35 @@ Homepage Base tables:
 - `Stores`
 - `FAQ`
 
-Optional shop-specific Base table:
-
-- `Store Drinks`
-
-Required Lark environment variables are unchanged from the previous setup:
+Required Lark environment variables:
 
 ```text
 LARK_APP_ID
 LARK_APP_SECRET
-LARK_BASE_APP_TOKEN
-LARK_CATEGORIES_TABLE_ID
-LARK_DRINKS_TABLE_ID
-LARK_MENU_SETTINGS_TABLE_ID
 LARK_HOMEPAGE_BASE_APP_TOKEN
 LARK_HOMEPAGE_SETTINGS_TABLE_ID
 LARK_HOMEPAGE_SLIDES_TABLE_ID
 LARK_HOMEPAGE_CARDS_TABLE_ID
 LARK_STORES_TABLE_ID
 LARK_FAQ_TABLE_ID
-LARK_STORES_JSON
 ```
 
 Useful maintenance commands:
 
 ```bash
 npm run publish
-npm run lark:export-menu
 npm run lark:publish
 npm run lark:sync-homepage-settings
 npm run lark:sync-homepage-images
-npm run lark:sync-images
-npm run lark:sync-store-products
+npm run i18n:update
 ```
 
-Recommended content workflow:
+`npm run publish` runs:
 
-1. Edit content in Lark.
-2. Run `npm run publish`.
-3. Review the generated changes, then commit and deploy.
-
-`npm run publish` runs the full safe sequence:
-
-1. Sync Lark menu images into local static assets.
-2. Sync Lark homepage images into local static assets.
-3. Publish Lark content snapshots.
-4. Update translation dictionaries.
-5. Build the site.
+1. Sync Lark homepage images into local static assets.
+2. Publish homepage and menu snapshots.
+3. Update translation dictionaries.
+4. Build the site.
 
 ## Translation Updates
 
@@ -175,17 +106,8 @@ After changing visible text, run:
 npm run i18n:update
 ```
 
-This refreshes the source dictionary and fills missing translations with OpenAI when `OPENAI_API_KEY` is available.
-
 ## Deployment
 
 Deploy as a standard Next.js project on Vercel.
-
-Recommended settings:
-
-- Framework Preset: `Next.js`
-- Build Command: default
-- Output Directory: default
-- Install Command: default
 
 `vercel.json` keeps long-term cache headers for `/assets/*`.

@@ -1,5 +1,4 @@
-const { findOrder } = require("./orders");
-const { toPublicOrder } = require("./realtime");
+const cleanEnv = (value = "") => String(value).trim().replace(/^["']|["']$/g, "");
 
 const toValues = (value) => {
   if (Array.isArray(value)) return value.flatMap(toValues);
@@ -23,24 +22,42 @@ const normalizePickupCode = (pickupCode = "") => {
   return value.startsWith("N-") ? value : `N-${value}`;
 };
 
-const findPublicOrder = async ({ orderId, pickupCode, pickupDate } = {}) => {
-  const orderIds = getLocalOrderIds(orderId);
-  const normalizedPickupCode = normalizePickupCode(pickupCode);
-  const rawPickupCode = getFirstValue(pickupCode);
-  const rawPickupDate = getFirstValue(pickupDate);
+const getOsStatusUrl = ({ orderId, pickupCode, pickupDate } = {}) => {
+  const configured = cleanEnv(process.env.FOUNDR1_OS_ORDER_STATUS_API_URL);
+  const base =
+    configured ||
+    `${cleanEnv(process.env.FOUNDR1_OS_BASE_URL || "https://foundr1.jp").replace(/\/$/, "")}/api/public/orders/status`;
+  const url = new URL(base);
+  if (orderId) url.searchParams.set("orderId", orderId);
+  if (pickupCode) url.searchParams.set("pickupCode", pickupCode);
+  if (pickupDate) url.searchParams.set("pickupDate", pickupDate);
+  return url;
+};
 
-  for (const candidateOrderId of orderIds) {
-    const order = await findOrder((item) => item.orderId === candidateOrderId);
-    if (order) return toPublicOrder(order);
+const findPublicOrder = async ({ orderId, pickupCode, pickupDate } = {}) => {
+  const candidateOrderId = getLocalOrderIds(orderId)[0] || "";
+  const normalizedPickupCode = normalizePickupCode(pickupCode);
+
+  if (!candidateOrderId && !normalizedPickupCode) {
+    return null;
   }
 
-  const order = normalizedPickupCode && rawPickupDate
-    ? await findOrder((item) => [rawPickupCode, normalizedPickupCode].includes(item.pickupCode) && item.pickupDate === rawPickupDate)
-    : normalizedPickupCode
-      ? await findOrder((item) => [rawPickupCode, normalizedPickupCode].includes(item.pickupCode))
-      : null;
-
-  return order ? toPublicOrder(order) : null;
+  try {
+    const response = await fetch(
+      getOsStatusUrl({
+        orderId: candidateOrderId,
+        pickupCode: normalizedPickupCode,
+        pickupDate: getFirstValue(pickupDate),
+      }),
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    const body = await response.json().catch(() => null);
+    return body?.order || body || null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 module.exports = {

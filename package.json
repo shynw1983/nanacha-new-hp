@@ -15,13 +15,9 @@
     "i18n:translate:openai": "node scripts/i18n.js translate:openai",
     "i18n:update": "node scripts/i18n.js extract && node scripts/i18n.js translate:openai",
     "i18n:update:en": "node scripts/i18n.js extract && OPENAI_TRANSLATION_LANGUAGES=en node scripts/i18n.js translate:openai",
-    "catalog:backup": "node scripts/export-product-catalog-backup.js",
-    "lark:export-menu": "node scripts/export-lark-menu.js",
     "lark:publish": "node scripts/publish-lark-content.js",
     "lark:sync-homepage-images": "node scripts/sync-lark-homepage-images.js",
-    "lark:sync-homepage-settings": "node scripts/sync-homepage-settings.js",
-    "lark:sync-images": "node scripts/sync-lark-images.js",
-    "lark:sync-store-products": "node scripts/sync-store-products.js"
+    "lark:sync-homepage-settings": "node scripts/sync-homepage-settings.js"
   },
   "keywords": [
     "nanacha",
@@ -30,10 +26,7 @@
   ],
   "license": "UNLICENSED",
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "@vercel/blob": "^2.4.0",
     "next": "^16.0.0",
-    "pusher": "^5.3.3",
     "pusher-js": "^8.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

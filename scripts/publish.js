@@ -2,11 +2,6 @@ const { spawnSync } = require("child_process");
 
 const steps = [
   {
-    label: "Sync Lark menu images to local assets",
-    command: "npm",
-    args: ["run", "lark:sync-images"],
-  },
-  {
     label: "Sync Lark homepage images to local assets",
     command: "npm",
     args: ["run", "lark:sync-homepage-images"],
