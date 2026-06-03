@@ -25,6 +25,10 @@ const asArray = (value) => {
 
 const fallbackMenu = () => ({
   ...basePublishedMenu,
+  storeOperation: {
+    ...(basePublishedMenu.storeOperation || {}),
+    minimumPickupMinutes: 5,
+  },
   categories: basePublishedMenu.categories.map((category) => ({
     ...category,
     note: category.note || localCategoryNotes[category.id] || "",
@@ -68,6 +72,13 @@ const normalizeOsMenu = (payload) => {
     whippedCategories: Array.isArray(menu.whippedCategories) ? menu.whippedCategories : basePublishedMenu.whippedCategories,
     stores: Array.isArray(menu.stores) && menu.stores.length ? menu.stores : basePublishedMenu.stores,
     selectedStoreId: menu.selectedStoreId || basePublishedMenu.selectedStoreId,
+    storeOperation: {
+      ...(basePublishedMenu.storeOperation || {}),
+      ...(menu.storeOperation || {}),
+      minimumPickupMinutes: Number.isFinite(Number(menu.storeOperation?.minimumPickupMinutes))
+        ? Math.max(0, Math.min(240, Math.round(Number(menu.storeOperation.minimumPickupMinutes))))
+        : 5,
+    },
   };
 };
 

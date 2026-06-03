@@ -33,6 +33,12 @@ const filterAllowedOptions = (items, drink) => {
 const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
+const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
+const normalizeMinimumPickupMinutes = (value) => {
+  const minutes = Math.round(Number(value));
+  if (!Number.isFinite(minutes)) return DEFAULT_MINIMUM_PICKUP_MINUTES;
+  return Math.max(0, Math.min(240, minutes));
+};
 const getTokyoDateTimeParts = (date = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -46,8 +52,8 @@ const getTokyoDateTimeParts = (date = new Date()) => {
 
   return Object.fromEntries(parts.map((part) => [part.type, part.value]));
 };
-const getMinimumPickupDateTime = () => {
-  const parts = getTokyoDateTimeParts(new Date(Date.now() + 5 * 60 * 1000));
+const getMinimumPickupDateTime = (leadMinutes = DEFAULT_MINIMUM_PICKUP_MINUTES) => {
+  const parts = getTokyoDateTimeParts(new Date(Date.now() + leadMinutes * 60 * 1000));
   return {
     date: `${parts.year}-${parts.month}-${parts.day}`,
     time: `${parts.hour}:${parts.minute}`,
@@ -73,8 +79,8 @@ const parseOpeningWindow = (hours = "") => {
 };
 const compareDateTime = (leftDate, leftTime, rightDate, rightTime) =>
   `${leftDate}T${leftTime}`.localeCompare(`${rightDate}T${rightTime}`);
-const getNextAvailablePickupDateTime = (hours = "") => {
-  const minimum = getMinimumPickupDateTime();
+const getNextAvailablePickupDateTime = (hours = "", leadMinutes = DEFAULT_MINIMUM_PICKUP_MINUTES) => {
+  const minimum = getMinimumPickupDateTime(leadMinutes);
   const window = parseOpeningWindow(hours);
   if (!window) return minimum;
 
@@ -102,7 +108,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const { language, t } = useI18n();
   const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
-  const initialPickup = getNextAvailablePickupDateTime(initialStore?.hours);
+  const initialMinimumPickupMinutes = normalizeMinimumPickupMinutes(initialMenu.storeOperation?.minimumPickupMinutes);
+  const initialPickup = getNextAvailablePickupDateTime(initialStore?.hours, initialMinimumPickupMinutes);
   const [menu, setMenu] = useState(initialMenu);
   const [store, setStore] = useState(initialStoreId);
   const [category, setCategory] = useState(
@@ -122,10 +129,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reservationItems, setReservationItems] = useState([]);
   const [hasLoadedReservationItems, setHasLoadedReservationItems] = useState(false);
+  const minimumPickupMinutes = normalizeMinimumPickupMinutes(menu.storeOperation?.minimumPickupMinutes);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
+      const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);
       setMinimumPickup(nextMinimum);
       setPickupDate((current) => (!current || current < nextMinimum.date ? nextMinimum.date : current));
       setPickup((current) =>
@@ -144,7 +152,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     }
 
     return () => window.clearInterval(interval);
-  }, [pickupDate, store, stores]);
+  }, [minimumPickupMinutes, pickupDate, store, stores]);
 
   useEffect(() => {
     let active = true;
@@ -175,11 +183,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   }, [store]);
 
   useEffect(() => {
-    const nextPickup = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
+    const nextPickup = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);
     setMinimumPickup(nextPickup);
     setPickupDate(nextPickup.date);
     setPickup(nextPickup.time);
-  }, [store, stores]);
+  }, [minimumPickupMinutes, store, stores]);
 
   const drinks = useMemo(
     () =>
@@ -356,7 +364,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
 
   const submitOrder = async (event) => {
     event.preventDefault();
-    const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours);
+    const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);
     const safePickupDate = pickupDate < nextMinimum.date ? nextMinimum.date : pickupDate;
     const safePickup =
       safePickupDate === nextMinimum.date && pickup < nextMinimum.time ? nextMinimum.time : pickup;
