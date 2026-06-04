@@ -1449,6 +1449,21 @@ h3 {
   font-size: 15px;
 }
 
+.reservation-closed-notice {
+  grid-column: 1 / -1;
+  width: min(100%, 680px);
+  justify-self: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(181, 70, 57, 0.28);
+  border-radius: 16px;
+  background: #fff1ee;
+  color: #9f2d24;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+  text-align: center;
+}
+
 .reservation-drink-preview {
   grid-column: 1 / -1;
   min-height: 132px;

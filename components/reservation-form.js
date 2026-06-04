@@ -131,6 +131,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [reservationItems, setReservationItems] = useState([]);
   const [hasLoadedReservationItems, setHasLoadedReservationItems] = useState(false);
   const minimumPickupMinutes = normalizeMinimumPickupMinutes(menu.storeOperation?.minimumPickupMinutes);
+  const reservationsPaused = menu.storeOperation?.reservationsEnabled === false;
+  const reservationPauseMessage = menu.storeOperation?.statusNote
+    ? `現在予約受付を停止しています（${menu.storeOperation.statusNote}）。店頭での受付状況は店舗へご確認ください。`
+    : "現在予約受付を停止しています。店頭での受付状況は店舗へご確認ください。";
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -365,6 +369,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
 
   const submitOrder = async (event) => {
     event.preventDefault();
+    if (reservationsPaused) return;
     const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);
     const safePickupDate = pickupDate < nextMinimum.date ? nextMinimum.date : pickupDate;
     const safePickup =
@@ -485,6 +490,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
           <img src="/assets/decor/dog-heart.png" alt="" aria-hidden="true" />
         </h2>
         <form className="reserve-form" onSubmit={submitOrder}>
+          {reservationsPaused ? <div className="reservation-closed-notice">{t(reservationPauseMessage)}</div> : null}
           <label>
             <span>{t("店舗")}</span>
             <select value={store} onChange={(event) => setStore(event.target.value)}>
@@ -624,10 +630,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
           <button
             className="add-reservation-item-button"
             type="button"
-            disabled={!hasAvailableDrinks || !selectedDrink}
+            disabled={reservationsPaused || !hasAvailableDrinks || !selectedDrink}
             onClick={addSelectedReservationItem}
           >
-            {t("この商品を予約リストに追加")}
+            {reservationsPaused ? t("現在予約受付を停止しています") : t("この商品を予約リストに追加")}
           </button>
           <div className="reservation-list">
             <div className="reservation-list-heading">
@@ -768,11 +774,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             )}
           </div>
           <p className="order-total">{t("合計")} {formatPrice(displayTotal)}</p>
-          <button className="checkout-button" type="submit" disabled={isSubmitting || !hasAvailableDrinks || !selectedDrink}>
-            {isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
+          <button className="checkout-button" type="submit" disabled={reservationsPaused || isSubmitting || !hasAvailableDrinks || !selectedDrink}>
+            {reservationsPaused ? t("現在予約受付を停止しています") : isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
           <p className="form-note">
-            {hasAvailableDrinks ? displayNote : t("現在、この店舗で予約できる商品はありません。")}
+            {reservationsPaused ? t(reservationPauseMessage) : hasAvailableDrinks ? displayNote : t("現在、この店舗で予約できる商品はありません。")}
           </p>
         </form>
       </div>
