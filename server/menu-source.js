@@ -18,8 +18,8 @@ const withLocalDescriptions = (menu) => ({
 
 const fallbackMenu = withLocalDescriptions(localMenu);
 
-const getMenuData = async (storeId = "") => {
-  const menu = await getProductCatalogMenu(storeId);
+const getMenuData = async (storeId = "", options = {}) => {
+  const menu = await getProductCatalogMenu(storeId, options);
 
   if (!storeId) {
     return menu;
