@@ -34,6 +34,7 @@ const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
+const MENU_REFRESH_INTERVAL_MS = 15000;
 const normalizeMinimumPickupMinutes = (value) => {
   if (value === null || value === undefined || value === "") return DEFAULT_MINIMUM_PICKUP_MINUTES;
   const minutes = Math.round(Number(value));
@@ -161,29 +162,34 @@ export function ReservationForm({ initialMenu, stores = [] }) {
 
   useEffect(() => {
     let active = true;
-    fetch(`/api/menu?store=${encodeURIComponent(store)}`, { headers: { Accept: "application/json" } })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (active && data?.categories && Array.isArray(data.drinks)) {
+    const loadMenu = (resetSelection = false) => {
+      fetch(`/api/menu?store=${encodeURIComponent(store)}`, { headers: { Accept: "application/json" }, cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data) => {
+          if (!active || !data?.categories || !Array.isArray(data.drinks)) return;
+
+          const availableDrinks = data.drinks.filter((drink) => drink.isAvailable !== false && drink.websiteEnabled !== false);
+          const categoriesWithDrinks = new Set(availableDrinks.map((drink) => drink.category));
+          const availableDrinkNames = new Set(availableDrinks.map((drink) => drink.name));
+
           setMenu(data);
-          setCategory((current) => {
-            const categoriesWithDrinks = new Set(
-              data.drinks
-                .filter((drink) => drink.isAvailable !== false && drink.websiteEnabled !== false)
-                .map((drink) => drink.category),
-            );
-            return categoriesWithDrinks.has(current)
+          setCategory((current) =>
+            categoriesWithDrinks.has(current)
               ? current
-              : data.categories.find((item) => categoriesWithDrinks.has(item.id))?.id || data.categories[0]?.id || "";
-          });
-          setDrinkName("");
-          setToppingIds([]);
-        }
-      })
-      .catch(() => {});
+              : data.categories.find((item) => categoriesWithDrinks.has(item.id))?.id || data.categories[0]?.id || "",
+          );
+          setDrinkName((current) => (resetSelection || !availableDrinkNames.has(current) ? "" : current));
+          if (resetSelection) setToppingIds([]);
+        })
+        .catch(() => {});
+    };
+
+    loadMenu(true);
+    const interval = window.setInterval(() => loadMenu(false), MENU_REFRESH_INTERVAL_MS);
 
     return () => {
       active = false;
+      window.clearInterval(interval);
     };
   }, [store]);
 
