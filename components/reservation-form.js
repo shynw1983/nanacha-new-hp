@@ -35,6 +35,7 @@ const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進�
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
 const normalizeMinimumPickupMinutes = (value) => {
+  if (value === null || value === undefined || value === "") return DEFAULT_MINIMUM_PICKUP_MINUTES;
   const minutes = Math.round(Number(value));
   if (!Number.isFinite(minutes)) return DEFAULT_MINIMUM_PICKUP_MINUTES;
   return Math.max(0, Math.min(240, minutes));

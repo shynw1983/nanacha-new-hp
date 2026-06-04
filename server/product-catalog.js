@@ -45,6 +45,8 @@ const normalizeOsMenu = (payload) => {
   if (!menu || !Array.isArray(menu.categories) || !Array.isArray(menu.drinks) || !menu.categories.length || !menu.drinks.length) {
     return null;
   }
+  const rawMinimumPickupMinutes = menu.storeOperation?.minimumPickupMinutes;
+  const hasConfiguredMinimumPickupMinutes = rawMinimumPickupMinutes !== null && rawMinimumPickupMinutes !== undefined && rawMinimumPickupMinutes !== "";
 
   return {
     ...basePublishedMenu,
@@ -75,8 +77,8 @@ const normalizeOsMenu = (payload) => {
     storeOperation: {
       ...(basePublishedMenu.storeOperation || {}),
       ...(menu.storeOperation || {}),
-      minimumPickupMinutes: Number.isFinite(Number(menu.storeOperation?.minimumPickupMinutes))
-        ? Math.max(0, Math.min(240, Math.round(Number(menu.storeOperation.minimumPickupMinutes))))
+      minimumPickupMinutes: hasConfiguredMinimumPickupMinutes && Number.isFinite(Number(rawMinimumPickupMinutes))
+        ? Math.max(0, Math.min(240, Math.round(Number(rawMinimumPickupMinutes))))
         : 5,
     },
   };
