@@ -21,6 +21,7 @@ export function OrderCompleteContent({
   const displayPickupDate = initialOrder?.pickupDate || pickupDate || "";
   const displayPickupTime = initialOrder?.pickupTime || pickupTime || "";
   const receiptUrl = initialOrder?.paymentStatus === "paid" ? initialOrder?.squareReceiptUrl : "";
+  const receiptPreviewUrl = initialOrder?.paymentStatus === "paid" ? initialOrder?.receiptPreviewUrl : "";
 
   return (
     <main className="order-complete-page">
@@ -46,6 +47,11 @@ export function OrderCompleteContent({
           <Link className="primary-button" href={homeHref}>
             ホームへ戻る
           </Link>
+          {receiptPreviewUrl ? (
+            <a className="ghost-button" href={receiptPreviewUrl} target="_blank" rel="noreferrer">
+              領収書プレビュー
+            </a>
+          ) : null}
           {receiptUrl ? (
             <a className="ghost-button" href={receiptUrl} target="_blank" rel="noreferrer">
               Square レシートを見る
@@ -53,17 +59,6 @@ export function OrderCompleteContent({
           ) : null}
           <a className="ghost-button" href="#pickup-guide">
             受け取り方法を確認
-          </a>
-        </div>
-
-        <div className="order-member-followup">
-          <div>
-            <span>会員ポイント</span>
-            <strong>会員登録すると、次回からポイント履歴を確認できます。</strong>
-            <p>予約時に入力したメールまたは電話番号と同じ情報でログインしてください。</p>
-          </div>
-          <a href="https://foundr1.jp/member" target="_blank" rel="noreferrer">
-            会員登録・ログイン
           </a>
         </div>
       </section>

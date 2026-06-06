@@ -138,6 +138,7 @@ export function OrderStatusCard({
     pickupDate: order?.pickupDate || pickupDate,
     pickupTime: order?.pickupTime || pickupTime,
     squareReceiptUrl: order?.squareReceiptUrl || initialOrder?.squareReceiptUrl || "",
+    receiptPreviewUrl: order?.receiptPreviewUrl || initialOrder?.receiptPreviewUrl || "",
     drink: order?.drink || drink,
     size: order?.size || size,
     temperature: order?.temperature || temperature,
@@ -149,7 +150,7 @@ export function OrderStatusCard({
   };
   const activeIndex = getStepIndex(status);
   const isProblem = ["cancelled", "payment_failed", "checkout_failed"].includes(status);
-  const canShowReceipt = order?.paymentStatus === "paid" && current.squareReceiptUrl;
+  const canShowReceipt = order?.paymentStatus === "paid" && (current.receiptPreviewUrl || current.squareReceiptUrl);
 
   return (
     <>
@@ -179,7 +180,12 @@ export function OrderStatusCard({
             {lastCheckedAt ? <span>最終確認 {lastCheckedAt}</span> : null}
           </p>
           <div className="order-status-actions">
-            {canShowReceipt ? (
+            {current.receiptPreviewUrl ? (
+              <a href={current.receiptPreviewUrl} target="_blank" rel="noreferrer">
+                領収書プレビュー
+              </a>
+            ) : null}
+            {current.squareReceiptUrl ? (
               <a href={current.squareReceiptUrl} target="_blank" rel="noreferrer">
                 Square レシートを見る
               </a>
