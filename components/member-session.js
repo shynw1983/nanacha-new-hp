@@ -59,6 +59,7 @@ export async function consumeMemberHandoff() {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || !body?.member) throw new Error(body?.error || "会員情報を読み込めませんでした。");
 
-  window.localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify(body.member));
-  return body.member;
+  const profile = { ...body.member, coupons: Array.isArray(body.coupons) ? body.coupons : [] };
+  window.localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify(profile));
+  return profile;
 }

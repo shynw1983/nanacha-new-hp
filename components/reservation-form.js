@@ -7,6 +7,19 @@ import { buildMemberHandoffUrl, consumeMemberHandoff } from "./member-session";
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
 const findById = (items, id) => items.find((item) => item.id === id);
+const getCouponDiscountAmount = (coupon, subtotal) => {
+  const baseAmount = Math.max(0, Math.round(Number(subtotal) || 0));
+  const value = Math.max(0, Math.round(Number(coupon?.discountValue) || 0));
+  const maxAmount = coupon?.maxDiscountAmount == null ? null : Math.max(0, Math.round(Number(coupon.maxDiscountAmount) || 0));
+  const rawDiscount = coupon?.discountType === "percent" ? Math.floor(baseAmount * value / 100) : value;
+  return Math.min(baseAmount, maxAmount == null ? rawDiscount : Math.min(rawDiscount, maxAmount));
+};
+const formatCouponValue = (coupon) => {
+  if (coupon?.discountType === "percent") {
+    return coupon.maxDiscountAmount ? `${coupon.discountValue}% OFF / 最大${formatPrice(coupon.maxDiscountAmount)}` : `${coupon.discountValue}% OFF`;
+  }
+  return `${formatPrice(coupon?.discountValue || 0)} OFF`;
+};
 const formatSweetnessLabel = (value) => (value ? `甘さ: ${value}` : "");
 const formatIceLabel = (value) => (value ? `氷: ${value}` : "");
 const normalizeAssetUrl = (url = "") =>
@@ -36,6 +49,7 @@ const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進�
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
 const MENU_REFRESH_INTERVAL_MS = 15000;
+const unsafeCheckoutErrorPattern = /(FOUNDR1|Foundr1|Square|configured|configuration|Invalid|Missing|Unknown|checkout|failed|required|Selected coupon)/i;
 const normalizeMinimumPickupMinutes = (value) => {
   if (value === null || value === undefined || value === "") return DEFAULT_MINIMUM_PICKUP_MINUTES;
   const minutes = Math.round(Number(value));
@@ -131,6 +145,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [memberProfile, setMemberProfile] = useState(null);
+  const [selectedCouponId, setSelectedCouponId] = useState("");
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -306,6 +321,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const preparedReservationItems = reservationItems.map(normalizeReservationItem).filter((item) => item.drink);
   const reservationTotal = preparedReservationItems.reduce((sum, item) => sum + item.total, 0);
   const displayTotal = preparedReservationItems.length ? reservationTotal : total;
+  const memberCoupons = memberProfile?.coupons || [];
+  const selectedCoupon = memberCoupons.find((coupon) => coupon.id === selectedCouponId);
+  const couponDiscount = selectedCoupon ? Math.min(getCouponDiscountAmount(selectedCoupon, displayTotal), Math.max(0, displayTotal - 1)) : 0;
+  const paymentTotal = Math.max(0, displayTotal - couponDiscount);
 
   const createReservationItem = ({
     drink,
@@ -390,6 +409,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     }
   }, [drinkName, selectedDrink]);
 
+  useEffect(() => {
+    if (!selectedCouponId) return;
+    if (!memberCoupons.some((coupon) => coupon.id === selectedCouponId)) setSelectedCouponId("");
+  }, [memberCoupons, selectedCouponId]);
+
   const submitOrder = async (event) => {
     event.preventDefault();
     if (reservationsPaused) return;
@@ -436,6 +460,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       memberName: memberProfile ? customerName : "",
       memberEmail: memberProfile?.email || "",
       memberPhone: memberProfile?.phone || "",
+      couponId: selectedCouponId,
       completionPath: language === "ja" ? "/order-complete" : `/${language}/order-complete`,
       completionSummary: {
         name: customerName,
@@ -446,10 +471,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
         ice: orderItems.length === 1 ? formatIceLabel(orderItems[0].ice) : "商品ごと",
         option: orderItems.length === 1 ? orderItems[0].optionLabel : "商品ごと",
         toppings: orderItems.length === 1 ? orderItems[0].toppingLabels : orderItems.map((item) => item.drink),
-        total: orderTotal,
+        total: paymentTotal,
         phone: customerPhone,
       },
-      total: orderTotal,
+      total: paymentTotal,
       labels: {
         drink: drinkSummary,
         size: orderItems.length === 1 ? orderItems[0].sizeLabel : `${orderItems.length}点`,
@@ -480,15 +505,16 @@ export function ReservationForm({ initialMenu, stores = [] }) {
 
       window.location.href = result.checkoutUrl;
     } catch (error) {
-      setNote(
+      const publicErrorMessage = error?.message && !unsafeCheckoutErrorPattern.test(error.message) ? error.message : "";
+      const checkoutErrorMessage =
         error.code === "SQUARE_NOT_CONFIGURED"
           ? "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。"
           : error.message === "Pickup time is outside store hours"
             ? "現在は営業時間外です。予約できる最短の受け取り時間を選択してください。"
             : error.message === "Reservations are temporarily paused for this store"
               ? "現在、この店舗では受け取り予約を停止しています。"
-          : "決済画面を作成できませんでした。時間をおいて再度お試しください。",
-      );
+              : publicErrorMessage || "決済画面を作成できませんでした。時間をおいて再度お試しください。";
+      setNote(checkoutErrorMessage);
       setIsSubmitting(false);
     }
   };
@@ -691,6 +717,22 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               </a>
             </div>
           ) : null}
+          {memberProfile && memberCoupons.length ? (
+            <div className="reservation-coupon-panel">
+              <span>{t("クーポン")}</span>
+              {memberCoupons.map((coupon) => (
+                <button
+                  key={coupon.id}
+                  className={selectedCouponId === coupon.id ? "is-selected" : ""}
+                  type="button"
+                  onClick={() => setSelectedCouponId((current) => (current === coupon.id ? "" : coupon.id))}
+                >
+                  <strong>{coupon.name}</strong>
+                  <small>{formatCouponValue(coupon)}</small>
+                </button>
+              ))}
+            </div>
+          ) : null}
           <button
             className="add-reservation-item-button"
             type="button"
@@ -837,7 +879,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               <p>{t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}</p>
             )}
           </div>
-          <p className="order-total">{t("合計")} {formatPrice(displayTotal)}</p>
+          <p className="order-total">
+            <span>{t("合計")} {formatPrice(paymentTotal)}</span>
+            {couponDiscount ? <small>{t("クーポン値引き")} -{formatPrice(couponDiscount)}</small> : null}
+          </p>
           <button className="checkout-button" type="submit" disabled={reservationsPaused || isSubmitting || !hasAvailableDrinks || !selectedDrink}>
             {reservationsPaused ? t("現在予約受付を停止しています") : isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
