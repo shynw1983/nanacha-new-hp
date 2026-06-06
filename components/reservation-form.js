@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "./i18n-provider";
+import { buildMemberPortalUrl, consumeMemberHandoff } from "./member-session";
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
@@ -129,6 +130,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [pickup, setPickup] = useState(initialPickup.time);
   const [memberEmail, setMemberEmail] = useState("");
   const [memberPhone, setMemberPhone] = useState("");
+  const [memberProfile, setMemberProfile] = useState(null);
+  const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reservationItems, setReservationItems] = useState([]);
@@ -138,6 +141,18 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const reservationPauseMessage = menu.storeOperation?.statusNote
     ? `現在予約受付を停止しています（${menu.storeOperation.statusNote}）。店頭での受付状況は店舗へご確認ください。`
     : "現在予約受付を停止しています。店頭での受付状況は店舗へご確認ください。";
+
+  useEffect(() => {
+    setMemberHref(buildMemberPortalUrl());
+    consumeMemberHandoff()
+      .then((profile) => {
+        if (!profile) return;
+        setMemberProfile(profile);
+        setMemberEmail((current) => current || profile.email || "");
+        setMemberPhone((current) => current || profile.phone || "");
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -639,16 +654,18 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               onChange={(event) => setPickup(event.target.value)}
             />
           </label>
-          <div className="reservation-member-panel">
-            <div>
-              <span>{t("会員ポイント")}</span>
-              <strong>{t("ログイン時と同じメールまたは電話番号でポイントが貯まります。")}</strong>
-              <p>{t("入力しなくても予約できます。会員登録は決済後でも可能です。")}</p>
+          {!memberProfile ? (
+            <div className="reservation-member-panel">
+              <div>
+                <span>{t("会員ポイント")}</span>
+                <strong>{t("ログイン時と同じメールまたは電話番号でポイントが貯まります。")}</strong>
+                <p>{t("入力しなくても予約できます。会員登録は決済後でも可能です。")}</p>
+              </div>
+              <a href={memberHref}>
+                {t("会員登録・ログイン")}
+              </a>
             </div>
-            <a href="https://foundr1.jp/member" target="_blank" rel="noreferrer">
-              {t("会員登録・ログイン")}
-            </a>
-          </div>
+          ) : null}
           <label className="reservation-member-field">
             <span>{t("ポイント用メール（任意）")}</span>
             <input

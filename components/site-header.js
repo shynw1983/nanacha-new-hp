@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
+import { buildMemberPortalUrl } from "./member-session";
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -29,6 +30,12 @@ export function SiteHeader({ menu = false, shops = false }) {
     syncHeader();
     return () => window.removeEventListener("scroll", syncHeader);
   }, []);
+
+  const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
+
+  useEffect(() => {
+    setMemberHref(buildMemberPortalUrl());
+  }, [pathname]);
 
   const changeLanguage = (nextLanguage) => {
     setLanguage(nextLanguage);
@@ -59,9 +66,7 @@ export function SiteHeader({ menu = false, shops = false }) {
       <div className="header-tools">
         <a
           className="member-icon-link"
-          href="https://foundr1.jp/member"
-          target="_blank"
-          rel="noreferrer"
+          href={memberHref}
           aria-label={t("会員ログイン")}
           title={t("会員ログイン")}
         >
