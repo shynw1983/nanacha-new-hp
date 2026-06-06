@@ -1459,6 +1459,7 @@ h3 {
   grid-column: span 6;
 }
 
+.reserve-form > .reservation-customer-field,
 .reserve-form > .reservation-member-field {
   grid-column: span 6;
 }
@@ -1971,6 +1972,7 @@ footer p {
   .reserve-form > .reservation-drink-field,
   .reserve-form > .reservation-pickup-date-field,
   .reserve-form > .reservation-pickup-time-field,
+  .reserve-form > .reservation-customer-field,
   .reserve-form > .reservation-member-field,
   .reservation-member-panel,
   .reservation-drink-preview,

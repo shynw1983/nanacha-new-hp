@@ -128,8 +128,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const [minimumPickup, setMinimumPickup] = useState(initialPickup);
   const [pickupDate, setPickupDate] = useState(initialPickup.date);
   const [pickup, setPickup] = useState(initialPickup.time);
-  const [memberEmail, setMemberEmail] = useState("");
-  const [memberPhone, setMemberPhone] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [memberProfile, setMemberProfile] = useState(null);
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
   const [note, setNote] = useState("");
@@ -148,8 +148,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       .then((profile) => {
         if (!profile) return;
         setMemberProfile(profile);
-        setMemberEmail((current) => current || profile.email || "");
-        setMemberPhone((current) => current || profile.phone || "");
+        setCustomerName((current) => current || profile.displayName || "");
+        setCustomerPhone((current) => current || profile.phone || "");
       })
       .catch(() => {});
   }, []);
@@ -430,10 +430,15 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       })),
       pickupDate: safePickupDate,
       pickup: safePickup,
-      memberEmail,
-      memberPhone,
+      name: customerName,
+      phone: customerPhone,
+      memberToken: memberProfile?.publicToken || "",
+      memberName: memberProfile ? customerName : "",
+      memberEmail: memberProfile?.email || "",
+      memberPhone: memberProfile?.phone || "",
       completionPath: language === "ja" ? "/order-complete" : `/${language}/order-complete`,
       completionSummary: {
+        name: customerName,
         drink: drinkSummary,
         size: orderItems.length === 1 ? orderItems[0].sizeLabel : `${orderItems.length}点`,
         temperature: orderItems.length === 1 ? orderItems[0].temperature : "複数商品",
@@ -442,8 +447,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
         option: orderItems.length === 1 ? orderItems[0].optionLabel : "商品ごと",
         toppings: orderItems.length === 1 ? orderItems[0].toppingLabels : orderItems.map((item) => item.drink),
         total: orderTotal,
-        email: memberEmail,
-        phone: memberPhone,
+        phone: customerPhone,
       },
       total: orderTotal,
       labels: {
@@ -654,38 +658,39 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               onChange={(event) => setPickup(event.target.value)}
             />
           </label>
+          <label className="reservation-customer-field">
+            <span>{t("お名前")}</span>
+            <input
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+              placeholder={t("例: 山田")}
+              autoComplete="name"
+              required
+            />
+          </label>
+          <label className="reservation-customer-field">
+            <span>{t("電話番号")}</span>
+            <input
+              value={customerPhone}
+              onChange={(event) => setCustomerPhone(event.target.value)}
+              placeholder="090..."
+              inputMode="tel"
+              autoComplete="tel"
+              required
+            />
+          </label>
           {!memberProfile ? (
             <div className="reservation-member-panel">
               <div>
                 <span>{t("会員ポイント")}</span>
-                <strong>{t("ログイン時と同じメールまたは電話番号でポイントが貯まります。")}</strong>
-                <p>{t("入力しなくても予約できます。会員登録は決済後でも可能です。")}</p>
+                <strong>{t("共通会員として、nanacha と まぁ麻 のポイントをまとめて貯められます。")}</strong>
+                <p>{t("ポイント利用には会員登録・ログインが必要です。予約だけなら登録なしで進めます。")}</p>
               </div>
               <a href={memberHref}>
                 {t("会員登録・ログイン")}
               </a>
             </div>
           ) : null}
-          <label className="reservation-member-field">
-            <span>{t("ポイント用メール（任意）")}</span>
-            <input
-              type="email"
-              value={memberEmail}
-              onChange={(event) => setMemberEmail(event.target.value)}
-              placeholder="member@example.com"
-              autoComplete="email"
-            />
-          </label>
-          <label className="reservation-member-field">
-            <span>{t("ポイント用電話番号（任意）")}</span>
-            <input
-              value={memberPhone}
-              onChange={(event) => setMemberPhone(event.target.value)}
-              placeholder="090..."
-              inputMode="tel"
-              autoComplete="tel"
-            />
-          </label>
           <button
             className="add-reservation-item-button"
             type="button"
