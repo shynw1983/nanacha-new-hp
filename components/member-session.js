@@ -2,7 +2,6 @@
 
 const MEMBER_STORAGE_KEY = "foundr1-member-profile";
 const MEMBER_PORTAL_URL = process.env.NEXT_PUBLIC_FOUNDR1_MEMBER_URL || "https://foundr1.jp/member";
-const FOUNDR1_API_BASE_URL = process.env.NEXT_PUBLIC_FOUNDR1_API_BASE_URL || "https://foundr1.jp";
 
 function cleanReturnUrl() {
   const url = new URL(window.location.href);
@@ -37,7 +36,7 @@ export async function consumeMemberHandoff() {
   url.searchParams.delete("memberHandoff");
   window.history.replaceState({}, "", url.toString());
 
-  const response = await fetch(`${FOUNDR1_API_BASE_URL}/api/public/members/handoff?token=${encodeURIComponent(token)}`, {
+  const response = await fetch(`/api/member-handoff?token=${encodeURIComponent(token)}`, {
     cache: "no-store"
   });
   const body = await response.json().catch(() => ({}));
