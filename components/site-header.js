@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
-import { buildMemberCardUrl } from "./member-session";
+import { buildMemberCardUrl, consumeMemberHandoff } from "./member-session";
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -35,6 +35,10 @@ export function SiteHeader({ menu = false, shops = false }) {
 
   useEffect(() => {
     setMemberHref(buildMemberCardUrl());
+  }, [pathname]);
+
+  useEffect(() => {
+    consumeMemberHandoff().catch(() => {});
   }, [pathname]);
 
   const changeLanguage = (nextLanguage) => {

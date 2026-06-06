@@ -6,6 +6,7 @@ const MEMBER_PORTAL_URL = process.env.NEXT_PUBLIC_FOUNDR1_MEMBER_URL || "https:/
 function cleanReturnUrl() {
   const url = new URL(window.location.href);
   url.searchParams.delete("memberHandoff");
+  url.searchParams.delete("memberSignedOut");
   return url.toString();
 }
 
@@ -39,6 +40,13 @@ export async function consumeMemberHandoff() {
   if (typeof window === "undefined") return getStoredMemberProfile();
 
   const url = new URL(window.location.href);
+  if (url.searchParams.get("memberSignedOut") === "1") {
+    window.localStorage.removeItem(MEMBER_STORAGE_KEY);
+    url.searchParams.delete("memberSignedOut");
+    window.history.replaceState({}, "", url.toString());
+    return null;
+  }
+
   const token = url.searchParams.get("memberHandoff");
   if (!token) return getStoredMemberProfile();
 
