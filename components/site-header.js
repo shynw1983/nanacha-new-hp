@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
-import { buildMemberPortalUrl } from "./member-session";
+import { buildMemberCardUrl } from "./member-session";
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -34,7 +34,7 @@ export function SiteHeader({ menu = false, shops = false }) {
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
 
   useEffect(() => {
-    setMemberHref(buildMemberPortalUrl());
+    setMemberHref(buildMemberCardUrl());
   }, [pathname]);
 
   const changeLanguage = (nextLanguage) => {

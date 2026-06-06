@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "./i18n-provider";
-import { buildMemberPortalUrl, consumeMemberHandoff } from "./member-session";
+import { buildMemberHandoffUrl, consumeMemberHandoff } from "./member-session";
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
@@ -143,7 +143,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     : "現在予約受付を停止しています。店頭での受付状況は店舗へご確認ください。";
 
   useEffect(() => {
-    setMemberHref(buildMemberPortalUrl());
+    setMemberHref(buildMemberHandoffUrl());
     consumeMemberHandoff()
       .then((profile) => {
         if (!profile) return;
