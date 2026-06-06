@@ -6,9 +6,13 @@ const foundr1BaseUrl = () => {
 export async function GET(request) {
   const url = new URL(request.url);
   const token = url.searchParams.get("token") || "";
-  if (!token) return Response.json({ error: "会員ログイン情報がありません。" }, { status: 400 });
+  const memberToken = url.searchParams.get("memberToken") || "";
+  if (!token && !memberToken) return Response.json({ error: "会員ログイン情報がありません。" }, { status: 400 });
 
-  const response = await fetch(`${foundr1BaseUrl()}/api/public/members/handoff?token=${encodeURIComponent(token)}`, {
+  const params = new URLSearchParams();
+  if (token) params.set("token", token);
+  if (memberToken) params.set("memberToken", memberToken);
+  const response = await fetch(`${foundr1BaseUrl()}/api/public/members/handoff?${params.toString()}`, {
     cache: "no-store"
   });
   const body = await response.json().catch(() => ({}));

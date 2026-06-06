@@ -36,6 +36,22 @@ export function getStoredMemberProfile() {
   }
 }
 
+async function refreshStoredMemberProfile(profile) {
+  if (!profile?.publicToken) return profile;
+  try {
+    const response = await fetch(`/api/member-handoff?memberToken=${encodeURIComponent(profile.publicToken)}`, {
+      cache: "no-store"
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body?.member) return profile;
+    const nextProfile = { ...body.member, coupons: Array.isArray(body.coupons) ? body.coupons : [] };
+    window.localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify(nextProfile));
+    return nextProfile;
+  } catch {
+    return profile;
+  }
+}
+
 export async function consumeMemberHandoff() {
   if (typeof window === "undefined") return getStoredMemberProfile();
 
@@ -48,7 +64,7 @@ export async function consumeMemberHandoff() {
   }
 
   const token = url.searchParams.get("memberHandoff");
-  if (!token) return getStoredMemberProfile();
+  if (!token) return refreshStoredMemberProfile(getStoredMemberProfile());
 
   url.searchParams.delete("memberHandoff");
   window.history.replaceState({}, "", url.toString());
