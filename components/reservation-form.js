@@ -683,8 +683,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <div className="reservation-member-panel">
               <div>
                 <span>{t("会員ポイント")}</span>
-                <strong>{t("共通会員として、nanacha と まぁ麻 のポイントをまとめて貯められます。")}</strong>
-                <p>{t("ポイント利用には会員登録・ログインが必要です。予約だけなら登録なしで進めます。")}</p>
+                <strong>{t("ログインするとポイントが貯まります。")}</strong>
+                <p>{t("予約だけなら登録なしで進めます。ポイント利用には会員登録・ログインが必要です。")}</p>
               </div>
               <a href={memberHref}>
                 {t("会員登録・ログイン")}
