@@ -150,7 +150,13 @@ export function OrderStatusCard({
   };
   const activeIndex = getStepIndex(status);
   const isProblem = ["cancelled", "payment_failed", "checkout_failed"].includes(status);
-  const canShowReceipt = order?.paymentStatus === "paid" && (current.receiptPreviewUrl || current.squareReceiptUrl);
+  const effectiveOrderId = resolvedOrderId || orderId || order?.orderId || initialOrder?.orderId || "";
+  const effectivePickupCode = order?.pickupCode || initialOrder?.pickupCode || pickupCode || "";
+  const localReceiptPreviewUrl = effectiveOrderId && effectivePickupCode
+    ? `/api/orders/${effectiveOrderId}/receipt-preview?pickupCode=${encodeURIComponent(effectivePickupCode)}`
+    : "";
+  const receiptPreviewUrl = current.receiptPreviewUrl || localReceiptPreviewUrl;
+  const isPaid = order?.paymentStatus === "paid";
 
   return (
     <>
@@ -180,12 +186,12 @@ export function OrderStatusCard({
             {lastCheckedAt ? <span>最終確認 {lastCheckedAt}</span> : null}
           </p>
           <div className="order-status-actions">
-            {current.receiptPreviewUrl ? (
-              <a href={current.receiptPreviewUrl} target="_blank" rel="noreferrer">
+            {isPaid && receiptPreviewUrl ? (
+              <a href={receiptPreviewUrl} target="_blank" rel="noreferrer">
                 領収書プレビュー
               </a>
             ) : null}
-            {current.squareReceiptUrl ? (
+            {isPaid && current.squareReceiptUrl ? (
               <a href={current.squareReceiptUrl} target="_blank" rel="noreferrer">
                 Square レシートを見る
               </a>
