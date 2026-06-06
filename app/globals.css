@@ -122,6 +122,35 @@ img {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.035);
 }
 
+.member-icon-link {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.035);
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.member-icon-link:hover {
+  border-color: rgba(28, 92, 70, 0.28);
+  color: #1f6f53;
+}
+
+.member-icon-link svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .header-tools {
   justify-self: end;
   display: flex;
@@ -1430,6 +1459,10 @@ h3 {
   grid-column: span 6;
 }
 
+.reserve-form > .reservation-member-field {
+  grid-column: span 6;
+}
+
 .reserve-form span {
   color: var(--muted);
   font-size: 12px;
@@ -1462,6 +1495,55 @@ h3 {
   font-weight: 800;
   line-height: 1.55;
   text-align: center;
+}
+
+.reservation-member-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(28, 92, 70, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f5fbf6, #fffaf0);
+}
+
+.reservation-member-panel div {
+  display: grid;
+  gap: 4px;
+}
+
+.reservation-member-panel span {
+  color: #1f6f53;
+}
+
+.reservation-member-panel strong {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.reservation-member-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.reservation-member-panel a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(28, 92, 70, 0.28);
+  border-radius: 999px;
+  color: #1f6f53;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .reservation-drink-preview {
@@ -1889,6 +1971,8 @@ footer p {
   .reserve-form > .reservation-drink-field,
   .reserve-form > .reservation-pickup-date-field,
   .reserve-form > .reservation-pickup-time-field,
+  .reserve-form > .reservation-member-field,
+  .reservation-member-panel,
   .reservation-drink-preview,
   .topping-field {
     grid-column: 1 / -1;
@@ -1981,6 +2065,11 @@ footer p {
     font-size: 13px;
     line-height: 1;
     white-space: nowrap;
+  }
+
+  .member-icon-link {
+    width: 44px;
+    height: 44px;
   }
 
   .header-tools {
@@ -2101,11 +2190,20 @@ footer p {
   .reserve-form > label,
   .reserve-form > label:nth-of-type(2),
   .topping-field,
+  .reservation-member-panel,
   .add-reservation-item-button,
   .checkout-button,
   .order-total,
   .form-note {
     grid-column: 1 / -1;
+  }
+
+  .reservation-member-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-member-panel a {
+    width: 100%;
   }
 
   .form-note {
@@ -2414,6 +2512,57 @@ footer p {
   gap: 12px;
 }
 
+.order-member-followup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid rgba(28, 92, 70, 0.18);
+  border-radius: 18px;
+  background: #f5fbf6;
+}
+
+.order-member-followup div {
+  display: grid;
+  gap: 4px;
+}
+
+.order-member-followup span {
+  color: #1f6f53;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.order-member-followup strong {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.order-member-followup p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.order-member-followup a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(28, 92, 70, 0.28);
+  border-radius: 999px;
+  color: #1f6f53;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .order-complete-guide h2 {
   margin-top: 0;
 }
@@ -2546,6 +2695,14 @@ footer p {
   .order-complete-guide {
     border-radius: 24px;
     padding: 24px 22px;
+  }
+
+  .order-member-followup {
+    grid-template-columns: 1fr;
+  }
+
+  .order-member-followup a {
+    width: 100%;
   }
 
   .order-status-heading {

@@ -55,6 +55,17 @@ export function OrderCompleteContent({
             受け取り方法を確認
           </a>
         </div>
+
+        <div className="order-member-followup">
+          <div>
+            <span>会員ポイント</span>
+            <strong>会員登録すると、次回からポイント履歴を確認できます。</strong>
+            <p>予約時に入力したメールまたは電話番号と同じ情報でログインしてください。</p>
+          </div>
+          <a href="https://foundr1.jp/member" target="_blank" rel="noreferrer">
+            会員登録・ログイン
+          </a>
+        </div>
       </section>
 
       <OrderStatusCard

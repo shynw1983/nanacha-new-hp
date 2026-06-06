@@ -57,6 +57,19 @@ export function SiteHeader({ menu = false, shops = false }) {
         <a href={reserveHref}>{t("予約")}</a>
       </nav>
       <div className="header-tools">
+        <a
+          className="member-icon-link"
+          href="https://foundr1.jp/member"
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t("会員ログイン")}
+          title={t("会員ログイン")}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" />
+            <path d="M4.8 20.2c.7-3.4 3.5-5.6 7.2-5.6s6.5 2.2 7.2 5.6" />
+          </svg>
+        </a>
         <label className="language-picker">
           <span>Language</span>
           <select value={language} onChange={(event) => changeLanguage(event.target.value)} aria-label="Language">
