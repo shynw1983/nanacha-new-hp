@@ -6,7 +6,7 @@ import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
 import { buildMemberCardUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
 
-const languagePrefixes = ["/en", "/zh", "/ko", "/vi", "/ne"];
+const languagePrefixes = ["/en", "/zh", "/zh-Hant", "/ko", "/vi", "/ne"];
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -93,7 +93,8 @@ export function SiteHeader({ menu = false, shops = false }) {
           <select value={language} onChange={(event) => changeLanguage(event.target.value)} aria-label="Language">
             <option value="ja">日本語</option>
             <option value="en">English</option>
-            <option value="zh">中文</option>
+            <option value="zh">简体中文</option>
+            <option value="zh-Hant">繁體中文</option>
             <option value="ko">한국어</option>
             <option value="vi">Tiếng Việt</option>
             <option value="ne">नेपाली</option>

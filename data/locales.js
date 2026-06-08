@@ -2,6 +2,7 @@ const localeConfig = {
   ja: { htmlLang: "ja", pathPrefix: "" },
   en: { htmlLang: "en", pathPrefix: "/en" },
   zh: { htmlLang: "zh-Hans", pathPrefix: "/zh" },
+  "zh-Hant": { htmlLang: "zh-Hant", pathPrefix: "/zh-Hant" },
   ko: { htmlLang: "ko", pathPrefix: "/ko" },
   vi: { htmlLang: "vi", pathPrefix: "/vi" },
   ne: { htmlLang: "ne", pathPrefix: "/ne" },

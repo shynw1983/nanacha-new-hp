@@ -5,6 +5,7 @@ const dictionaries = {
   ja: require("../public/locales/ja.json"),
   ko: require("../public/locales/ko.json"),
   zh: require("../public/locales/zh.json"),
+  "zh-Hant": require("../public/locales/zh-Hant.json"),
   vi: require("../public/locales/vi.json"),
   ne: require("../public/locales/ne.json"),
 };

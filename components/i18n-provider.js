@@ -3,11 +3,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
-const LOCALE_CACHE_VERSION = "20260518-react-i18n";
+const LOCALE_CACHE_VERSION = "20260608-zh-hant-i18n";
 const LANGUAGE_META = {
   ja: { htmlLang: "ja" },
   en: { htmlLang: "en" },
   zh: { htmlLang: "zh-Hans" },
+  "zh-Hant": { htmlLang: "zh-Hant" },
   ko: { htmlLang: "ko" },
   vi: { htmlLang: "vi" },
   ne: { htmlLang: "ne" },

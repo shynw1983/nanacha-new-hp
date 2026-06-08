@@ -4,7 +4,7 @@ const MEMBER_STORAGE_KEY = "foundr1-member-profile";
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
 const MEMBER_PORTAL_URL = process.env.NEXT_PUBLIC_FOUNDR1_MEMBER_URL || "https://foundr1.jp/member";
 const MEMBER_BRAND = "nanacha";
-const SUPPORTED_LANGUAGES = ["ja", "en", "zh", "ko", "vi", "ne"];
+const SUPPORTED_LANGUAGES = ["ja", "en", "zh", "zh-Hant", "ko", "vi", "ne"];
 
 export function normalizeMemberLanguage(value) {
   const language = String(value || "").trim();
