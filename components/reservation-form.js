@@ -123,6 +123,12 @@ const getNextAvailablePickupDateTime = (hours = "", leadMinutes = DEFAULT_MINIMU
 
 export function ReservationForm({ initialMenu, stores = [] }) {
   const { language, t } = useI18n();
+  const menuText = (item, fallback = "") => {
+    const source = item && typeof item === "object" ? item : {};
+    const original = fallback || source.label || source.name || "";
+    return source.displayNames?.[language] || source.displayNames?.en || t(original);
+  };
+  const rawText = (value) => t(value);
   const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
   const initialMinimumPickupMinutes = normalizeMinimumPickupMinutes(initialMenu.storeOperation?.minimumPickupMinutes);
@@ -553,7 +559,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={store} onChange={(event) => setStore(event.target.value)}>
               {(menu.stores?.length ? menu.stores : [{ id: "kiyokawa", label: "福岡清川店" }]).map((item) => (
                 <option value={item.id} key={item.id}>
-                  {t(item.label)}
+                  {menuText(item, item.label)}
                 </option>
               ))}
             </select>
@@ -563,7 +569,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={category} onChange={(event) => setCategory(event.target.value)}>
               {menu.categories.map((item) => (
                 <option value={item.id} key={item.id}>
-                  {t(item.label)}
+                  {menuText(item, item.label)}
                 </option>
               ))}
             </select>
@@ -574,7 +580,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               {drinks.length ? (
                 drinks.map((drink) => (
                   <option value={drink.name} key={drink.id}>
-                    {t(drink.name)} {formatPrice(drink.price)}
+                    {menuText(drink, drink.name)} {formatPrice(drink.price)}
                   </option>
                 ))
               ) : (
@@ -584,10 +590,10 @@ export function ReservationForm({ initialMenu, stores = [] }) {
           </label>
           {selectedDrink?.imageUrl ? (
             <div className="reservation-drink-preview" aria-live="polite">
-              <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={t(selectedDrink.name)} />
+              <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={menuText(selectedDrink, selectedDrink.name)} />
               <div>
                 <span>{t("選択中の商品")}</span>
-                <strong>{t(selectedDrink.name)}</strong>
+                <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
                 {selectedDrink.description ? <p>{t(selectedDrink.description)}</p> : null}
                 <small>{formatPrice(selectedDrink.price)}</small>
               </div>
@@ -598,7 +604,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={selectedSize?.id || ""} onChange={(event) => setSizeId(event.target.value)}>
               {availableSizes.map((size) => (
                 <option value={size.id} key={size.id}>
-                  {t(size.label)} ({formatDelta(size.price)})
+                  {menuText(size, size.label)} ({formatDelta(size.price)})
                 </option>
               ))}
             </select>
@@ -618,7 +624,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={selectedSweetness} onChange={(event) => setSweetness(event.target.value)}>
               {sweetnessOptions.map((item) => (
                 <option value={item} key={item}>
-                  {t(item)}
+                  {rawText(item)}
                 </option>
               ))}
             </select>
@@ -628,7 +634,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={selectedIce} onChange={(event) => setIce(event.target.value)}>
               {iceOptions.map((item) => (
                 <option value={item} key={item}>
-                  {t(item)}
+                  {rawText(item)}
                 </option>
               ))}
             </select>
@@ -638,7 +644,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             <select value={selectedOption?.id || ""} onChange={(event) => setOptionId(event.target.value)}>
               {availableOptions.map((option) => (
                 <option value={option.id} key={option.id}>
-                  {t(option.label)} ({formatDelta(option.price)})
+                  {menuText(option, option.label)} ({formatDelta(option.price)})
                 </option>
               ))}
             </select>
@@ -660,7 +666,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                     }
                   />
                   <span>
-                    {t(topping.label)} ({formatDelta(topping.price)})
+                    {menuText(topping, topping.label)} ({formatDelta(topping.price)})
                   </span>
                 </label>
               ))}
@@ -768,12 +774,12 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                           <img
                             className="reservation-item-thumb"
                             src={normalizeAssetUrl(drink.imageUrl)}
-                            alt={t(item.drink)}
+                            alt={menuText(drink, item.drink)}
                           />
                         ) : null}
                         <div>
                           <span>
-                            {index + 1}. {t(item.drink)}
+                            {index + 1}. {menuText(drink, item.drink)}
                           </span>
                           <small>{t("この1杯のカスタマイズ")}</small>
                         </div>
@@ -794,7 +800,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                           <select value={item.size} onChange={(event) => updateReservationItem(item.id, { size: event.target.value })}>
                             {itemSizes.map((size) => (
                               <option value={size.id} key={size.id}>
-                                {t(size.label)} ({formatDelta(size.price)})
+                                {menuText(size, size.label)} ({formatDelta(size.price)})
                               </option>
                             ))}
                           </select>
@@ -822,7 +828,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                           <select value={item.sweetness} onChange={(event) => updateReservationItem(item.id, { sweetness: event.target.value })}>
                             {itemSweetnessOptions.map((sweetnessItem) => (
                               <option value={sweetnessItem} key={sweetnessItem}>
-                                {t(sweetnessItem)}
+                                {rawText(sweetnessItem)}
                               </option>
                             ))}
                           </select>
@@ -832,7 +838,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                           <select value={item.ice} onChange={(event) => updateReservationItem(item.id, { ice: event.target.value })}>
                             {itemIceOptions.map((iceItem) => (
                               <option value={iceItem} key={iceItem}>
-                                {t(iceItem)}
+                                {rawText(iceItem)}
                               </option>
                             ))}
                           </select>
@@ -842,7 +848,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                           <select value={item.option} onChange={(event) => updateReservationItem(item.id, { option: event.target.value })}>
                             {itemOptions.map((option) => (
                               <option value={option.id} key={option.id}>
-                                {t(option.label)} ({formatDelta(option.price)})
+                                {menuText(option, option.label)} ({formatDelta(option.price)})
                               </option>
                             ))}
                           </select>
@@ -865,7 +871,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                                 }
                               />
                               <span>
-                                {t(topping.label)} ({formatDelta(topping.price)})
+                                {menuText(topping, topping.label)} ({formatDelta(topping.price)})
                               </span>
                             </label>
                           ))}

@@ -3,7 +3,7 @@ const localCategoryNotes = require("../data/category-notes.js");
 const localDrinkDescriptions = require("../data/menu-descriptions.js");
 
 const basePublishedMenu = publishedMenu.baseMenu;
-const defaultOsMenuApiUrl = "https://foundr1.jp/api/public/menus/nanacha-compatible";
+const defaultOsMenuApiUrl = "https://foundr1.jp/api/public/menus?brand=nanacha";
 const brandMenuRevalidateSeconds = 300;
 const storeMenuRevalidateSeconds = 15;
 
@@ -21,6 +21,91 @@ const asArray = (value) => {
     }
   }
   return [];
+};
+
+const optionId = (option) => String(option?.optionKey || option?.id || option?.externalId || "").trim();
+const optionLabel = (option) => String(option?.label || option?.name || "").trim();
+const toPricedOption = (option) => ({
+  id: optionId(option),
+  label: optionLabel(option),
+  displayNames: option?.displayNames || {},
+  price: Number(option?.price ?? option?.priceDelta ?? 0),
+});
+const optionGroupByKey = (groups, key) => groups.find((group) => group.groupKey === key);
+const optionsForGroup = (groups, key) => {
+  const group = optionGroupByKey(groups, key);
+  return Array.isArray(group?.options) ? group.options : [];
+};
+const categoryId = (category) => String(category.externalId || category.id || category.name || "").trim();
+const normalizeCategory = (category) => ({
+  id: categoryId(category),
+  label: String(category.label || category.name || categoryId(category)).trim(),
+  displayNames: category.displayNames || {},
+  note: category.note || localCategoryNotes[categoryId(category)] || "",
+  isTapiocaFree: category.isTapiocaFree === true,
+  hasWhipByDefault: category.hasWhipByDefault === true,
+});
+const normalizeStandardMenu = (payload) => {
+  if (!Array.isArray(payload?.items) || !payload.items.length) return null;
+  const groups = Array.isArray(payload.optionGroups) ? payload.optionGroups : [];
+  const sizes = optionsForGroup(groups, "size").map(toPricedOption).filter((item) => item.id && item.label);
+  const sweetness = optionsForGroup(groups, "sweetness").map(optionLabel).filter(Boolean);
+  const ice = optionsForGroup(groups, "ice").map(optionLabel).filter(Boolean);
+  const menuOptions = optionsForGroup(groups, "option").map(toPricedOption).filter((item) => item.id && item.label);
+  const toppings = optionsForGroup(groups, "topping").map(toPricedOption).filter((item) => item.id && item.label);
+  const categories = Array.isArray(payload.categories) && payload.categories.length
+    ? payload.categories.map(normalizeCategory)
+    : basePublishedMenu.categories;
+  const categoryByName = new Map(categories.map((category) => [category.label, category]));
+  const drinks = payload.items
+    .filter((item) => item.websiteEnabled !== false && item.isAvailable !== false)
+    .map((item) => {
+      const schema = item.variableSchema || {};
+      const category = categoryByName.get(item.category) || categories.find((entry) => entry.id === item.category);
+      return {
+        id: String(item.externalId || item.id || "").trim(),
+        menuCatalogItemId: String(item.id || "").trim(),
+        name: String(item.name || "").trim(),
+        displayNames: item.displayNames || {},
+        category: category?.id || item.category || "menu",
+        price: Number(item.priceOverride ?? item.basePrice ?? 0),
+        description: item.description || localDrinkDescriptions[item.name] || "",
+        imageUrl: item.imageUrl || "",
+        temperatures: asArray(schema.temperatures).length ? asArray(schema.temperatures) : ["ICE"],
+        isRecommended: schema.isRecommended === true,
+        isFeatured: schema.isFeatured === true,
+        allowedSizes: asArray(schema.allowedSizes),
+        allowedSweetness: asArray(schema.allowedSweetness),
+        allowedIce: asArray(schema.allowedIce),
+        allowedOptions: asArray(schema.allowedOptions),
+        allowedToppings: asArray(schema.allowedToppings),
+        isAvailable: item.isAvailable !== false,
+        websiteEnabled: item.websiteEnabled !== false,
+        isActive: item.isActive !== false,
+      };
+    })
+    .filter((drink) => drink.id && drink.name);
+
+  return {
+    ...basePublishedMenu,
+    source: "foundr1-os",
+    categories,
+    drinks,
+    sizes: sizes.length ? sizes : basePublishedMenu.sizes,
+    sweetness: sweetness.length ? sweetness : basePublishedMenu.sweetness,
+    ice: ice.length ? ice : basePublishedMenu.ice,
+    hotIce: String(optionGroupByKey(groups, "ice")?.ruleJson?.hotValue || basePublishedMenu.hotIce),
+    options: menuOptions.length ? menuOptions : basePublishedMenu.options,
+    toppings: toppings.length ? toppings : basePublishedMenu.toppings,
+    tapiocaFreeCategories: categories.filter((category) => category.isTapiocaFree).map((category) => category.id),
+    whippedCategories: categories.filter((category) => category.hasWhipByDefault).map((category) => category.id),
+    stores: Array.isArray(payload.stores) && payload.stores.length ? payload.stores : basePublishedMenu.stores,
+    selectedStoreId: payload.selectedStoreId || basePublishedMenu.selectedStoreId,
+    storeOperation: {
+      ...(basePublishedMenu.storeOperation || {}),
+      ...(payload.storeOperation || {}),
+    },
+  };
 };
 
 const fallbackMenu = () => ({
@@ -41,6 +126,20 @@ const fallbackMenu = () => ({
 });
 
 const normalizeOsMenu = (payload) => {
+  const standardMenu = normalizeStandardMenu(payload);
+  if (standardMenu) {
+    const rawMinimumPickupMinutes = standardMenu.storeOperation?.minimumPickupMinutes;
+    const hasConfiguredMinimumPickupMinutes = rawMinimumPickupMinutes !== null && rawMinimumPickupMinutes !== undefined && rawMinimumPickupMinutes !== "";
+    return {
+      ...standardMenu,
+      storeOperation: {
+        ...(standardMenu.storeOperation || {}),
+        minimumPickupMinutes: hasConfiguredMinimumPickupMinutes && Number.isFinite(Number(rawMinimumPickupMinutes))
+          ? Math.max(0, Math.min(240, Math.round(Number(rawMinimumPickupMinutes))))
+          : 5,
+      },
+    };
+  }
   const menu = payload?.baseMenu;
   if (!menu || !Array.isArray(menu.categories) || !Array.isArray(menu.drinks) || !menu.categories.length || !menu.drinks.length) {
     return null;
