@@ -1,5 +1,6 @@
 const homepageFallback = require("../homepage-data.js");
 const publishedHomepage = require("../published/homepage.json");
+const { getBrandSiteSections, mergeNanachaHomepage } = require("./brand-site-source");
 const {
   cleanEnv,
   textValue,
@@ -201,7 +202,11 @@ const getLiveHomepageData = async () => {
   return await fetchLarkHomepage(token);
 };
 
-const getHomepageData = async () => publishedHomepage || homepageFallback;
+const getHomepageData = async (language = "ja") => {
+  const baseHomepage = publishedHomepage || homepageFallback;
+  const sections = await getBrandSiteSections("nanacha", language);
+  return mergeNanachaHomepage(baseHomepage, sections);
+};
 
 module.exports = {
   getHomepageData,

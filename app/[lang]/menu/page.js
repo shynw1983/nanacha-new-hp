@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 const { getMenuData } = require("../../../server/menu-source");
+const { getBrandSiteSections } = require("../../../server/brand-site-source");
 import { LocalizedShell } from "../../../components/localized-shell";
 import { MenuBrowser } from "../../../components/menu-browser";
 import { MenuInfo, MenuIntro } from "../../../components/menu-static-content";
@@ -33,17 +34,17 @@ export async function generateMetadata({ params }) {
 export default async function LocalizedMenuPage({ params }) {
   const { lang } = await params;
   if (!translatedLocales.includes(lang)) notFound();
-  const menu = await getMenuData();
+  const [menu, siteSections] = await Promise.all([getMenuData(), getBrandSiteSections("nanacha", lang)]);
 
   return (
     <LocalizedShell language={lang}>
       <SiteHeader menu />
       <main>
-        <MenuIntro />
+        <MenuIntro sections={siteSections} />
         <MenuBrowser initialMenu={menu} />
-        <MenuInfo />
+        <MenuInfo sections={siteSections} />
       </main>
-      <SiteFooter />
+      <SiteFooter sections={siteSections} />
     </LocalizedShell>
   );
 }

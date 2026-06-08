@@ -1,5 +1,6 @@
 const { getMenuData } = require("../server/menu-source");
 const { getHomepageData } = require("../server/homepage-source");
+const { getBrandSiteSections } = require("../server/brand-site-source");
 import { HomeContent } from "../components/home-content";
 import { LocalBusinessJsonLd } from "../components/local-business-json-ld";
 import { ReservationForm } from "../components/reservation-form";
@@ -20,7 +21,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [menu, homepage] = await Promise.all([getMenuData(), getHomepageData()]);
+  const [menu, homepage, siteSections] = await Promise.all([getMenuData(), getHomepageData("ja"), getBrandSiteSections("nanacha", "ja")]);
   const primaryStore = homepage.stores.find((store) => store.isPrimary && store.address) || homepage.stores.find((store) => store.address);
 
   return (
@@ -31,7 +32,7 @@ export default async function HomePage() {
         <HomeContent homepage={homepage} menu={menu} />
         <ReservationForm initialMenu={menu} stores={homepage.stores} />
       </main>
-      <SiteFooter />
+      <SiteFooter sections={siteSections} />
     </>
   );
 }

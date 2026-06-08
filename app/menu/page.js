@@ -1,4 +1,5 @@
 const { getMenuData } = require("../../server/menu-source");
+const { getBrandSiteSections } = require("../../server/brand-site-source");
 import { MenuBrowser } from "../../components/menu-browser";
 import { MenuInfo, MenuIntro } from "../../components/menu-static-content";
 import { SiteFooter } from "../../components/site-footer";
@@ -24,17 +25,17 @@ export const metadata = {
 };
 
 export default async function MenuPage() {
-  const menu = await getMenuData();
+  const [menu, siteSections] = await Promise.all([getMenuData(), getBrandSiteSections("nanacha", "ja")]);
 
   return (
     <>
       <SiteHeader menu />
       <main>
-        <MenuIntro />
+        <MenuIntro sections={siteSections} />
         <MenuBrowser initialMenu={menu} />
-        <MenuInfo />
+        <MenuInfo sections={siteSections} />
       </main>
-      <SiteFooter />
+      <SiteFooter sections={siteSections} />
     </>
   );
 }

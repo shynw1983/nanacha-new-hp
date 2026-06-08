@@ -2,35 +2,39 @@
 
 import { useI18n } from "./i18n-provider";
 
-export function MenuIntro() {
+const findSection = (sections = [], key) => sections.find((section) => section.sectionKey === key) || {};
+
+export function MenuIntro({ sections = [] }) {
   const { t } = useI18n();
+  const hero = findSection(sections, "menu-hero");
 
   return (
     <section className="menu-hero" aria-labelledby="menu-page-title">
       <p className="eyebrow eyebrow-with-decor">
         <img src="/assets/decor/tapioca-one.png" alt="" aria-hidden="true" />
-        nanacha full menu
+        {hero.subtitle || "nanacha full menu"}
       </p>
       <h1 id="menu-page-title" className="title-with-decor">
-        nanacha menu
+        {hero.title || "nanacha menu"}
         <img className="title-decor" src="/assets/decor/sunglasses.png" alt="" aria-hidden="true" />
       </h1>
       <p>
-        {t("nanacha のタピオカミルク、フラッペ、チーズティー、スムージー、ティー、コーヒーまで。 サイズ・甘さ・氷の量・トッピングを選んで、自分好みの一杯に。")}
+        {t(hero.body || "nanacha のタピオカミルク、フラッペ、チーズティー、スムージー、ティー、コーヒーまで。 サイズ・甘さ・氷の量・トッピングを選んで、自分好みの一杯に。")}
       </p>
     </section>
   );
 }
 
-export function MenuInfo() {
+export function MenuInfo({ sections = [] }) {
   const { t } = useI18n();
+  const info = findSection(sections, "allergy-caffeine");
 
   return (
     <section className="menu-info-section" aria-labelledby="menu-info-title">
       <div className="category-heading">
-        <p className="eyebrow">menu information</p>
+        <p className="eyebrow">{info.subtitle || "menu information"}</p>
         <h2 id="menu-info-title" className="heading-with-decor">
-          {t("アレルギー・カフェインについて")}
+          {t(info.title || "アレルギー・カフェインについて")}
           <img src="/assets/decor/dog-smile.png" alt="" aria-hidden="true" />
         </h2>
       </div>

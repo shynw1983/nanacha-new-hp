@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 const { getMenuData } = require("../../server/menu-source");
 const { getHomepageData } = require("../../server/homepage-source");
+const { getBrandSiteSections } = require("../../server/brand-site-source");
 import { HomeContent } from "../../components/home-content";
 import { LocalizedShell } from "../../components/localized-shell";
 import { LocalBusinessJsonLd } from "../../components/local-business-json-ld";
@@ -39,7 +40,7 @@ export default async function LocalizedHomePage({ params }) {
   const { lang } = await params;
   if (!translatedLocales.includes(lang)) notFound();
 
-  const [menu, homepage] = await Promise.all([getMenuData(), getHomepageData()]);
+  const [menu, homepage, siteSections] = await Promise.all([getMenuData(), getHomepageData(lang), getBrandSiteSections("nanacha", lang)]);
   const primaryStore = homepage.stores.find((store) => store.isPrimary && store.address) || homepage.stores.find((store) => store.address);
 
   return (
@@ -50,7 +51,7 @@ export default async function LocalizedHomePage({ params }) {
         <HomeContent homepage={homepage} menu={menu} />
         <ReservationForm initialMenu={menu} stores={homepage.stores} />
       </main>
-      <SiteFooter />
+      <SiteFooter sections={siteSections} />
     </LocalizedShell>
   );
 }
