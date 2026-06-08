@@ -19,7 +19,7 @@ const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
 
 export function MenuBrowser({ initialMenu }) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const [menu, setMenu] = useState(initialMenu || null);
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -45,6 +45,7 @@ export function MenuBrowser({ initialMenu }) {
   }, [initialMenu]);
 
   const localizedMenu = useMemo(() => (menu ? localizeValue(menu, t) : null), [menu, t]);
+  const descriptionText = (drink) => drink.descriptionDisplayNames?.[language] || drink.descriptionDisplayNames?.en || drink.description || "";
   const visibleCategories = useMemo(() => {
     if (!localizedMenu) return [];
 
@@ -106,7 +107,7 @@ export function MenuBrowser({ initialMenu }) {
                   ) : null}
                   <div>
                     <h3>{drink.name}</h3>
-                    {drink.description ? <p>{drink.description}</p> : null}
+                    {descriptionText(drink) ? <p>{descriptionText(drink)}</p> : null}
                   </div>
                   <div className="product-item-actions">
                     <span>{formatPrice(drink.price)}</span>

@@ -70,6 +70,7 @@ const normalizeStandardMenu = (payload) => {
         category: category?.id || item.category || "menu",
         price: Number(item.priceOverride ?? item.basePrice ?? 0),
         description: item.description || localDrinkDescriptions[item.name] || "",
+        descriptionDisplayNames: item.descriptionDisplayNames || {},
         imageUrl: item.imageUrl || "",
         temperatures: asArray(schema.temperatures).length ? asArray(schema.temperatures) : ["ICE"],
         isRecommended: schema.isRecommended === true,
@@ -121,6 +122,7 @@ const fallbackMenu = () => ({
   drinks: basePublishedMenu.drinks.map((drink) => ({
     ...drink,
     description: drink.description || localDrinkDescriptions[drink.name] || "",
+    descriptionDisplayNames: drink.descriptionDisplayNames || {},
     isActive: drink.isActive !== false,
   })),
 });
@@ -158,6 +160,7 @@ const normalizeOsMenu = (payload) => {
     drinks: menu.drinks.map((drink) => ({
       ...drink,
       description: drink.description || localDrinkDescriptions[drink.name] || "",
+      descriptionDisplayNames: drink.descriptionDisplayNames || {},
       temperatures: asArray(drink.temperatures).length ? asArray(drink.temperatures) : ["ICE"],
       isActive: drink.isActive !== false,
     })),

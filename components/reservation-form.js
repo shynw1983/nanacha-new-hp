@@ -128,6 +128,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     const original = fallback || source.label || source.name || "";
     return source.displayNames?.[language] || source.displayNames?.en || t(original);
   };
+  const menuDescription = (item) => {
+    const source = item && typeof item === "object" ? item : {};
+    const original = source.description || "";
+    return source.descriptionDisplayNames?.[language] || source.descriptionDisplayNames?.en || t(original);
+  };
   const rawText = (value) => t(value);
   const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
@@ -596,7 +601,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
               <div>
                 <span>{t("選択中の商品")}</span>
                 <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
-                {selectedDrink.description ? <p>{t(selectedDrink.description)}</p> : null}
+                {selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
                 <small>{formatPrice(selectedDrink.price)}</small>
               </div>
             </div>

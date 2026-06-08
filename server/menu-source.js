@@ -13,6 +13,7 @@ const withLocalDescriptions = (menu) => ({
   drinks: menu.drinks.map((drink) => ({
     ...drink,
     description: drink.description || localDrinkDescriptions[drink.name] || "",
+    descriptionDisplayNames: drink.descriptionDisplayNames || {},
   })),
 });
 
