@@ -3,6 +3,8 @@ const localeConfig = {
   en: { htmlLang: "en", pathPrefix: "/en" },
   zh: { htmlLang: "zh-Hans", pathPrefix: "/zh" },
   ko: { htmlLang: "ko", pathPrefix: "/ko" },
+  vi: { htmlLang: "vi", pathPrefix: "/vi" },
+  ne: { htmlLang: "ne", pathPrefix: "/ne" },
 };
 
 const supportedLocales = Object.keys(localeConfig);

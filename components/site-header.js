@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
-import { buildMemberCardUrl, consumeMemberHandoff } from "./member-session";
+import { buildMemberCardUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
+
+const languagePrefixes = ["/en", "/zh", "/ko", "/vi", "/ne"];
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -37,14 +39,10 @@ export function SiteHeader({ menu = false, shops = false }) {
     setMemberHref(buildMemberCardUrl());
   }, [pathname]);
 
-  useEffect(() => {
-    consumeMemberHandoff().catch(() => {});
-  }, [pathname]);
-
   const changeLanguage = (nextLanguage) => {
     setLanguage(nextLanguage);
 
-    const currentLanguagePrefix = ["/en", "/zh", "/ko"].find(
+    const currentLanguagePrefix = languagePrefixes.find(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
     );
     const basePath = currentLanguagePrefix ? pathname.slice(currentLanguagePrefix.length) || "/" : pathname;
@@ -52,6 +50,15 @@ export function SiteHeader({ menu = false, shops = false }) {
     const hash = window.location.hash;
     router.push(`${localizedPath(nextLanguage, basePath)}${query}${hash}`);
   };
+
+  useEffect(() => {
+    consumeMemberHandoff()
+      .then((profile) => {
+        const nextLanguage = memberPreferredLanguage(profile);
+        if (nextLanguage && nextLanguage !== language) changeLanguage(nextLanguage);
+      })
+      .catch(() => {});
+  }, [pathname]);
 
   return (
     <header className="site-header" data-header>
@@ -88,6 +95,8 @@ export function SiteHeader({ menu = false, shops = false }) {
             <option value="en">English</option>
             <option value="zh">中文</option>
             <option value="ko">한국어</option>
+            <option value="vi">Tiếng Việt</option>
+            <option value="ne">नेपाली</option>
           </select>
         </label>
         <a className="header-action" href={reserveHref}>

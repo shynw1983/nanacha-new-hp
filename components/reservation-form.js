@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "./i18n-provider";
-import { buildMemberHandoffUrl, consumeMemberHandoff } from "./member-session";
+import { buildMemberHandoffUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
@@ -122,7 +122,7 @@ const getNextAvailablePickupDateTime = (hours = "", leadMinutes = DEFAULT_MINIMU
 };
 
 export function ReservationForm({ initialMenu, stores = [] }) {
-  const { language, t } = useI18n();
+  const { language, setLanguage, t } = useI18n();
   const menuText = (item, fallback = "") => {
     const source = item && typeof item === "object" ? item : {};
     const original = fallback || source.label || source.name || "";
@@ -168,12 +168,14 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     consumeMemberHandoff()
       .then((profile) => {
         if (!profile) return;
+        const nextLanguage = memberPreferredLanguage(profile);
+        if (nextLanguage && nextLanguage !== language) setLanguage(nextLanguage);
         setMemberProfile(profile);
         setCustomerName((current) => current || profile.displayName || "");
         setCustomerPhone((current) => current || profile.phone || "");
       })
       .catch(() => {});
-  }, []);
+  }, [language, setLanguage]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {

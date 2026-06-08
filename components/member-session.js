@@ -1,8 +1,31 @@
 "use client";
 
 const MEMBER_STORAGE_KEY = "foundr1-member-profile";
+const LANGUAGE_STORAGE_KEY = "nanacha-language";
 const MEMBER_PORTAL_URL = process.env.NEXT_PUBLIC_FOUNDR1_MEMBER_URL || "https://foundr1.jp/member";
 const MEMBER_BRAND = "nanacha";
+const SUPPORTED_LANGUAGES = ["ja", "en", "zh", "ko", "vi", "ne"];
+
+export function normalizeMemberLanguage(value) {
+  const language = String(value || "").trim();
+  return SUPPORTED_LANGUAGES.includes(language) ? language : "";
+}
+
+export function memberPreferredLanguage(profile) {
+  return normalizeMemberLanguage(profile?.preferredLanguage || profile?.language || profile?.selectedLanguage);
+}
+
+function currentLanguage() {
+  if (typeof window === "undefined") return "ja";
+  try {
+    const stored = normalizeMemberLanguage(window.localStorage.getItem(LANGUAGE_STORAGE_KEY));
+    if (stored) return stored;
+  } catch {
+    // Fall back below.
+  }
+  const htmlLanguage = normalizeMemberLanguage(document.documentElement.lang);
+  return htmlLanguage || "ja";
+}
 
 function cleanReturnUrl() {
   const url = new URL(window.location.href);
@@ -15,6 +38,7 @@ function buildMemberUrl({ handoff }) {
   if (typeof window === "undefined") return MEMBER_PORTAL_URL;
   const url = new URL(MEMBER_PORTAL_URL);
   url.searchParams.set("returnTo", cleanReturnUrl());
+  url.searchParams.set("lang", currentLanguage());
   if (handoff) url.searchParams.set("handoff", "1");
   return url.toString();
 }

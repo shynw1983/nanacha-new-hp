@@ -9,6 +9,8 @@ const LANGUAGE_META = {
   en: { htmlLang: "en" },
   zh: { htmlLang: "zh-Hans" },
   ko: { htmlLang: "ko" },
+  vi: { htmlLang: "vi" },
+  ne: { htmlLang: "ne" },
 };
 const I18nContext = createContext({
   language: "ja",
