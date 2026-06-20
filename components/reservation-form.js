@@ -50,6 +50,16 @@ const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
 const MENU_REFRESH_INTERVAL_MS = 15000;
 const unsafeCheckoutErrorPattern = /(FOUNDR1|Foundr1|Square|configured|configuration|Invalid|Missing|Unknown|checkout|failed|required|Selected coupon)/i;
+const unavailableCheckoutErrorMessages = new Set([
+  "Unknown drink",
+  "Invalid customization",
+  "Invalid temperature",
+  "Invalid ice amount",
+  "Invalid topping",
+  "Invalid topping for tapioca-free category",
+  "Invalid topping for non-whip category",
+]);
+const unavailableCheckoutMessage = "選択した商品の一部が現在販売停止または品切れです。予約リストを更新して、もう一度選び直してください。";
 const normalizeMinimumPickupMinutes = (value) => {
   if (value === null || value === undefined || value === "") return DEFAULT_MINIMUM_PICKUP_MINUTES;
   const minutes = Math.round(Number(value));
@@ -522,6 +532,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
       const checkoutErrorMessage =
         error.code === "SQUARE_NOT_CONFIGURED"
           ? "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。"
+          : unavailableCheckoutErrorMessages.has(error.message)
+            ? unavailableCheckoutMessage
           : error.message === "Pickup time is outside store hours"
             ? "現在は営業時間外です。予約できる最短の受け取り時間を選択してください。"
             : error.message === "Reservations are temporarily paused for this store"
