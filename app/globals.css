@@ -1299,7 +1299,7 @@ h3 {
   width: 116px;
   height: 140px;
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center top;
 }
 
 .product-item > div {
