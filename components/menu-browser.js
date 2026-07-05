@@ -62,6 +62,13 @@ export function MenuBrowser({ initialMenu }) {
     return <div data-react-menu-browser />;
   }
 
+  const displayDescription = (drink) => {
+    if (language === "ja") {
+      return drink.descriptionDisplayNames?.ja || drink.description || drink.descriptionDisplayNames?.en || "";
+    }
+    return descriptionText(drink);
+  };
+
   return (
     <div data-react-menu-browser>
       <section className="menu-controls" aria-label="メニューカテゴリー">
@@ -107,7 +114,7 @@ export function MenuBrowser({ initialMenu }) {
                   ) : null}
                   <div>
                     <h3>{drink.name}</h3>
-                    {descriptionText(drink) ? <p>{descriptionText(drink)}</p> : null}
+                    {displayDescription(drink) ? <p>{displayDescription(drink)}</p> : null}
                   </div>
                   <div className="product-item-actions">
                     <span>{formatPrice(drink.price)}</span>

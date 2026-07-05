@@ -136,12 +136,18 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const menuText = (item, fallback = "") => {
     const source = item && typeof item === "object" ? item : {};
     const original = fallback || source.label || source.name || "";
-    return source.displayNames?.[language] || source.displayNames?.en || t(original);
+    if (language === "ja") {
+      return source.displayNames?.ja || original || source.displayNames?.en || "";
+    }
+    return source.displayNames?.[language] || t(original) || source.displayNames?.en || "";
   };
   const menuDescription = (item) => {
     const source = item && typeof item === "object" ? item : {};
     const original = source.description || "";
-    return source.descriptionDisplayNames?.[language] || source.descriptionDisplayNames?.en || t(original);
+    if (language === "ja") {
+      return source.descriptionDisplayNames?.ja || original || source.descriptionDisplayNames?.en || "";
+    }
+    return source.descriptionDisplayNames?.[language] || t(original) || source.descriptionDisplayNames?.en || "";
   };
   const rawText = (value) => t(value);
   const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
