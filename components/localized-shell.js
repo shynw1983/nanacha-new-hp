@@ -1,4 +1,5 @@
 import { I18nProvider } from "./i18n-provider";
+const { localeConfig } = require("../data/locales");
 
 const dictionaries = {
   en: require("../public/locales/en.json"),
@@ -11,9 +12,13 @@ const dictionaries = {
 };
 
 export function LocalizedShell({ language, children }) {
+  const htmlLang = localeConfig[language]?.htmlLang || "ja";
+
   return (
     <I18nProvider initialLanguage={language} initialDictionary={dictionaries[language] || {}}>
-      {children}
+      <div className="localized-shell" lang={htmlLang}>
+        {children}
+      </div>
     </I18nProvider>
   );
 }
