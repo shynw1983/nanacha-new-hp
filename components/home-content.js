@@ -36,7 +36,7 @@ export function HomeContent({ homepage, menu }) {
           </p>
           <h1 id="hero-title" className="title-with-decor">
             {settings.heroTitle}
-            <img className="title-decor" src="/assets/decor/dog-sparkle.png" alt="" aria-hidden="true" />
+            <img className="title-decor" src="/assets/decor/sparkle.png" alt="" aria-hidden="true" />
           </h1>
           <p className="hero-text">{settings.heroDescription}</p>
           <div className="hero-actions">
@@ -147,7 +147,7 @@ export function HomeContent({ homepage, menu }) {
             <p className="eyebrow">our tea stand</p>
             <h2 id="story-title" className="heading-with-decor">
               {t("nanachaのこだわり")}
-              <img src="/assets/decor/paw.png" alt="" aria-hidden="true" />
+              <img src="/assets/decor/wave.png" alt="" aria-hidden="true" />
             </h2>
           </div>
         </div>
@@ -178,7 +178,7 @@ export function HomeContent({ homepage, menu }) {
             <p className="eyebrow">our shops</p>
             <h2 id="stores-title" className="heading-with-decor">
               {t("店舗紹介")}
-              <img src="/assets/decor/dog-smile.png" alt="" aria-hidden="true" />
+              <img src="/assets/decor/heart.png" alt="" aria-hidden="true" />
             </h2>
           </div>
         </div>

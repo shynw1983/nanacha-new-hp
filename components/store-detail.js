@@ -13,7 +13,7 @@ export function StoreDetail({ store, headingLevel = "h1", reserveHref = "/#reser
       <p className="eyebrow store-detail-eyebrow">shop map</p>
       <Heading id={`store-${store.id}-title`} className="heading-with-decor store-detail-title">
         {store.name}
-        <img src="/assets/decor/tail.png" alt="" aria-hidden="true" />
+        <img src="/assets/decor/wave.png" alt="" aria-hidden="true" />
       </Heading>
       <address className="store-detail-address">
         {store.postalCode} {store.address}

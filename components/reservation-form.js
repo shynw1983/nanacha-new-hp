@@ -569,7 +569,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
         </p>
         <h2 id="reserve-title" className="heading-with-decor">
           {t("受け取り予約")}
-          <img src="/assets/decor/dog-heart.png" alt="" aria-hidden="true" />
+          <img src="/assets/decor/heart-fill.png" alt="" aria-hidden="true" />
         </h2>
         <form className="reserve-form" onSubmit={submitOrder}>
           {reservationsPaused ? <div className="reservation-closed-notice">{t(reservationPauseMessage)}</div> : null}

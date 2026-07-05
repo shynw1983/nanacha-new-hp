@@ -35,7 +35,7 @@ export function MenuInfo({ sections = [] }) {
         <p className="eyebrow">{info.subtitle || "menu information"}</p>
         <h2 id="menu-info-title" className="heading-with-decor">
           {t(info.title || "アレルギー・カフェインについて")}
-          <img src="/assets/decor/dog-smile.png" alt="" aria-hidden="true" />
+          <img src="/assets/decor/tapioca-two.png" alt="" aria-hidden="true" />
         </h2>
       </div>
       <div className="info-grid">

@@ -8,8 +8,8 @@ const categoryDecor = {
   milk: "tapioca-three.png",
   smoothie: "wave.png",
   "cheese-tea": "heart-fill.png",
-  tea: "tail.png",
-  special: "dog-heart.png",
+  tea: "tapioca-one.png",
+  special: "heart.png",
   coffee: "tapioca-two.png",
   "tea-coffee": "sunglasses.png",
 };
