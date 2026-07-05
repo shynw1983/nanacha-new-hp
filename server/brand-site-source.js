@@ -4,6 +4,11 @@ const osBaseUrl =
   "https://foundr1.jp";
 
 const normalizeUrl = (url = "") => String(url || "").replace(/\/$/, "");
+const localHeroImages = {
+  "hero-01": "assets/hero/hero-01.png",
+  "hero-02": "assets/hero/hero-02.png",
+  "hero-03": "assets/hero/hero-03.png",
+};
 
 const localizeSection = (section, language = "ja") => {
   if (!section || language === "ja") return section;
@@ -76,7 +81,7 @@ function mergeNanachaHomepage(homepage, sections = []) {
         ...slide,
         title: section.title || slide.title,
         caption: section.body || slide.caption,
-        imageUrl: section.imageUrl || slide.imageUrl,
+        imageUrl: localHeroImages[slide.id] || slide.imageUrl,
         altText: section.imageAlt || slide.altText,
       };
     }),

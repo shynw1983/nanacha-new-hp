@@ -4,6 +4,8 @@ import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
 import siteLinks from "../data/site-links";
 
+const footerLogoPath = "/assets/nanacha-logo-20211101.png";
+
 export function SiteFooter({ sections = [] }) {
   const { language, t } = useI18n();
   const footer = sections.find((section) => section.sectionKey === "footer") || {};
@@ -11,7 +13,7 @@ export function SiteFooter({ sections = [] }) {
   return (
     <footer>
       <div className="footer-brand">
-        <img src={footer.imageUrl || "/assets/nanacha-logo.png"} alt={footer.imageAlt || "nanacha"} />
+        <img src={footerLogoPath} alt={footer.imageAlt || "nanacha"} />
         <p>{t(footer.title || "nanacha · tapioca & more...")}</p>
       </div>
       <div className="footer-links" aria-label="外部リンク">

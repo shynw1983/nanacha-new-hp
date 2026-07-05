@@ -63,7 +63,7 @@ export function SiteHeader({ menu = false, shops = false }) {
   return (
     <header className="site-header" data-header>
       <a className="brand" href={homeHref} aria-label={t("nanacha ホーム")}>
-        <img className="brand-logo" src="/assets/nanacha-logo.png" alt="nanacha" />
+        <img className="brand-logo" src="/assets/nanacha-logo-20211101.png" alt="nanacha" />
       </a>
       <nav className="nav-links" aria-label={t("メインナビゲーション")}>
         <a href={localizedPath(language, "/menu")} aria-current={menu ? "page" : undefined}>
