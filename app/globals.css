@@ -679,7 +679,7 @@ h3 {
 }
 
 .drink-card {
-  min-height: 300px;
+  min-height: 392px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -693,8 +693,8 @@ h3 {
 }
 
 .drink-photo {
-  width: 82px;
-  height: 132px;
+  width: 150px;
+  height: 220px;
   margin-bottom: var(--space-md);
   object-fit: contain;
   object-position: center bottom;
@@ -2420,15 +2420,15 @@ footer p {
   .menu-section .drink-card {
     min-height: 0;
     display: grid;
-    grid-template-columns: 86px minmax(0, 1fr) auto;
+    grid-template-columns: 122px minmax(0, 1fr) auto;
     align-items: start;
     gap: 14px;
     padding: 18px;
   }
 
   .menu-section .drink-photo {
-    width: 70px;
-    height: 96px;
+    width: 112px;
+    height: 154px;
     margin: 0 auto;
   }
 

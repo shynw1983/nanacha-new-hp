@@ -7,6 +7,8 @@ import { localizedPath } from "./localized-path";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
+const highResolutionMenuAssetUrl = (url = "") =>
+  url.startsWith("assets/menu/") ? url.replace("assets/menu/", "assets/menu-large/") : url;
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 
 const cardsBySection = (homepage, section) => homepage.cards.filter((card) => card.section === section);
@@ -85,7 +87,9 @@ export function HomeContent({ homepage, menu }) {
         <div className="menu-grid reveal-group">
           {picks.map((drink, index) => (
             <article className={`drink-card${drink.isFeatured || index === 0 ? " featured" : ""}`} key={drink.id}>
-              {drink.imageUrl ? <img className="drink-photo" src={normalizeAssetUrl(drink.imageUrl)} alt={drink.name} /> : null}
+              {drink.imageUrl ? (
+                <img className="drink-photo" src={normalizeAssetUrl(highResolutionMenuAssetUrl(drink.imageUrl))} alt={drink.name} />
+              ) : null}
               <div>
                 <p className="drink-tag">{localizedMenu.categories.find((category) => category.id === drink.category)?.label}</p>
                 <h3>{drink.name}</h3>

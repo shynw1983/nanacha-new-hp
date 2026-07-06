@@ -17,6 +17,8 @@ const categoryDecor = {
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
+const highResolutionMenuAssetUrl = (url = "") =>
+  url.startsWith("assets/menu/") ? url.replace("assets/menu/", "assets/menu-large/") : url;
 
 export function MenuBrowser({ initialMenu }) {
   const { language, t } = useI18n();
@@ -110,7 +112,7 @@ export function MenuBrowser({ initialMenu }) {
               {category.drinks.map((drink) => (
                 <article className={`product-item ${drink.imageUrl ? "with-photo" : "simple"}`} key={drink.id}>
                   {drink.imageUrl ? (
-                    <img className="product-photo" src={normalizeAssetUrl(drink.imageUrl)} alt={drink.name} />
+                    <img className="product-photo" src={normalizeAssetUrl(highResolutionMenuAssetUrl(drink.imageUrl))} alt={drink.name} />
                   ) : null}
                   <div>
                     <h3>{drink.name}</h3>
