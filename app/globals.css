@@ -191,6 +191,7 @@ img {
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -202,6 +203,11 @@ img {
   color: var(--muted);
   font-size: 11px;
   font-weight: 800;
+}
+
+.language-picker-current,
+.header-action-short {
+  display: none;
 }
 
 .language-picker select {
@@ -2149,49 +2155,83 @@ footer p {
 
 @media (max-width: 640px) {
   .site-header {
-    padding: 14px 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .brand {
+    min-width: 0;
   }
 
   .brand-logo {
-    height: 42px;
+    height: 62px;
+    max-width: min(54vw, 220px);
   }
 
   .header-action {
-    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 14px;
-    font-size: 13px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    font-size: 12px;
     line-height: 1;
     white-space: nowrap;
   }
 
+  .header-action-full {
+    display: none;
+  }
+
+  .header-action-short {
+    display: inline;
+  }
+
   .member-icon-link {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .member-icon-link svg {
+    width: 18px;
+    height: 18px;
   }
 
   .header-tools {
     align-items: center;
     justify-content: end;
     flex-direction: row;
-    gap: 8px;
+    gap: 6px;
   }
 
   .language-picker {
-    min-height: 44px;
-    padding: 0 10px 0 12px;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
   }
 
-  .language-picker span {
+  .language-picker-label {
     display: none;
   }
 
-  .language-picker select {
-    max-width: 82px;
-    font-size: 13px;
+  .language-picker-current {
+    display: block;
+    color: var(--ink);
+    font-size: 12px;
     line-height: 1;
+  }
+
+  .language-picker select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
   }
 
   h1 {

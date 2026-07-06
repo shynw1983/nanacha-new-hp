@@ -7,6 +7,15 @@ import { localizedPath } from "./localized-path";
 import { buildMemberCardUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
 
 const languagePrefixes = ["/en", "/zh", "/zh-Hant", "/ko", "/vi", "/ne"];
+const compactLanguageLabels = {
+  ja: "JP",
+  en: "EN",
+  zh: "简",
+  "zh-Hant": "繁",
+  ko: "KO",
+  vi: "VI",
+  ne: "NE",
+};
 
 export function SiteHeader({ menu = false, shops = false }) {
   const { language, setLanguage, t } = useI18n();
@@ -89,7 +98,10 @@ export function SiteHeader({ menu = false, shops = false }) {
           </svg>
         </a>
         <label className="language-picker">
-          <span>Language</span>
+          <span className="language-picker-label">Language</span>
+          <span className="language-picker-current" aria-hidden="true">
+            {compactLanguageLabels[language] || language.toUpperCase()}
+          </span>
           <select value={language} onChange={(event) => changeLanguage(event.target.value)} aria-label="Language">
             <option value="ja">日本語</option>
             <option value="en">English</option>
@@ -101,7 +113,8 @@ export function SiteHeader({ menu = false, shops = false }) {
           </select>
         </label>
         <a className="header-action" href={reserveHref}>
-          {t("受け取り予約")}
+          <span className="header-action-full">{t("受け取り予約")}</span>
+          <span className="header-action-short">{t("予約")}</span>
         </a>
       </div>
     </header>
