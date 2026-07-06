@@ -2587,6 +2587,14 @@ footer p {
     align-items: flex-start;
   }
 
+  .footer-brand {
+    gap: 10px;
+  }
+
+  .footer-brand img {
+    height: 44px;
+  }
+
   .footer-links + p {
     justify-self: auto;
   }
