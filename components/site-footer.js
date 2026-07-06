@@ -14,7 +14,10 @@ export function SiteFooter({ sections = [] }) {
     <footer>
       <div className="footer-brand">
         <img src={footerLogoPath} alt={footer.imageAlt || "nanacha"} />
-        <p>{t(footer.title || "nanacha · tapioca & more...")}</p>
+        <div>
+          <p>{t(footer.title || "nanacha · tapioca & more...")}</p>
+          <small>A Foundr1 Brand</small>
+        </div>
       </div>
       <div className="footer-links" aria-label="外部リンク">
         <a href={localizedPath(language, footer.actionUrl || "/shops")}>{t(footer.actionLabel || "店舗一覧を見る")}</a>
