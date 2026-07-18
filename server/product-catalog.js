@@ -36,6 +36,11 @@ const optionsForGroup = (groups, key) => {
   const group = optionGroupByKey(groups, key);
   return Array.isArray(group?.options) ? group.options : [];
 };
+const scopedValues = (groups, key, mapper) => optionsForGroup(groups, key).map(mapper).filter(Boolean);
+const intersectConfiguredValues = (configured, scoped) => {
+  const values = asArray(configured);
+  return values.length ? scoped.filter((value) => values.includes(value)) : scoped;
+};
 const categoryId = (category) => String(category.externalId || category.id || category.name || "").trim();
 const normalizeCategory = (category) => ({
   id: categoryId(category),
@@ -61,6 +66,7 @@ const normalizeStandardMenu = (payload) => {
     .filter((item) => item.websiteEnabled !== false && item.isAvailable !== false)
     .map((item) => {
       const schema = item.variableSchema || {};
+      const itemGroups = Array.isArray(item.optionGroups) ? item.optionGroups : groups;
       const category = categoryByName.get(item.category) || categories.find((entry) => entry.id === item.category);
       return {
         id: String(item.externalId || item.id || "").trim(),
@@ -72,14 +78,15 @@ const normalizeStandardMenu = (payload) => {
         description: item.description || localDrinkDescriptions[item.name] || "",
         descriptionDisplayNames: item.descriptionDisplayNames || {},
         imageUrl: item.imageUrl || "",
-        temperatures: asArray(schema.temperatures).length ? asArray(schema.temperatures) : ["ICE"],
+        strictOptionScopes: Array.isArray(item.optionGroups),
+        temperatures: intersectConfiguredValues(schema.temperatures, scopedValues(itemGroups, "temperature", optionLabel)),
         isRecommended: schema.isRecommended === true,
         isFeatured: schema.isFeatured === true,
-        allowedSizes: asArray(schema.allowedSizes),
-        allowedSweetness: asArray(schema.allowedSweetness),
-        allowedIce: asArray(schema.allowedIce),
-        allowedOptions: asArray(schema.allowedOptions),
-        allowedToppings: asArray(schema.allowedToppings),
+        allowedSizes: intersectConfiguredValues(schema.allowedSizes, scopedValues(itemGroups, "size", optionId)),
+        allowedSweetness: intersectConfiguredValues(schema.allowedSweetness, scopedValues(itemGroups, "sweetness", optionLabel)),
+        allowedIce: intersectConfiguredValues(schema.allowedIce, scopedValues(itemGroups, "ice", optionLabel)),
+        allowedOptions: intersectConfiguredValues(schema.allowedOptions, scopedValues(itemGroups, "option", optionId)),
+        allowedToppings: intersectConfiguredValues(schema.allowedToppings, scopedValues(itemGroups, "topping", optionId)),
         isAvailable: item.isAvailable !== false,
         websiteEnabled: item.websiteEnabled !== false,
         isActive: item.isActive !== false,

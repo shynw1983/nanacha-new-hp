@@ -26,18 +26,21 @@ const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
 const allowedSet = (drink, field) => {
   const values = Array.isArray(drink?.[field]) ? drink[field].filter(Boolean) : [];
+  if (drink?.strictOptionScopes && Array.isArray(drink?.[field])) return new Set(values.map(String));
   return values.length ? new Set(values.map(String)) : null;
 };
 const filterAllowedIds = (items, drink, field) => {
   const allowed = allowedSet(drink, field);
   if (!allowed) return items;
   const filtered = items.filter((item) => allowed.has(item.id));
+  if (drink?.strictOptionScopes) return filtered;
   return filtered.length ? filtered : items;
 };
 const filterAllowedValues = (items, drink, field) => {
   const allowed = allowedSet(drink, field);
   if (!allowed) return items;
   const filtered = items.filter((item) => allowed.has(item));
+  if (drink?.strictOptionScopes) return filtered;
   return filtered.length ? filtered : items;
 };
 const filterAllowedOptions = (items, drink) => {
