@@ -31,6 +31,31 @@ const toPricedOption = (option) => ({
   displayNames: option?.displayNames || {},
   price: Number(option?.price ?? option?.priceDelta ?? 0),
 });
+const toCustomizationGroup = (group) => {
+  const rule = group?.ruleJson || {};
+  return {
+    id: String(group?.id || group?.externalId || group?.groupKey || "").trim(),
+    externalId: String(group?.externalId || "").trim(),
+    groupKey: String(group?.groupKey || "").trim(),
+    label: String(group?.name || group?.label || "").trim(),
+    displayNames: group?.displayNames || {},
+    selectionType: group?.selectionType === "multiple" ? "multiple" : "single",
+    minSelections: Math.max(0, Number(group?.minSelections ?? rule.minSelections) || 0),
+    maxSelections: Math.max(0, Number(group?.maxSelections ?? rule.maxSelections) || 0),
+    allowRepeat: (group?.allowRepeat ?? rule.allowRepeat) === true,
+    perOptionMax: Math.max(0, Number(group?.perOptionMax ?? rule.perOptionMax) || 0),
+    options: Array.isArray(group?.options)
+      ? group.options.map((option) => ({
+          id: String(option?.id || option?.optionKey || option?.externalId || "").trim(),
+          externalId: String(option?.externalId || "").trim(),
+          optionKey: String(option?.optionKey || "").trim(),
+          label: optionLabel(option),
+          displayNames: option?.displayNames || {},
+          price: Number(option?.price ?? option?.priceDelta ?? 0),
+        })).filter((option) => option.id && option.label)
+      : [],
+  };
+};
 const optionGroupByKey = (groups, key) => groups.find((group) => group.groupKey === key);
 const optionsForGroup = (groups, key) => {
   const group = optionGroupByKey(groups, key);
@@ -67,6 +92,9 @@ const normalizeStandardMenu = (payload) => {
     .map((item) => {
       const schema = item.variableSchema || {};
       const itemGroups = Array.isArray(item.optionGroups) ? item.optionGroups : groups;
+      const customizationGroups = Array.isArray(item.customizationGroups)
+        ? item.customizationGroups.map(toCustomizationGroup).filter((group) => group.id && group.label && group.options.length)
+        : [];
       const category = categoryByName.get(item.category) || categories.find((entry) => entry.id === item.category);
       return {
         id: String(item.externalId || item.id || "").trim(),
@@ -78,6 +106,8 @@ const normalizeStandardMenu = (payload) => {
         description: item.description || localDrinkDescriptions[item.name] || "",
         descriptionDisplayNames: item.descriptionDisplayNames || {},
         imageUrl: item.imageUrl || "",
+        usesStructuredCustomizations: item.usesStructuredCustomizations === true && customizationGroups.length > 0,
+        customizationGroups,
         strictOptionScopes: Array.isArray(item.optionGroups),
         temperatures: intersectConfiguredValues(schema.temperatures, scopedValues(itemGroups, "temperature", optionLabel)),
         isRecommended: schema.isRecommended === true,

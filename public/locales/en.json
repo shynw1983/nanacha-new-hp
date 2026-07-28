@@ -272,5 +272,10 @@
   "黒糖タピオカ塩キャラメルミルク": "Black Sugar Tapioca Salted Caramel Milk",
   "黒糖タピオカ練乳いちごミルク": "Black Sugar Tapioca Strawberry Milk with Condensed Milk",
   "閉じる": "Close",
-  "カスタマイズへ進む": "Customize this item"
+  "カスタマイズへ進む": "Customize this item",
+  "必須": "Required",
+  "任意": "Optional",
+  "選択してください": "Please select",
+  "選択しない": "None",
+  "必須のカスタマイズを選択してください。": "Please select all required options."
 }

@@ -2186,6 +2186,103 @@ h3 {
   accent-color: var(--ink);
 }
 
+.structured-customization-groups {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.structured-customization-group {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.structured-customization-group legend {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 2px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.structured-customization-group legend small {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.structured-customization-group > select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.structured-customization-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.structured-customization-options > label {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.structured-customization-options input {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  padding: 0;
+  accent-color: var(--ink);
+}
+
+.structured-customization-options span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.structured-customization-quantity {
+  justify-content: space-between;
+}
+
+.structured-customization-quantity select {
+  width: 68px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
 .reservation-list {
   grid-column: 1 / -1;
   display: grid;
@@ -2328,6 +2425,35 @@ h3 {
 .reservation-item-toppings span {
   font-size: 12px;
   line-height: 1.35;
+}
+
+.reservation-item-customizations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.reservation-item-customizations > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.reservation-item-customizations span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.reservation-item-customizations strong {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: normal;
 }
 
 .add-reservation-item-button {
@@ -2527,7 +2653,8 @@ footer p {
   }
 
   .reservation-item-controls,
-  .reservation-item-toppings > div {
+  .reservation-item-toppings > div,
+  .reservation-item-customizations {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2754,6 +2881,8 @@ footer p {
   .topping-grid,
   .reservation-item-controls,
   .reservation-item-toppings > div,
+  .reservation-item-customizations,
+  .structured-customization-options,
   .product-list,
   .product-list.compact,
   .customize-grid,

@@ -84,5 +84,10 @@
   "タピオカ抜き": "Khong tran chau",
   "ホイップ抜き": "Khong kem tuoi",
   "閉じる": "Đóng",
-  "カスタマイズへ進む": "Tiếp tục tùy chỉnh"
+  "カスタマイズへ進む": "Tiếp tục tùy chỉnh",
+  "必須": "Bắt buộc",
+  "任意": "Tùy chọn",
+  "選択してください": "Vui lòng chọn",
+  "選択しない": "Không chọn",
+  "必須のカスタマイズを選択してください。": "Vui lòng chọn tất cả tùy chọn bắt buộc."
 }
