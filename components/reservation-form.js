@@ -718,9 +718,11 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                     </span>
                     <h3 id="catalog-product-dialog-title">{menuText(detailDrink, detailDrink.name)}</h3>
                     <strong className="catalog-product-dialog-price">{formatPrice(detailDrink.price)}〜</strong>
-                    {detailDrink.description ? (
-                      <p className="catalog-product-dialog-description">{menuDescription(detailDrink)}</p>
-                    ) : null}
+                    <div className="catalog-product-dialog-description-scroll">
+                      {detailDrink.description ? (
+                        <p className="catalog-product-dialog-description">{menuDescription(detailDrink)}</p>
+                      ) : null}
+                    </div>
                     <button
                       className="catalog-product-dialog-continue"
                       type="button"

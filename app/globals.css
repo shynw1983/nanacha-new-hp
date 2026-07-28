@@ -253,6 +253,7 @@
 .catalog-product-dialog {
   position: relative;
   width: min(880px, 100%);
+  height: min(88vh, 900px);
   max-height: min(88vh, 900px);
   display: grid;
   grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
@@ -303,7 +304,10 @@
 
 .catalog-product-dialog-copy {
   min-width: 0;
-  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 48px 42px 36px;
 }
 
@@ -328,8 +332,17 @@
   font-size: 20px;
 }
 
+.catalog-product-dialog-description-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 24px;
+  padding-right: 10px;
+  overscroll-behavior: contain;
+}
+
 .catalog-product-dialog-description {
-  margin: 24px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.9;
@@ -337,9 +350,10 @@
 }
 
 .catalog-product-dialog-continue {
+  flex: 0 0 auto;
   width: 100%;
   min-height: 52px;
-  margin-top: 30px;
+  margin-top: 18px;
   border: 0;
   border-radius: 999px;
   background: var(--ink);
@@ -436,19 +450,21 @@
 
   .catalog-product-dialog {
     width: 100%;
+    height: 92vh;
     max-height: 92vh;
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(180px, 34vh) minmax(0, 1fr);
     border-radius: 22px 22px 0 0;
   }
 
   .catalog-product-dialog-photo {
-    min-height: 240px;
-    max-height: 34vh;
+    min-height: 0;
+    max-height: none;
     padding: 18px;
   }
 
   .catalog-product-dialog-copy {
-    padding: 30px 22px 24px;
+    padding: 24px 22px 18px;
   }
 
   .catalog-product-dialog-copy h3 {
