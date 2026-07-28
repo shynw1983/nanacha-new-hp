@@ -31,7 +31,7 @@ export function StoreListContent({ stores }) {
                 <p>{store.summary}</p>
                 {store.address ? (
                   <a className="text-link" href={localizedPath(language, `/shops/${store.id}`)}>
-                    {t("店舗情報を見る")}
+                    {t("メニュー・Web予約")}
                   </a>
                 ) : (
                   <span className="store-link-spacer" aria-hidden="true" />

@@ -17,7 +17,7 @@ const compactLanguageLabels = {
   ne: "NE",
 };
 
-export function SiteHeader({ menu = false, shops = false }) {
+export function SiteHeader({ menu = false, shops = false, reservationHref = "" }) {
   const { language, setLanguage, t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
@@ -26,7 +26,7 @@ export function SiteHeader({ menu = false, shops = false }) {
   const homeHref = isInteriorPage ? `${homeBase}#top` : "#top";
   const orderHref = isInteriorPage ? `${homeBase}#order` : "#order";
   const faqHref = isInteriorPage ? `${homeBase}#faq` : "#faq";
-  const reserveHref = isInteriorPage ? `${homeBase}#reserve` : "#reserve";
+  const reserveHref = reservationHref || localizedPath(language, "/shops");
 
   useEffect(() => {
     const syncHeader = () => {

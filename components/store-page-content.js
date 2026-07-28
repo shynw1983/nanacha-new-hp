@@ -2,9 +2,10 @@
 
 import { localizeValue, useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
+import { ReservationForm } from "./reservation-form";
 import { StoreDetail } from "./store-detail";
 
-export function StorePageContent({ store }) {
+export function StorePageContent({ store, menu }) {
   const { language, t } = useI18n();
   const localizedStore = localizeValue(store, t);
 
@@ -15,7 +16,8 @@ export function StorePageContent({ store }) {
         <h1>{localizedStore.name}</h1>
         <p>{localizedStore.summary}</p>
       </section>
-      <StoreDetail store={localizedStore} />
+      <ReservationForm initialMenu={menu} stores={[store]} fixedStoreId={store.id} catalogMode />
+      <StoreDetail store={localizedStore} reserveHref="#order-menu" />
       <section className="store-page-links">
         <a className="text-link" href={localizedPath(language, "/shops")}>
           ← {t("店舗一覧へ戻る")}

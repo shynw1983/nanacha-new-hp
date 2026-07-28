@@ -5,7 +5,6 @@ const { getBrandSiteSections } = require("../../server/brand-site-source");
 import { HomeContent } from "../../components/home-content";
 import { LocalizedShell } from "../../components/localized-shell";
 import { LocalBusinessJsonLd } from "../../components/local-business-json-ld";
-import { ReservationForm } from "../../components/reservation-form";
 import { SiteFooter } from "../../components/site-footer";
 import { SiteHeader } from "../../components/site-header";
 import siteConfig from "../../data/site-config";
@@ -49,7 +48,6 @@ export default async function LocalizedHomePage({ params }) {
       <SiteHeader />
       <main id="top">
         <HomeContent homepage={homepage} menu={menu} />
-        <ReservationForm initialMenu={menu} stores={homepage.stores} />
       </main>
       <SiteFooter sections={siteSections} />
     </LocalizedShell>

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 const { getHomepageData } = require("../../../../server/homepage-source");
+const { getMenuData } = require("../../../../server/menu-source");
 import { LocalizedShell } from "../../../../components/localized-shell";
 import { LocalBusinessJsonLd } from "../../../../components/local-business-json-ld";
 import { SiteFooter } from "../../../../components/site-footer";
@@ -45,6 +46,7 @@ export default async function LocalizedStorePage({ params }) {
   const homepage = await getHomepageData();
   const store = findStore(homepage.stores, slug);
   if (!store) notFound();
+  const menu = await getMenuData(store.id);
 
   return (
     <LocalizedShell language={lang}>
@@ -52,8 +54,8 @@ export default async function LocalizedStorePage({ params }) {
         store={store}
         url={`${siteConfig.siteUrl}${withLocalePath(lang, `/shops/${store.id}`)}`}
       />
-      <SiteHeader shops />
-      <StorePageContent store={store} />
+      <SiteHeader shops reservationHref="#order-menu" />
+      <StorePageContent store={store} menu={menu} />
       <SiteFooter />
     </LocalizedShell>
   );

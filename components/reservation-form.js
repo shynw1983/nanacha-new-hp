@@ -134,7 +134,7 @@ const getNextAvailablePickupDateTime = (hours = "", leadMinutes = DEFAULT_MINIMU
   return minimum;
 };
 
-export function ReservationForm({ initialMenu, stores = [] }) {
+export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", catalogMode = false }) {
   const { language, setLanguage, t } = useI18n();
   const menuText = (item, fallback = "") => {
     const source = item && typeof item === "object" ? item : {};
@@ -153,7 +153,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     return source.descriptionDisplayNames?.[language] || t(original) || source.descriptionDisplayNames?.en || "";
   };
   const rawText = (value) => t(value);
-  const initialStoreId = initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
+  const initialStoreId = fixedStoreId || initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
   const initialMinimumPickupMinutes = normalizeMinimumPickupMinutes(initialMenu.storeOperation?.minimumPickupMinutes);
   const initialPickup = getNextAvailablePickupDateTime(initialStore?.hours, initialMinimumPickupMinutes);
@@ -301,6 +301,17 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const hasAvailableDrinks = menu.drinks.some(
     (drink) => drink.isAvailable !== false && drink.websiteEnabled !== false,
   );
+  const catalogCategories = menu.categories
+    .map((item) => ({
+      ...item,
+      drinks: menu.drinks.filter(
+        (drink) =>
+          drink.category === item.id &&
+          drink.isAvailable !== false &&
+          drink.websiteEnabled !== false,
+      ),
+    }))
+    .filter((item) => item.drinks.length);
   const getReservationDrink = (item) =>
     menu.drinks.find((drink) => drink.id === item.drinkId) || menu.drinks.find((drink) => drink.name === item.drink);
   const getReservationSizes = (drink) => filterAllowedIds(menu.sizes, drink, "allowedSizes");
@@ -352,7 +363,7 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   };
   const preparedReservationItems = reservationItems.map(normalizeReservationItem).filter((item) => item.drink);
   const reservationTotal = preparedReservationItems.reduce((sum, item) => sum + item.total, 0);
-  const displayTotal = preparedReservationItems.length ? reservationTotal : total;
+  const displayTotal = catalogMode ? reservationTotal : preparedReservationItems.length ? reservationTotal : total;
   const memberCoupons = memberProfile?.coupons || [];
   const selectedCoupon = memberCoupons.find((coupon) => coupon.id === selectedCouponId);
   const couponDiscount = selectedCoupon ? Math.min(getCouponDiscountAmount(selectedCoupon, displayTotal), Math.max(0, displayTotal - 1)) : 0;
@@ -457,7 +468,8 @@ export function ReservationForm({ initialMenu, stores = [] }) {
     setPickupDate(safePickupDate);
     setPickup(safePickup);
 
-    const selectedItem = selectedDrink ? normalizeReservationItem(createReservationItem({ drink: selectedDrink })) : null;
+    const selectedItem =
+      !catalogMode && selectedDrink ? normalizeReservationItem(createReservationItem({ drink: selectedDrink })) : null;
     const orderItems = preparedReservationItems.length ? preparedReservationItems : selectedItem ? [selectedItem] : [];
     const drinkSummary =
       orderItems.length === 1
@@ -556,7 +568,15 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const addSelectedReservationItem = () => {
     if (!selectedDrink) return;
     setReservationItems((current) => [...current, createReservationItem({ drink: selectedDrink })]);
-    setNote(t("予約リストに追加しました。ほかの商品も続けて選べます。"));
+    setNote(t("カートに追加しました。ほかの商品も続けて選べます。"));
+  };
+  const selectCatalogDrink = (drink) => {
+    setCategory(drink.category);
+    setDrinkName(drink.name);
+    setToppingIds([]);
+    window.requestAnimationFrame(() => {
+      document.getElementById("product-customize")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
   const updateReservationItem = (itemId, patch) => {
     setReservationItems((current) =>
@@ -570,52 +590,119 @@ export function ReservationForm({ initialMenu, stores = [] }) {
   const displayNote = note ? t(note) : t(DEFAULT_NOTE);
 
   return (
-    <section className="reserve-section" id="reserve" aria-labelledby="reserve-title" data-react-reservation-form>
+    <section
+      className={`reserve-section${catalogMode ? " catalog-order-section" : ""}`}
+      id={catalogMode ? "order-menu" : "reserve"}
+      aria-labelledby="reserve-title"
+      data-react-reservation-form
+    >
       <div className="reserve-panel">
         <p className="eyebrow eyebrow-with-decor">
           <img src="/assets/decor/speed-lines.png" alt="" aria-hidden="true" />
-          pickup desk
+          {catalogMode ? "order & pickup" : "pickup desk"}
         </p>
         <h2 id="reserve-title" className="heading-with-decor">
-          {t("受け取り予約")}
+          {catalogMode ? t("商品を選ぶ") : t("受け取り予約")}
           <img src="/assets/decor/heart-fill.png" alt="" aria-hidden="true" />
         </h2>
-        <form className="reserve-form" onSubmit={submitOrder}>
+        {catalogMode ? (
+          <>
+            <p className="catalog-order-lead">
+              {t("カテゴリーから商品を選び、サイズ・甘さ・氷・トッピングをカスタマイズしてカートに追加してください。")}
+            </p>
+            <nav className="catalog-category-nav" aria-label={t("商品カテゴリー")}>
+              {catalogCategories.map((item) => (
+                <a href={`#category-${item.id}`} key={item.id}>
+                  {menuText(item, item.label)}
+                </a>
+              ))}
+              <a className="catalog-cart-link" href="#cart">
+                {t("カート")} <strong>{reservationItems.length}</strong>
+              </a>
+            </nav>
+            <div className="catalog-category-list">
+              {catalogCategories.map((item) => (
+                <section className="catalog-category" id={`category-${item.id}`} key={item.id}>
+                  <div className="catalog-category-heading">
+                    <h3>{menuText(item, item.label)}</h3>
+                    <span>{item.drinks.length} items</span>
+                  </div>
+                  <div className="catalog-product-grid">
+                    {item.drinks.map((drink) => (
+                      <button
+                        className={`catalog-product-card${selectedDrink?.id === drink.id ? " is-selected" : ""}`}
+                        type="button"
+                        onClick={() => selectCatalogDrink(drink)}
+                        key={drink.id}
+                      >
+                        <span className="catalog-product-photo">
+                          {drink.imageUrl ? (
+                            <img src={normalizeAssetUrl(drink.imageUrl)} alt="" />
+                          ) : (
+                            <span aria-hidden="true">nanacha</span>
+                          )}
+                        </span>
+                        <span className="catalog-product-copy">
+                          <strong>{menuText(drink, drink.name)}</strong>
+                          {drink.description ? <small>{menuDescription(drink)}</small> : null}
+                          <span>{formatPrice(drink.price)}〜</span>
+                        </span>
+                        <span className="catalog-product-add" aria-hidden="true">＋</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
+        ) : null}
+        <form
+          className={`reserve-form${catalogMode ? " catalog-order-form" : ""}`}
+          id={catalogMode ? "product-customize" : undefined}
+          onSubmit={submitOrder}
+        >
           {reservationsPaused ? <div className="reservation-closed-notice">{t(reservationPauseMessage)}</div> : null}
-          <label>
-            <span>{t("店舗")}</span>
-            <select value={store} onChange={(event) => setStore(event.target.value)}>
-              {(menu.stores?.length ? menu.stores : [{ id: "kiyokawa", label: "福岡清川店" }]).map((item) => (
-                <option value={item.id} key={item.id}>
-                  {menuText(item, item.label)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>{t("カテゴリー")}</span>
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
-              {menu.categories.map((item) => (
-                <option value={item.id} key={item.id}>
-                  {menuText(item, item.label)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="reservation-drink-field">
-            <span>{t("ドリンク")}</span>
-            <select value={selectedDrink?.name || ""} onChange={(event) => setDrinkName(event.target.value)}>
-              {drinks.length ? (
-                drinks.map((drink) => (
-                  <option value={drink.name} key={drink.id}>
-                    {menuText(drink, drink.name)} {formatPrice(drink.price)}
+          {catalogMode ? <h3 className="catalog-customize-title">{t("選択した商品のカスタマイズ")}</h3> : null}
+          {!fixedStoreId ? (
+            <label>
+              <span>{t("店舗")}</span>
+              <select value={store} onChange={(event) => setStore(event.target.value)}>
+                {(menu.stores?.length ? menu.stores : [{ id: "kiyokawa", label: "福岡清川店" }]).map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {menuText(item, item.label)}
                   </option>
-                ))
-              ) : (
-                <option value="">{t("予約できる商品がありません")}</option>
-              )}
-            </select>
-          </label>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {!catalogMode ? (
+            <>
+              <label>
+                <span>{t("カテゴリー")}</span>
+                <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                  {menu.categories.map((item) => (
+                    <option value={item.id} key={item.id}>
+                      {menuText(item, item.label)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="reservation-drink-field">
+                <span>{t("ドリンク")}</span>
+                <select value={selectedDrink?.name || ""} onChange={(event) => setDrinkName(event.target.value)}>
+                  {drinks.length ? (
+                    drinks.map((drink) => (
+                      <option value={drink.name} key={drink.id}>
+                        {menuText(drink, drink.name)} {formatPrice(drink.price)}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">{t("予約できる商品がありません")}</option>
+                  )}
+                </select>
+              </label>
+            </>
+          ) : null}
           {selectedDrink?.imageUrl ? (
             <div className="reservation-drink-preview" aria-live="polite">
               <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={menuText(selectedDrink, selectedDrink.name)} />
@@ -773,11 +860,11 @@ export function ReservationForm({ initialMenu, stores = [] }) {
             disabled={reservationsPaused || !hasAvailableDrinks || !selectedDrink}
             onClick={addSelectedReservationItem}
           >
-            {reservationsPaused ? t("現在予約受付を停止しています") : t("この商品を予約リストに追加")}
+            {reservationsPaused ? t("現在予約受付を停止しています") : t("この商品をカートに追加")}
           </button>
-          <div className="reservation-list">
+          <div className="reservation-list" id={catalogMode ? "cart" : undefined}>
             <div className="reservation-list-heading">
-              <span>{t("予約リスト")}</span>
+              <span>{catalogMode ? t("カート") : t("予約リスト")}</span>
               {reservationItems.length ? (
                 <button type="button" onClick={() => setReservationItems([])}>
                   {t("クリア")}
@@ -910,14 +997,28 @@ export function ReservationForm({ initialMenu, stores = [] }) {
                 })}
               </ul>
             ) : (
-              <p>{t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}</p>
+              <p>
+                {catalogMode
+                  ? t("商品を選んでカートに追加してください。")
+                  : t("複数の商品を予約する場合は、商品を選んで予約リストに追加してください。")}
+              </p>
             )}
           </div>
           <p className="order-total">
             <span>{t("合計")} {formatPrice(paymentTotal)}</span>
             {couponDiscount ? <small>{t("クーポン値引き")} -{formatPrice(couponDiscount)}</small> : null}
           </p>
-          <button className="checkout-button" type="submit" disabled={reservationsPaused || isSubmitting || !hasAvailableDrinks || !selectedDrink}>
+          <button
+            className="checkout-button"
+            type="submit"
+            disabled={
+              reservationsPaused ||
+              isSubmitting ||
+              !hasAvailableDrinks ||
+              !selectedDrink ||
+              (catalogMode && !reservationItems.length)
+            }
+          >
             {reservationsPaused ? t("現在予約受付を停止しています") : isSubmitting ? t("決済画面を作成中...") : t("Squareで注文・支払い")}
           </button>
           <p className="form-note">

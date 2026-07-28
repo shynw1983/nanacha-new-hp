@@ -45,7 +45,9 @@ export function HomeContent({ homepage, menu }) {
             <a
               className="primary-button"
               href={
-                settings.primaryButtonUrl.startsWith("/")
+                settings.primaryButtonUrl === "#reserve"
+                  ? localizedPath(language, "/shops")
+                  : settings.primaryButtonUrl.startsWith("/")
                   ? localizedPath(language, settings.primaryButtonUrl)
                   : normalizeAssetUrl(settings.primaryButtonUrl)
               }
@@ -206,7 +208,7 @@ export function HomeContent({ homepage, menu }) {
                 <p>{store.summary}</p>
                 {store.address ? (
                   <a className="text-link" href={localizedPath(language, `/shops/${store.id}`)}>
-                    {t("店舗情報を見る")}
+                    {t("メニュー・Web予約")}
                   </a>
                 ) : (
                   <span className="store-link-spacer" aria-hidden="true" />
