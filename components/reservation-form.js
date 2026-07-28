@@ -163,6 +163,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     initialMenu.categories.some((item) => item.id === "milk") ? "milk" : initialMenu.categories[0]?.id || "",
   );
   const [drinkName, setDrinkName] = useState("");
+  const [detailDrinkId, setDetailDrinkId] = useState("");
   const [sizeId, setSizeId] = useState("regular");
   const [temperature, setTemperature] = useState("ICE");
   const [sweetness, setSweetness] = useState(initialMenu.sweetness[0] || "");
@@ -264,6 +265,22 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     setPickup(nextPickup.time);
   }, [minimumPickupMinutes, store, stores]);
 
+  useEffect(() => {
+    if (!detailDrinkId) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setDetailDrinkId("");
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [detailDrinkId]);
+
   const drinks = useMemo(
     () =>
       menu.drinks.filter(
@@ -275,6 +292,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     drinks.find((drink) => drink.name === drinkName) ||
     drinks.find((drink) => drink.name === DEFAULT_RESERVATION_DRINK_NAME) ||
     drinks[0];
+  const detailDrink = menu.drinks.find((drink) => drink.id === detailDrinkId);
   const temperatures = selectedDrink?.temperatures?.length ? selectedDrink.temperatures : ["ICE"];
   const selectedTemperature = temperatures.includes(temperature) ? temperature : temperatures[0];
   const availableSizes = filterAllowedIds(menu.sizes, selectedDrink, "allowedSizes");
@@ -574,6 +592,10 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     setCategory(drink.category);
     setDrinkName(drink.name);
     setToppingIds([]);
+    setDetailDrinkId(drink.id);
+  };
+  const continueToCustomize = () => {
+    setDetailDrinkId("");
     window.requestAnimationFrame(() => {
       document.getElementById("product-customize")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -633,6 +655,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                         className={`catalog-product-card${selectedDrink?.id === drink.id ? " is-selected" : ""}`}
                         type="button"
                         onClick={() => selectCatalogDrink(drink)}
+                        aria-haspopup="dialog"
                         key={drink.id}
                       >
                         <span className="catalog-product-photo">
@@ -654,6 +677,61 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                 </section>
               ))}
             </div>
+            {detailDrink ? (
+              <div
+                className="catalog-product-dialog-backdrop"
+                role="presentation"
+                onMouseDown={(event) => {
+                  if (event.target === event.currentTarget) setDetailDrinkId("");
+                }}
+              >
+                <section
+                  className="catalog-product-dialog"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="catalog-product-dialog-title"
+                >
+                  <button
+                    className="catalog-product-dialog-close"
+                    type="button"
+                    onClick={() => setDetailDrinkId("")}
+                    aria-label={t("閉じる")}
+                  >
+                    ×
+                  </button>
+                  <div className="catalog-product-dialog-photo">
+                    {detailDrink.imageUrl ? (
+                      <img
+                        src={normalizeAssetUrl(detailDrink.imageUrl)}
+                        alt={menuText(detailDrink, detailDrink.name)}
+                      />
+                    ) : (
+                      <span aria-hidden="true">nanacha</span>
+                    )}
+                  </div>
+                  <div className="catalog-product-dialog-copy">
+                    <span className="catalog-product-dialog-category">
+                      {menuText(
+                        menu.categories.find((item) => item.id === detailDrink.category),
+                        menu.categories.find((item) => item.id === detailDrink.category)?.label || "",
+                      )}
+                    </span>
+                    <h3 id="catalog-product-dialog-title">{menuText(detailDrink, detailDrink.name)}</h3>
+                    <strong className="catalog-product-dialog-price">{formatPrice(detailDrink.price)}〜</strong>
+                    {detailDrink.description ? (
+                      <p className="catalog-product-dialog-description">{menuDescription(detailDrink)}</p>
+                    ) : null}
+                    <button
+                      className="catalog-product-dialog-continue"
+                      type="button"
+                      onClick={continueToCustomize}
+                    >
+                      {t("カスタマイズへ進む")}
+                    </button>
+                  </div>
+                </section>
+              </div>
+            ) : null}
           </>
         ) : null}
         <form
