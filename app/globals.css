@@ -36,6 +36,7 @@
   --font-zh-simplified: "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", var(--font-latin);
   --font-zh-traditional: "Noto Sans TC", "Noto Sans CJK TC", "Source Han Sans TC", "PingFang TC", "Microsoft JhengHei", var(--font-latin);
   --font-ko: "Noto Sans KR", "Noto Sans CJK KR", "Source Han Sans KR", "Apple SD Gothic Neo", var(--font-latin);
+  --site-header-height: 98px;
 }
 
 /* Store-specific Web reservation catalog */
@@ -69,8 +70,8 @@
 .catalog-menu-toolbar {
   position: sticky;
   z-index: 8;
-  top: 92px;
-  max-height: calc(100vh - 116px);
+  top: var(--site-header-height);
+  max-height: calc(100vh - var(--site-header-height) - 24px);
   display: grid;
   gap: 14px;
   overflow-y: auto;
@@ -142,7 +143,7 @@
 }
 
 .catalog-category {
-  scroll-margin-top: 104px;
+  scroll-margin-top: calc(var(--site-header-height) + 16px);
 }
 
 .catalog-category-heading {
@@ -199,7 +200,9 @@
 
 .catalog-product-photo {
   min-width: 0;
-  height: 148px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  align-self: start;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -213,7 +216,7 @@
 .catalog-product-photo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .catalog-product-copy {
@@ -455,7 +458,7 @@
   }
 
   .catalog-menu-toolbar {
-    top: 72px;
+    top: var(--site-header-height);
     max-height: none;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
@@ -489,11 +492,11 @@
   }
 
   .catalog-category {
-    scroll-margin-top: 150px;
+    scroll-margin-top: calc(var(--site-header-height) + 72px);
   }
 
   .catalog-order-form .reservation-list {
-    scroll-margin-top: 150px;
+    scroll-margin-top: calc(var(--site-header-height) + 72px);
   }
 
 }
@@ -509,7 +512,7 @@
   }
 
   .catalog-menu-toolbar {
-    top: 64px;
+    top: var(--site-header-height);
     gap: 8px;
     padding: 10px 14px;
   }
@@ -523,7 +526,7 @@
   }
 
   .catalog-category {
-    scroll-margin-top: 126px;
+    scroll-margin-top: calc(var(--site-header-height) + 68px);
   }
 
   .catalog-product-grid {
@@ -539,7 +542,7 @@
   }
 
   .catalog-product-photo {
-    height: 120px;
+    height: auto;
   }
 
   .catalog-product-copy small {
@@ -2245,7 +2248,7 @@ h3 {
 .reservation-drink-preview img {
   width: 112px;
   height: 112px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.78);
 }
@@ -2253,7 +2256,7 @@ h3 {
 .reservation-item-thumb {
   width: 72px;
   height: 72px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.78);
 }

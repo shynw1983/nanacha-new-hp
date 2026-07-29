@@ -29,17 +29,32 @@ export function SiteHeader({ menu = false, shops = false, reservationHref = "" }
   const reserveHref = reservationHref || localizedPath(language, "/shops");
 
   useEffect(() => {
+    const root = document.documentElement;
+    const header = document.querySelector("[data-header]");
     const syncHeader = () => {
-      const header = document.querySelector("[data-header]");
       if (header) {
         header.style.boxShadow =
           window.scrollY > 12 ? "0 12px 36px rgba(0, 0, 0, 0.05)" : "none";
+        root.style.setProperty(
+          "--site-header-height",
+          `${Math.ceil(header.getBoundingClientRect().height)}px`,
+        );
       }
     };
+    const resizeObserver =
+      header && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(syncHeader)
+        : null;
 
     window.addEventListener("scroll", syncHeader, { passive: true });
+    window.addEventListener("resize", syncHeader);
+    if (header && resizeObserver) resizeObserver.observe(header);
     syncHeader();
-    return () => window.removeEventListener("scroll", syncHeader);
+    return () => {
+      window.removeEventListener("scroll", syncHeader);
+      window.removeEventListener("resize", syncHeader);
+      resizeObserver?.disconnect();
+    };
   }, []);
 
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
