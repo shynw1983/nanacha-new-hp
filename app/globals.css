@@ -521,16 +521,22 @@
 @media (max-width: 680px) {
   .catalog-order-section {
     padding-inline: 0;
-    padding-top: 24px;
+    padding-top: 0;
+    background: var(--paper);
   }
 
   .catalog-order-section .reserve-panel {
+    max-width: none;
+    padding: 24px 14px 48px;
+    border: 0;
     border-radius: 0;
+    box-shadow: none;
   }
 
   .catalog-menu-toolbar {
     top: var(--site-header-height);
     gap: 8px;
+    margin-inline: -14px;
     padding: 10px 14px;
   }
 
