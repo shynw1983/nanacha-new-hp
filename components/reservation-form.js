@@ -911,7 +911,6 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                             {drink.description ? <small>{menuDescription(drink)}</small> : null}
                             <span>{formatPrice(drink.price)}〜</span>
                           </span>
-                          <span className="catalog-product-add" aria-hidden="true">＋</span>
                         </button>
                       ))}
                     </div>

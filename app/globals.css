@@ -241,21 +241,6 @@
   font-weight: 700;
 }
 
-.catalog-product-add {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
-  font-size: 20px;
-  line-height: 1;
-}
-
 .catalog-product-dialog-backdrop {
   position: fixed;
   z-index: 60;
