@@ -191,8 +191,7 @@
 }
 
 .catalog-product-card:hover,
-.catalog-product-card:focus-visible,
-.catalog-product-card.is-selected {
+.catalog-product-card:focus-visible {
   border-color: var(--ink);
   box-shadow: 0 12px 30px rgba(28, 45, 38, 0.09);
   transform: translateY(-2px);

@@ -893,7 +893,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                     <div className="catalog-product-grid">
                       {item.drinks.map((drink) => (
                         <button
-                          className={`catalog-product-card${selectedDrink?.id === drink.id ? " is-selected" : ""}`}
+                          className="catalog-product-card"
                           type="button"
                           onClick={() => selectCatalogDrink(drink)}
                           aria-haspopup="dialog"
