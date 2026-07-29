@@ -2668,7 +2668,38 @@ h3 {
   justify-self: center;
   width: min(100%, 420px);
   min-height: 56px;
-  font-size: 14px;
+  border-color: var(--ink);
+  background: var(--ink);
+  box-shadow: 0 12px 30px rgba(23, 23, 23, 0.2);
+  color: var(--paper);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.add-reservation-item-button:hover:not(:disabled) {
+  box-shadow: 0 16px 36px rgba(23, 23, 23, 0.26);
+  transform: translateY(-2px);
+}
+
+.add-reservation-item-button:active:not(:disabled) {
+  box-shadow: 0 8px 20px rgba(23, 23, 23, 0.18);
+  transform: translateY(0);
+}
+
+.add-reservation-item-button:focus-visible {
+  outline: 3px solid rgba(23, 23, 23, 0.2);
+  outline-offset: 3px;
+}
+
+.add-reservation-item-button:disabled {
+  border-color: #d8d5cf;
+  background: #d8d5cf;
+  box-shadow: none;
+  color: #77736d;
+  opacity: 1;
 }
 
 .order-total {
