@@ -1041,7 +1041,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                 ) : null}
                 <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
                 {selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
-                <small>{formatPrice(selectedDrink.price)}</small>
+                <small aria-live="polite">
+                  {t("現在の価格")} {formatPrice(total)}
+                </small>
               </div>
             </div>
           ) : null}
