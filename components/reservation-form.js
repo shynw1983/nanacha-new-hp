@@ -1031,8 +1031,14 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
               </label>
             </>
           ) : null}
+          {selectedDrink ? (
+            <div className="reservation-live-price" aria-live="polite" aria-atomic="true">
+              <span>{t("現在の価格")}</span>
+              <strong>{formatPrice(total)}</strong>
+            </div>
+          ) : null}
           {selectedDrink?.imageUrl ? (
-            <div className="reservation-drink-preview" aria-live="polite">
+            <div className="reservation-drink-preview">
               <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={menuText(selectedDrink, selectedDrink.name)} />
               <div>
                 <span>{t("選択中の商品")}</span>
@@ -1041,9 +1047,6 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                 ) : null}
                 <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
                 {selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
-                <small aria-live="polite">
-                  {t("現在の価格")} {formatPrice(total)}
-                </small>
               </div>
             </div>
           ) : null}
