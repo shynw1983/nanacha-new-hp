@@ -870,55 +870,57 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
             <p className="catalog-order-lead">
               {t("カテゴリーから商品を選び、サイズ・甘さ・氷・トッピングをカスタマイズしてカートに追加してください。")}
             </p>
-            <div className="catalog-menu-toolbar">
-              <nav className="catalog-category-nav" aria-label={t("商品カテゴリー")}>
+            <div className="catalog-menu-layout">
+              <div className="catalog-menu-toolbar">
+                <nav className="catalog-category-nav" aria-label={t("商品カテゴリー")}>
+                  {catalogCategories.map((item) => (
+                    <a href={`#category-${item.id}`} key={item.id}>
+                      {menuText(item, item.label)}
+                    </a>
+                  ))}
+                </nav>
+                <a className="catalog-cart-link" href="#cart">
+                  {t("カート")} <strong>{reservationItems.length}</strong>
+                </a>
+              </div>
+              <div className="catalog-category-list">
                 {catalogCategories.map((item) => (
-                  <a href={`#category-${item.id}`} key={item.id}>
-                    {menuText(item, item.label)}
-                  </a>
+                  <section className="catalog-category" id={`category-${item.id}`} key={item.id}>
+                    <div className="catalog-category-heading">
+                      <h3>{menuText(item, item.label)}</h3>
+                      <span>{item.drinks.length} items</span>
+                    </div>
+                    <div className="catalog-product-grid">
+                      {item.drinks.map((drink) => (
+                        <button
+                          className={`catalog-product-card${selectedDrink?.id === drink.id ? " is-selected" : ""}`}
+                          type="button"
+                          onClick={() => selectCatalogDrink(drink)}
+                          aria-haspopup="dialog"
+                          key={drink.id}
+                        >
+                          <span className="catalog-product-photo">
+                            {drink.imageUrl ? (
+                              <img src={normalizeAssetUrl(drink.imageUrl)} alt="" />
+                            ) : (
+                              <span aria-hidden="true">nanacha</span>
+                            )}
+                          </span>
+                          <span className="catalog-product-copy">
+                            {promotionPrefixText(drink) ? (
+                              <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
+                            ) : null}
+                            <strong>{menuText(drink, drink.name)}</strong>
+                            {drink.description ? <small>{menuDescription(drink)}</small> : null}
+                            <span>{formatPrice(drink.price)}〜</span>
+                          </span>
+                          <span className="catalog-product-add" aria-hidden="true">＋</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
                 ))}
-              </nav>
-              <a className="catalog-cart-link" href="#cart">
-                {t("カート")} <strong>{reservationItems.length}</strong>
-              </a>
-            </div>
-            <div className="catalog-category-list">
-              {catalogCategories.map((item) => (
-                <section className="catalog-category" id={`category-${item.id}`} key={item.id}>
-                  <div className="catalog-category-heading">
-                    <h3>{menuText(item, item.label)}</h3>
-                    <span>{item.drinks.length} items</span>
-                  </div>
-                  <div className="catalog-product-grid">
-                    {item.drinks.map((drink) => (
-                      <button
-                        className={`catalog-product-card${selectedDrink?.id === drink.id ? " is-selected" : ""}`}
-                        type="button"
-                        onClick={() => selectCatalogDrink(drink)}
-                        aria-haspopup="dialog"
-                        key={drink.id}
-                      >
-                        <span className="catalog-product-photo">
-                          {drink.imageUrl ? (
-                            <img src={normalizeAssetUrl(drink.imageUrl)} alt="" />
-                          ) : (
-                            <span aria-hidden="true">nanacha</span>
-                          )}
-                        </span>
-                        <span className="catalog-product-copy">
-                          {promotionPrefixText(drink) ? (
-                            <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
-                          ) : null}
-                          <strong>{menuText(drink, drink.name)}</strong>
-                          {drink.description ? <small>{menuDescription(drink)}</small> : null}
-                          <span>{formatPrice(drink.price)}〜</span>
-                        </span>
-                        <span className="catalog-product-add" aria-hidden="true">＋</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              ))}
+              </div>
             </div>
             {detailDrink ? (
               <div
