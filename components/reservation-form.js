@@ -308,6 +308,13 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     }
     return source.descriptionDisplayNames?.[language] || t(original) || source.descriptionDisplayNames?.en || "";
   };
+  const promotionPrefixText = (item) => {
+    const original = String(item?.promotionPrefix || "").trim();
+    if (!original) return "";
+    const displayNames = item?.promotionPrefixDisplayNames || {};
+    if (language === "ja") return displayNames.ja || original;
+    return displayNames[language] || displayNames.en || original;
+  };
   const rawText = (value) => t(value);
   const initialStoreId = fixedStoreId || initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
@@ -897,6 +904,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                           )}
                         </span>
                         <span className="catalog-product-copy">
+                          {promotionPrefixText(drink) ? (
+                            <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
+                          ) : null}
                           <strong>{menuText(drink, drink.name)}</strong>
                           {drink.description ? <small>{menuDescription(drink)}</small> : null}
                           <span>{formatPrice(drink.price)}〜</span>
@@ -941,6 +951,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                     )}
                   </div>
                   <div className="catalog-product-dialog-copy">
+                    {promotionPrefixText(detailDrink) ? (
+                      <span className="menu-promotion-prefix">{promotionPrefixText(detailDrink)}</span>
+                    ) : null}
                     <span className="catalog-product-dialog-category">
                       {menuText(
                         menu.categories.find((item) => item.id === detailDrink.category),
@@ -1019,6 +1032,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
               <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={menuText(selectedDrink, selectedDrink.name)} />
               <div>
                 <span>{t("選択中の商品")}</span>
+                {promotionPrefixText(selectedDrink) ? (
+                  <span className="menu-promotion-prefix">{promotionPrefixText(selectedDrink)}</span>
+                ) : null}
                 <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
                 {selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
                 <small>{formatPrice(selectedDrink.price)}</small>
@@ -1216,6 +1232,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                           />
                         ) : null}
                         <div>
+                          {promotionPrefixText(drink) ? (
+                            <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
+                          ) : null}
                           <span>
                             {index + 1}. {menuText(drink, item.drink)}
                           </span>

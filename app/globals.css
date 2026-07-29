@@ -224,6 +224,28 @@
   font-weight: 700;
 }
 
+.menu-promotion-prefix {
+  width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef8ef;
+  color: #1f6f53;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.catalog-product-copy > .menu-promotion-prefix {
+  color: #1f6f53;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .catalog-product-add {
   position: absolute;
   right: 14px;
@@ -316,6 +338,11 @@
   margin-bottom: 10px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.catalog-product-dialog-copy > .menu-promotion-prefix {
+  flex: 0 0 auto;
+  margin-bottom: 8px;
 }
 
 .catalog-product-dialog-copy h3 {
@@ -2108,6 +2135,10 @@ h3 {
   grid-column: 1 / -1;
 }
 
+.reservation-drink-preview .menu-promotion-prefix {
+  justify-self: start;
+}
+
 .reservation-drink-preview strong {
   grid-column: 1;
   align-self: start;
@@ -2335,6 +2366,10 @@ h3 {
   min-width: 0;
   display: grid;
   gap: 3px;
+}
+
+.reservation-item-card-heading .menu-promotion-prefix {
+  justify-self: start;
 }
 
 .reservation-item-card-heading button {

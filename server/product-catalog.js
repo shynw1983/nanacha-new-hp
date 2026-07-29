@@ -101,6 +101,8 @@ const normalizeStandardMenu = (payload) => {
         menuCatalogItemId: String(item.id || "").trim(),
         name: String(item.name || "").trim(),
         displayNames: item.displayNames || {},
+        promotionPrefix: String(item.promotionPrefix || "").trim(),
+        promotionPrefixDisplayNames: item.promotionPrefixDisplayNames || {},
         category: category?.id || item.category || "menu",
         price: Number(item.priceOverride ?? item.basePrice ?? 0),
         description: item.description || localDrinkDescriptions[item.name] || "",
