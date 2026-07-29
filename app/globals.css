@@ -2223,13 +2223,13 @@ h3 {
 
 @media (max-width: 900px) {
   .catalog-order-form .reservation-live-price {
-    top: 72px;
+    top: 100px;
   }
 }
 
 @media (max-width: 680px) {
   .catalog-order-form .reservation-live-price {
-    top: 64px;
+    top: calc(102px + env(safe-area-inset-top, 0px));
   }
 
   .reservation-live-price {
