@@ -870,16 +870,18 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
             <p className="catalog-order-lead">
               {t("カテゴリーから商品を選び、サイズ・甘さ・氷・トッピングをカスタマイズしてカートに追加してください。")}
             </p>
-            <nav className="catalog-category-nav" aria-label={t("商品カテゴリー")}>
-              {catalogCategories.map((item) => (
-                <a href={`#category-${item.id}`} key={item.id}>
-                  {menuText(item, item.label)}
-                </a>
-              ))}
+            <div className="catalog-menu-toolbar">
+              <nav className="catalog-category-nav" aria-label={t("商品カテゴリー")}>
+                {catalogCategories.map((item) => (
+                  <a href={`#category-${item.id}`} key={item.id}>
+                    {menuText(item, item.label)}
+                  </a>
+                ))}
+              </nav>
               <a className="catalog-cart-link" href="#cart">
                 {t("カート")} <strong>{reservationItems.length}</strong>
               </a>
-            </nav>
+            </div>
             <div className="catalog-category-list">
               {catalogCategories.map((item) => (
                 <section className="catalog-category" id={`category-${item.id}`} key={item.id}>
