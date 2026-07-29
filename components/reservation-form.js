@@ -1041,12 +1041,12 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
             <div className="reservation-drink-preview">
               <img src={normalizeAssetUrl(selectedDrink.imageUrl)} alt={menuText(selectedDrink, selectedDrink.name)} />
               <div>
-                <span>{t("選択中の商品")}</span>
+                {!catalogMode ? <span>{t("選択中の商品")}</span> : null}
                 {promotionPrefixText(selectedDrink) ? (
                   <span className="menu-promotion-prefix">{promotionPrefixText(selectedDrink)}</span>
                 ) : null}
                 <strong>{menuText(selectedDrink, selectedDrink.name)}</strong>
-                {selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
+                {!catalogMode && selectedDrink.description ? <p>{menuDescription(selectedDrink)}</p> : null}
               </div>
             </div>
           ) : null}
