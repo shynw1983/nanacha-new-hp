@@ -56,6 +56,21 @@ const toCustomizationGroup = (group) => {
       : [],
   };
 };
+const customerCustomizationGroupRank = (group) => {
+  if ((group?.minSelections || 0) > 0) return 0;
+  if (/^トッピング(?:\s|$)/.test(String(group?.label || "").trim())) return 1;
+  return 2;
+};
+const orderCustomizationGroupsForCustomer = (groups) =>
+  groups
+    .map((group, index) => ({ group, index }))
+    .sort((left, right) => {
+      const rankDifference =
+        customerCustomizationGroupRank(left.group) -
+        customerCustomizationGroupRank(right.group);
+      return rankDifference || left.index - right.index;
+    })
+    .map(({ group }) => group);
 const optionGroupByKey = (groups, key) => groups.find((group) => group.groupKey === key);
 const optionsForGroup = (groups, key) => {
   const group = optionGroupByKey(groups, key);
@@ -93,7 +108,11 @@ const normalizeStandardMenu = (payload) => {
       const schema = item.variableSchema || {};
       const itemGroups = Array.isArray(item.optionGroups) ? item.optionGroups : groups;
       const customizationGroups = Array.isArray(item.customizationGroups)
-        ? item.customizationGroups.map(toCustomizationGroup).filter((group) => group.id && group.label && group.options.length)
+        ? orderCustomizationGroupsForCustomer(
+            item.customizationGroups
+              .map(toCustomizationGroup)
+              .filter((group) => group.id && group.label && group.options.length),
+          )
         : [];
       const category = categoryByName.get(item.category) || categories.find((entry) => entry.id === item.category);
       return {
