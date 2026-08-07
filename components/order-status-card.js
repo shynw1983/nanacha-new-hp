@@ -82,13 +82,40 @@ export function OrderStatusCard({
   useEffect(() => {
     if (!orderId && !pickupCode) return undefined;
     let active = true;
+    let timer = 0;
+    const fallbackStartedAt = Date.now();
+
+    const schedule = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = 0;
+      if (!active || connection === "connected" || document.visibilityState !== "visible") return;
+      const disconnectedFor = Date.now() - fallbackStartedAt;
+      const delay = disconnectedFor >= 15 * 60_000 ? 5 * 60_000 : disconnectedFor >= 5 * 60_000 ? 60_000 : disconnectedFor >= 60_000 ? 30_000 : 15_000;
+      timer = window.setTimeout(async () => {
+        await loadOrder();
+        schedule();
+      }, delay);
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== "visible") {
+        if (timer) window.clearTimeout(timer);
+        timer = 0;
+        return;
+      }
+      void loadOrder();
+      schedule();
+    };
 
     loadOrder();
-    const interval = window.setInterval(loadOrder, connection === "connected" ? 60000 : 15000);
+    schedule();
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, [orderId, pickupCode, pickupDate, resolvedOrderId, connection]);
 
@@ -108,10 +135,16 @@ export function OrderStatusCard({
         const { default: Pusher } = await import("pusher-js");
         if (!active) return;
         pusher = new Pusher(config.key, { cluster: config.cluster });
+        pusher.connection.bind("unavailable", () => active && setConnection("polling"));
+        pusher.connection.bind("failed", () => active && setConnection("polling"));
+        pusher.connection.bind("disconnected", () => active && setConnection("polling"));
         channel = pusher.subscribe(`order-${resolvedOrderId}`);
         channel.bind("pusher:subscription_succeeded", () => {
-          if (active) setConnection("connected");
+          if (!active) return;
+          setConnection("connected");
+          void loadOrder();
         });
+        channel.bind("pusher:subscription_error", () => active && setConnection("polling"));
         channel.bind("order.created", ({ order: nextOrder }) => {
           if (active) setOrder(nextOrder);
         });

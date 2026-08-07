@@ -115,7 +115,6 @@ const RESERVATION_CART_KEY = "nanacha-reservation-cart";
 const DEFAULT_NOTE = "注文内容を確認して、Squareの決済画面へ進みます。";
 const DEFAULT_RESERVATION_DRINK_NAME = "黒糖タピオカミルク";
 const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
-const MENU_REFRESH_INTERVAL_MS = 15000;
 const unsafeCheckoutErrorPattern = /(FOUNDR1|Foundr1|Square|configured|configuration|Invalid|Missing|Unknown|checkout|failed|required|Selected coupon)/i;
 const unavailableCheckoutErrorMessages = new Set([
   "Unknown drink",
@@ -391,6 +390,11 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
 
   useEffect(() => {
     let active = true;
+    let pusher;
+    let channel;
+    let fallbackTimer = 0;
+    let fallbackStartedAt = Date.now();
+    let realtimeConnected = false;
     const loadMenu = (resetSelection = false) => {
       fetch(`/api/menu?store=${encodeURIComponent(store)}`, { headers: { Accept: "application/json" }, cache: "no-store" })
         .then((response) => (response.ok ? response.json() : null))
@@ -413,14 +417,80 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
         .catch(() => {});
     };
 
+    const clearFallback = () => {
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+      fallbackTimer = 0;
+    };
+    const scheduleFallback = () => {
+      clearFallback();
+      if (!active || realtimeConnected || document.visibilityState !== "visible") return;
+      const disconnectedFor = Date.now() - fallbackStartedAt;
+      const delay = disconnectedFor >= 15 * 60_000 ? 5 * 60_000 : disconnectedFor >= 5 * 60_000 ? 2 * 60_000 : 60_000;
+      fallbackTimer = window.setTimeout(() => {
+        loadMenu(false);
+        scheduleFallback();
+      }, delay);
+    };
+    const startFallback = (immediate = false) => {
+      if (!fallbackStartedAt) fallbackStartedAt = Date.now();
+      realtimeConnected = false;
+      if (immediate && document.visibilityState === "visible") loadMenu(false);
+      scheduleFallback();
+    };
+    const stopFallback = () => {
+      realtimeConnected = true;
+      fallbackStartedAt = 0;
+      clearFallback();
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== "visible") {
+        clearFallback();
+        return;
+      }
+      loadMenu(false);
+      if (!realtimeConnected) scheduleFallback();
+    };
+
     loadMenu(true);
-    const interval = window.setInterval(() => loadMenu(false), MENU_REFRESH_INTERVAL_MS);
+    scheduleFallback();
+    const osStoreId = String(
+      stores.find((item) => item.id === store)?.osStoreId ||
+      initialMenu.stores?.find((item) => item.id === store)?.osStoreId ||
+      initialMenu.stores?.[0]?.osStoreId ||
+      "",
+    ).trim();
+    fetch(`/api/menu/realtime-config?storeId=${encodeURIComponent(osStoreId)}`, { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then(async (config) => {
+        if (!active || !config?.key || !config?.cluster || !config?.menuChannel) return;
+        const { default: Pusher } = await import("pusher-js");
+        if (!active) return;
+        pusher = new Pusher(config.key, { cluster: config.cluster, forceTLS: true });
+        pusher.connection.bind("unavailable", () => startFallback(true));
+        pusher.connection.bind("failed", () => startFallback(true));
+        pusher.connection.bind("disconnected", () => startFallback(true));
+        channel = pusher.subscribe(config.menuChannel);
+        channel.bind("pusher:subscription_succeeded", () => {
+          stopFallback();
+          loadMenu(false);
+        });
+        channel.bind("pusher:subscription_error", () => startFallback(true));
+        channel.bind("menu.updated", () => loadMenu(false));
+      })
+      .catch(() => startFallback());
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+      clearFallback();
+      channel?.unbind_all?.();
+      if (channel) pusher?.unsubscribe(channel.name);
+      pusher?.disconnect();
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [store]);
+  }, [initialMenu.stores, store, stores]);
 
   useEffect(() => {
     const nextPickup = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);

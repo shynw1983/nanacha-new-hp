@@ -149,8 +149,38 @@ export function AdminOrdersBoard({ initialOrders }) {
 
   useEffect(() => {
     if (realtimeStatus === "connected") return undefined;
-    const interval = window.setInterval(refresh, 5000);
-    return () => window.clearInterval(interval);
+    let active = true;
+    let timer = 0;
+    const startedAt = Date.now();
+    const schedule = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = 0;
+      if (!active || document.visibilityState !== "visible") return;
+      const disconnectedFor = Date.now() - startedAt;
+      const delay = disconnectedFor >= 15 * 60_000 ? 5 * 60_000 : disconnectedFor >= 5 * 60_000 ? 60_000 : disconnectedFor >= 60_000 ? 15_000 : 5000;
+      timer = window.setTimeout(async () => {
+        await refresh();
+        schedule();
+      }, delay);
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== "visible") {
+        if (timer) window.clearTimeout(timer);
+        timer = 0;
+        return;
+      }
+      void refresh();
+      schedule();
+    };
+    schedule();
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      active = false;
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, [realtimeStatus]);
 
   useEffect(() => {
