@@ -1458,14 +1458,14 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
           </p>
           <fieldset className="shortage-preference">
             <legend>{t("欠品時の対応")}</legend>
-            <p>{t("複数の販売先で在庫を共有しているため、決済後に欠品が判明する場合があります。")}</p>
+            <p>{t("ご注文の商品を確実にご用意できるよう在庫管理に努めておりますが、複数の販売先で在庫を共有しているため、ご注文確定後にやむを得ず欠品が判明する場合があります。万一の場合のご希望をお選びください。")}</p>
             <label>
               <input type="radio" name="shortagePreference" checked={shortagePreference === "substitute_or_refund"} onChange={() => setShortagePreference("substitute_or_refund")} />
-              <span><strong>{t("同類・同等以上の商品へ変更")}</strong><small>{t("安全に同類と判断できる代替品がない場合は、その商品・オプションを返金します。")}</small></span>
+              <span><strong>{t("同等以上の同類商品へ変更")}</strong><small>{t("適切な代替品がある場合に限り変更します。ご用意できない場合は、該当する商品・オプションを返金します。")}</small></span>
             </label>
             <label>
               <input type="radio" name="shortagePreference" checked={shortagePreference === "refund"} onChange={() => setShortagePreference("refund")} />
-              <span><strong>{t("欠品した商品・オプションを返金")}</strong><small>{t("代替せず、提供できない分を返金します。")}</small></span>
+              <span><strong>{t("欠品した商品・オプションをキャンセルして返金")}</strong><small>{t("代替品への変更は行わず、ご用意できない分を返金します。")}</small></span>
             </label>
           </fieldset>
           <button

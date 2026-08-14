@@ -92,9 +92,9 @@
   "必須のカスタマイズを選択してください。": "Vui lòng chọn tất cả tùy chọn bắt buộc.",
   "現在の価格": "Giá hiện tại",
   "欠品時の対応": "Cách xử lý khi hết hàng",
-  "複数の販売先で在庫を共有しているため、決済後に欠品が判明する場合があります。": "Tồn kho được dùng chung cho nhiều kênh bán hàng, nên có thể phát hiện hết hàng sau khi thanh toán.",
-  "同類・同等以上の商品へ変更": "Đổi sang sản phẩm tương tự có giá trị bằng hoặc cao hơn",
-  "安全に同類と判断できる代替品がない場合は、その商品・オプションを返金します。": "Nếu không có sản phẩm thay thế tương tự và an toàn, chúng tôi sẽ hoàn tiền cho món hoặc tùy chọn đó.",
-  "欠品した商品・オプションを返金": "Hoàn tiền món hoặc tùy chọn đã hết",
-  "代替せず、提供できない分を返金します。": "Không thay thế và hoàn tiền phần không thể cung cấp."
+  "ご注文の商品を確実にご用意できるよう在庫管理に努めておりますが、複数の販売先で在庫を共有しているため、ご注文確定後にやむを得ず欠品が判明する場合があります。万一の場合のご希望をお選びください。": "Chúng tôi quản lý tồn kho cẩn thận để cố gắng chuẩn bị đầy đủ các món quý khách đã đặt. Tuy nhiên, do tồn kho được dùng chung cho nhiều kênh bán hàng, trong một số ít trường hợp có thể phát hiện hết hàng sau khi đơn đã được xác nhận. Vui lòng chọn trước cách xử lý nếu tình huống này xảy ra.",
+  "同等以上の同類商品へ変更": "Đổi sang sản phẩm tương tự có giá trị bằng hoặc cao hơn",
+  "適切な代替品がある場合に限り変更します。ご用意できない場合は、該当する商品・オプションを返金します。": "Chúng tôi chỉ thay thế khi có lựa chọn phù hợp. Nếu không thể chuẩn bị, chúng tôi sẽ hoàn tiền cho món hoặc tùy chọn liên quan.",
+  "欠品した商品・オプションをキャンセルして返金": "Hủy và hoàn tiền món hoặc tùy chọn đã hết",
+  "代替品への変更は行わず、ご用意できない分を返金します。": "Chúng tôi sẽ không thay thế và sẽ hoàn tiền phần không thể cung cấp."
 }
