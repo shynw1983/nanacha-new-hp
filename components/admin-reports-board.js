@@ -25,7 +25,7 @@ const paymentStatusLabels = {
 const getReportOrderState = (order) => {
   if (order.status === "cancelled" || order.paymentStatus === "canceled") return { label: "キャンセル", tone: "cancelled" };
   if (order.status === "payment_failed" || order.paymentStatus === "failed") return { label: "失敗", tone: "failed" };
-  if (order.paymentStatus !== "paid") return { label: "未決済", tone: "pending" };
+  if (!["paid", "partial_refunded"].includes(order.paymentStatus)) return { label: "未決済", tone: "pending" };
   if (order.status === "completed") return { label: "完了", tone: "sale" };
   if (order.status === "ready") return { label: "受け取り可", tone: "sale" };
   if (order.status === "preparing") return { label: "制作中", tone: "sale" };

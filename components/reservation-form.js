@@ -340,6 +340,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
   const [customerPhone, setCustomerPhone] = useState("");
   const [memberProfile, setMemberProfile] = useState(null);
   const [selectedCouponId, setSelectedCouponId] = useState("");
+  const [shortagePreference, setShortagePreference] = useState("");
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -768,6 +769,10 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
   const submitOrder = async (event) => {
     event.preventDefault();
     if (reservationsPaused) return;
+    if (!shortagePreference) {
+      setNote(t("欠品時の対応"));
+      return;
+    }
     const nextMinimum = getNextAvailablePickupDateTime(stores.find((item) => item.id === store)?.hours, minimumPickupMinutes);
     const safePickupDate = pickupDate < nextMinimum.date ? nextMinimum.date : pickupDate;
     const safePickup =
@@ -818,6 +823,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
       memberEmail: memberProfile?.email || "",
       memberPhone: memberProfile?.phone || "",
       couponId: selectedCouponId,
+      shortagePreference,
       completionPath: language === "ja" ? "/order-complete" : `/${language}/order-complete`,
       completionSummary: {
         name: customerName,
@@ -1450,6 +1456,18 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
             <span>{t("合計")} {formatPrice(paymentTotal)}</span>
             {couponDiscount ? <small>{t("クーポン値引き")} -{formatPrice(couponDiscount)}</small> : null}
           </p>
+          <fieldset className="shortage-preference">
+            <legend>{t("欠品時の対応")}</legend>
+            <p>{t("複数の販売先で在庫を共有しているため、決済後に欠品が判明する場合があります。")}</p>
+            <label>
+              <input type="radio" name="shortagePreference" checked={shortagePreference === "substitute_or_refund"} onChange={() => setShortagePreference("substitute_or_refund")} />
+              <span><strong>{t("同類・同等以上の商品へ変更")}</strong><small>{t("安全に同類と判断できる代替品がない場合は、その商品・オプションを返金します。")}</small></span>
+            </label>
+            <label>
+              <input type="radio" name="shortagePreference" checked={shortagePreference === "refund"} onChange={() => setShortagePreference("refund")} />
+              <span><strong>{t("欠品した商品・オプションを返金")}</strong><small>{t("代替せず、提供できない分を返金します。")}</small></span>
+            </label>
+          </fieldset>
           <button
             className="checkout-button"
             type="submit"
@@ -1457,6 +1475,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
               reservationsPaused ||
               isSubmitting ||
               !hasAvailableDrinks ||
+              !shortagePreference ||
               !selectedDrink ||
               (catalogMode && !reservationItems.length)
             }

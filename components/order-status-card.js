@@ -189,7 +189,7 @@ export function OrderStatusCard({
     ? `/api/orders/${effectiveOrderId}/receipt-preview?pickupCode=${encodeURIComponent(effectivePickupCode)}`
     : "";
   const receiptPreviewUrl = current.receiptPreviewUrl || localReceiptPreviewUrl;
-  const isPaid = order?.paymentStatus === "paid";
+  const isPaid = ["paid", "partial_refunded", "refunded"].includes(order?.paymentStatus);
 
   return (
     <>

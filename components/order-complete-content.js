@@ -20,11 +20,12 @@ export function OrderCompleteContent({
   const displayPickupCode = initialOrder?.pickupCode || pickupCode || "";
   const displayPickupDate = initialOrder?.pickupDate || pickupDate || "";
   const displayPickupTime = initialOrder?.pickupTime || pickupTime || "";
-  const receiptUrl = initialOrder?.paymentStatus === "paid" ? initialOrder?.squareReceiptUrl : "";
+  const paymentSettled = ["paid", "partial_refunded", "refunded"].includes(initialOrder?.paymentStatus);
+  const receiptUrl = paymentSettled ? initialOrder?.squareReceiptUrl : "";
   const localReceiptPreviewUrl = initialOrder?.orderId && displayPickupCode
     ? `/api/orders/${initialOrder.orderId}/receipt-preview?pickupCode=${encodeURIComponent(displayPickupCode)}`
     : "";
-  const receiptPreviewUrl = initialOrder?.paymentStatus === "paid" ? initialOrder?.receiptPreviewUrl || localReceiptPreviewUrl : "";
+  const receiptPreviewUrl = paymentSettled ? initialOrder?.receiptPreviewUrl || localReceiptPreviewUrl : "";
 
   return (
     <main className="order-complete-page">

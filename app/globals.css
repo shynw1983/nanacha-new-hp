@@ -2716,6 +2716,57 @@ h3 {
   font-weight: 800;
 }
 
+.shortage-preference {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid rgba(35, 91, 68, 0.22);
+  border-radius: 12px;
+  background: #f7faf8;
+}
+
+.shortage-preference legend {
+  padding: 0 5px;
+  font-weight: 700;
+}
+
+.shortage-preference > p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.shortage-preference label {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.shortage-preference input {
+  width: 17px;
+  height: 17px;
+  margin: 2px 0 0;
+  accent-color: #235b44;
+}
+
+.shortage-preference label span {
+  display: grid;
+  gap: 3px;
+}
+
+.shortage-preference label strong {
+  font-size: 13px;
+}
+
+.shortage-preference label small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .checkout-button {
   grid-column: 1 / -1;
   justify-self: center;
