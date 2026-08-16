@@ -169,6 +169,20 @@
   transform: translateY(-2px);
 }
 
+.catalog-product-card.is-unavailable {
+  cursor: not-allowed;
+  opacity: 0.58;
+  box-shadow: none;
+  transform: none;
+}
+
+.catalog-product-card.is-unavailable:hover,
+.catalog-product-card.is-unavailable:focus-visible {
+  border-color: var(--line-soft);
+  box-shadow: none;
+  transform: none;
+}
+
 .catalog-product-photo {
   min-width: 0;
   height: auto;

@@ -30,7 +30,7 @@ const getMenuData = async (storeId = "", options = {}) => {
     return {
       ...menu,
       selectedStoreId: storeId,
-      drinks: menu.drinks.filter((drink) => drink.websiteEnabled !== false && drink.isAvailable !== false),
+      drinks: menu.drinks.filter((drink) => drink.websiteEnabled !== false),
     };
   }
 

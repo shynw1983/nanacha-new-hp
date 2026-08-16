@@ -402,8 +402,9 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
         .then((data) => {
           if (!active || !data?.categories || !Array.isArray(data.drinks)) return;
 
-          const availableDrinks = data.drinks.filter((drink) => drink.isAvailable !== false && drink.websiteEnabled !== false);
-          const categoriesWithDrinks = new Set(availableDrinks.map((drink) => drink.category));
+          const visibleDrinks = data.drinks.filter((drink) => drink.websiteEnabled !== false);
+          const availableDrinks = visibleDrinks.filter((drink) => drink.isAvailable !== false);
+          const categoriesWithDrinks = new Set(visibleDrinks.map((drink) => drink.category));
           const availableDrinkNames = new Set(availableDrinks.map((drink) => drink.name));
 
           setMenu(data);
@@ -566,7 +567,6 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
       drinks: menu.drinks.filter(
         (drink) =>
           drink.category === item.id &&
-          drink.isAvailable !== false &&
           drink.websiteEnabled !== false,
       ),
     }))
@@ -964,31 +964,35 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                       <span>{item.drinks.length} items</span>
                     </div>
                     <div className="catalog-product-grid">
-                      {item.drinks.map((drink) => (
-                        <button
-                          className="catalog-product-card"
-                          type="button"
-                          onClick={() => selectCatalogDrink(drink)}
-                          aria-haspopup="dialog"
-                          key={drink.id}
-                        >
-                          <span className="catalog-product-photo">
-                            {drink.imageUrl ? (
-                              <img src={normalizeAssetUrl(drink.imageUrl)} alt="" />
-                            ) : (
-                              <span aria-hidden="true">nanacha</span>
-                            )}
-                          </span>
-                          <span className="catalog-product-copy">
-                            {promotionPrefixText(drink) ? (
-                              <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
-                            ) : null}
-                            <strong>{menuText(drink, drink.name)}</strong>
-                            {drink.description ? <small>{menuDescription(drink)}</small> : null}
-                            <span>{formatPrice(drink.price)}〜</span>
-                          </span>
-                        </button>
-                      ))}
+                      {item.drinks.map((drink) => {
+                        const unavailable = drink.isAvailable === false;
+                        return (
+                          <button
+                            className={`catalog-product-card${unavailable ? " is-unavailable" : ""}`}
+                            type="button"
+                            onClick={() => { if (!unavailable) selectCatalogDrink(drink); }}
+                            aria-haspopup="dialog"
+                            disabled={unavailable}
+                            key={drink.id}
+                          >
+                            <span className="catalog-product-photo">
+                              {drink.imageUrl ? (
+                                <img src={normalizeAssetUrl(drink.imageUrl)} alt="" />
+                              ) : (
+                                <span aria-hidden="true">nanacha</span>
+                              )}
+                            </span>
+                            <span className="catalog-product-copy">
+                              {promotionPrefixText(drink) ? (
+                                <span className="menu-promotion-prefix">{promotionPrefixText(drink)}</span>
+                              ) : null}
+                              <strong>{menuText(drink, drink.name)}</strong>
+                              {drink.description ? <small>{menuDescription(drink)}</small> : null}
+                              <span>{formatPrice(drink.price)}〜{unavailable ? ` / ${t("売切")}` : ""}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </section>
                 ))}
