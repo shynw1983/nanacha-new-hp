@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { localizeValue, useI18n } from "./i18n-provider";
+import { useI18n } from "./i18n-provider";
+import { localizeMenu } from "../data/menu-display";
 
 const categoryDecor = {
   frappe: "sparkle.png",
@@ -46,8 +47,7 @@ export function MenuBrowser({ initialMenu }) {
     };
   }, [initialMenu]);
 
-  const localizedMenu = useMemo(() => (menu ? localizeValue(menu, t) : null), [menu, t]);
-  const descriptionText = (drink) => drink.descriptionDisplayNames?.[language] || drink.descriptionDisplayNames?.en || drink.description || "";
+  const localizedMenu = useMemo(() => (menu ? localizeMenu(menu, language) : null), [menu, language]);
   const visibleCategories = useMemo(() => {
     if (!localizedMenu) return [];
 
@@ -64,24 +64,17 @@ export function MenuBrowser({ initialMenu }) {
     return <div data-react-menu-browser />;
   }
 
-  const displayDescription = (drink) => {
-    if (language === "ja") {
-      return drink.descriptionDisplayNames?.ja || drink.description || drink.descriptionDisplayNames?.en || "";
-    }
-    return descriptionText(drink);
-  };
-
   return (
     <div data-react-menu-browser>
-      <section className="menu-controls" aria-label="メニューカテゴリー">
+      <section className="menu-controls" aria-label={t("メニューカテゴリー")}>
         <button
           type="button"
           className={activeFilter === "all" ? "is-active" : ""}
           onClick={() => setActiveFilter("all")}
         >
-          all
+          {t("すべて")}
         </button>
-        {localizedMenu.categories.map((category) => (
+        {localizedMenu.categories.filter((category) => localizedMenu.drinks.some((item) => item.category === category.id)).map((category) => (
           <button
             key={category.id}
             type="button"
@@ -93,11 +86,10 @@ export function MenuBrowser({ initialMenu }) {
         ))}
       </section>
 
-      <section className="full-menu" aria-label="nanacha メニュー一覧">
+      <section className="full-menu" aria-label={t("nanacha メニュー一覧")}>
         {visibleCategories.map((category) => (
           <article className="menu-category" key={category.id}>
             <div className="category-heading">
-              <p className="eyebrow">{category.id}</p>
               <h2 className="heading-with-decor">
                 {category.label}
                 <img
@@ -116,10 +108,16 @@ export function MenuBrowser({ initialMenu }) {
                   ) : null}
                   <div>
                     <h3>{drink.name}</h3>
-                    {displayDescription(drink) ? <p>{displayDescription(drink)}</p> : null}
+                    {drink.description ? <p className="menu-description-preview">{drink.description}</p> : null}
+                    {drink.description.length > 140 ? (
+                      <details className="menu-description-details">
+                        <summary>{t("商品説明を読む")}</summary>
+                        <p>{drink.description}</p>
+                      </details>
+                    ) : null}
                   </div>
                   <div className="product-item-actions">
-                    <span>{formatPrice(drink.price)}</span>
+                    {drink.priceConfigured === false ? <span>{t("準備中")}</span> : <><small>{t("基本価格")}</small><span>{formatPrice(drink.price)}</span></>}
                   </div>
                 </article>
               ))}

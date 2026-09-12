@@ -86,6 +86,8 @@ const normalizeCategory = (category) => ({
   id: categoryId(category),
   label: String(category.label || category.name || categoryId(category)).trim(),
   displayNames: category.displayNames || {},
+  noteDisplayNames: category.noteDisplayNames || {},
+  productType: category.productType || "other",
   note: category.note || localCategoryNotes[categoryId(category)] || "",
   isTapiocaFree: category.isTapiocaFree === true,
   hasWhipByDefault: category.hasWhipByDefault === true,
@@ -94,6 +96,7 @@ const normalizeStandardMenu = (payload) => {
   if (!Array.isArray(payload?.items) || !payload.items.length) return null;
   const groups = Array.isArray(payload.optionGroups) ? payload.optionGroups : [];
   const sizes = optionsForGroup(groups, "size").map(toPricedOption).filter((item) => item.id && item.label);
+  const valueDisplayNames = Object.fromEntries(groups.flatMap((group) => (group.options || []).map((option) => [optionLabel(option), option.displayNames || {}])));
   const sweetness = optionsForGroup(groups, "sweetness").map(optionLabel).filter(Boolean);
   const ice = optionsForGroup(groups, "ice").map(optionLabel).filter(Boolean);
   const menuOptions = optionsForGroup(groups, "option").map(toPricedOption).filter((item) => item.id && item.label);
@@ -103,7 +106,7 @@ const normalizeStandardMenu = (payload) => {
     : basePublishedMenu.categories;
   const categoryByName = new Map(categories.map((category) => [category.label, category]));
   const drinks = payload.items
-    .filter((item) => item.websiteEnabled !== false && item.isAvailable !== false)
+    .filter((item) => item.storeSetting?.websiteEnabled !== false && item.websiteEnabled !== false)
     .map((item) => {
       const schema = item.variableSchema || {};
       const itemGroups = Array.isArray(item.optionGroups) ? item.optionGroups : groups;
@@ -111,10 +114,13 @@ const normalizeStandardMenu = (payload) => {
         ? orderCustomizationGroupsForCustomer(
             item.customizationGroups
               .map(toCustomizationGroup)
-              .filter((group) => group.id && group.label && group.options.length),
+              .filter((group) => group.id && group.label),
           )
         : [];
       const category = categoryByName.get(item.category) || categories.find((entry) => entry.id === item.category);
+      const productType = item.productType || schema.productType || category?.productType || "other";
+      const rawPrice = item.storeSetting?.priceOverride ?? item.priceOverride ?? item.basePrice;
+      const priceConfigured = rawPrice !== null && rawPrice !== undefined && Number.isFinite(Number(rawPrice)) && Number(rawPrice) > 0;
       return {
         id: String(item.externalId || item.id || "").trim(),
         menuCatalogItemId: String(item.id || "").trim(),
@@ -123,11 +129,13 @@ const normalizeStandardMenu = (payload) => {
         promotionPrefix: String(item.promotionPrefix || "").trim(),
         promotionPrefixDisplayNames: item.promotionPrefixDisplayNames || {},
         category: category?.id || item.category || "menu",
-        price: Number(item.priceOverride ?? item.basePrice ?? 0),
+        productType,
+        priceConfigured,
+        price: Number(rawPrice ?? 0),
         description: item.description || localDrinkDescriptions[item.name] || "",
         descriptionDisplayNames: item.descriptionDisplayNames || {},
         imageUrl: item.imageUrl || "",
-        usesStructuredCustomizations: item.usesStructuredCustomizations === true && customizationGroups.length > 0,
+        usesStructuredCustomizations: productType === "food" || item.usesStructuredCustomizations === true,
         customizationGroups,
         strictOptionScopes: Array.isArray(item.optionGroups),
         temperatures: intersectConfiguredValues(schema.temperatures, scopedValues(itemGroups, "temperature", optionLabel)),
@@ -138,8 +146,8 @@ const normalizeStandardMenu = (payload) => {
         allowedIce: intersectConfiguredValues(schema.allowedIce, scopedValues(itemGroups, "ice", optionLabel)),
         allowedOptions: intersectConfiguredValues(schema.allowedOptions, scopedValues(itemGroups, "option", optionId)),
         allowedToppings: intersectConfiguredValues(schema.allowedToppings, scopedValues(itemGroups, "topping", optionId)),
-        isAvailable: item.isAvailable !== false,
-        websiteEnabled: item.websiteEnabled !== false,
+        isAvailable: item.storeSetting?.isAvailable !== false && item.isAvailable !== false,
+        websiteEnabled: item.storeSetting?.websiteEnabled !== false && item.websiteEnabled !== false,
         isActive: item.isActive !== false,
       };
     })
@@ -148,6 +156,7 @@ const normalizeStandardMenu = (payload) => {
   return {
     ...basePublishedMenu,
     source: "foundr1-os",
+    valueDisplayNames,
     categories,
     drinks,
     sizes: sizes.length ? sizes : basePublishedMenu.sizes,
@@ -283,4 +292,5 @@ const getProductCatalogMenu = async (storeId = "", options = {}) => (await fetch
 module.exports = {
   getProductCatalogMenu,
   fallbackMenu,
+  normalizeStandardMenu,
 };

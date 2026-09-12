@@ -34,21 +34,21 @@ function cleanReturnUrl() {
   return url.toString();
 }
 
-function buildMemberUrl({ handoff }) {
+function buildMemberUrl({ handoff, language }) {
   if (typeof window === "undefined") return MEMBER_PORTAL_URL;
   const url = new URL(MEMBER_PORTAL_URL);
   url.searchParams.set("returnTo", cleanReturnUrl());
-  url.searchParams.set("lang", currentLanguage());
+  url.searchParams.set("lang", normalizeMemberLanguage(language) || currentLanguage());
   if (handoff) url.searchParams.set("handoff", "1");
   return url.toString();
 }
 
-export function buildMemberCardUrl() {
-  return buildMemberUrl({ handoff: false });
+export function buildMemberCardUrl(language) {
+  return buildMemberUrl({ handoff: false, language });
 }
 
-export function buildMemberHandoffUrl() {
-  return buildMemberUrl({ handoff: true });
+export function buildMemberHandoffUrl(language) {
+  return buildMemberUrl({ handoff: true, language });
 }
 
 export function getStoredMemberProfile() {

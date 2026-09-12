@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "./i18n-provider";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") ? url : `/${url}`;
 
 export function HeroCarousel({ slides }) {
+  const { t } = useI18n();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function HeroCarousel({ slides }) {
   const showNext = () => setActiveIndex((current) => (current + 1) % slides.length);
 
   return (
-    <figure className="hero-visual hero-carousel" aria-label="nanacha の紹介" data-react-hero-carousel>
+    <figure className="hero-visual hero-carousel" aria-label={t("nanacha の紹介")} data-react-hero-carousel>
       <div className="hero-slides">
         {slides.map((slide, index) => (
           <article className={`hero-slide${index === activeIndex ? " is-active" : ""}`} key={slide.id}>
@@ -37,21 +39,21 @@ export function HeroCarousel({ slides }) {
         ))}
       </div>
       <div className="hero-carousel-controls">
-        <button type="button" onClick={showPrevious} aria-label="前の画像を見る">
+        <button type="button" onClick={showPrevious} aria-label={t("前の画像を見る")}>
           ←
         </button>
-        <div className="hero-carousel-dots" aria-label="スライドを選択">
+        <div className="hero-carousel-dots" aria-label={t("スライドを選択")}>
           {slides.map((slide, index) => (
             <button
               type="button"
               className={index === activeIndex ? "is-active" : ""}
               onClick={() => setActiveIndex(index)}
-              aria-label={`${index + 1}枚目の画像`}
+              aria-label={`${t("画像")} ${index + 1}`}
               key={slide.id}
             />
           ))}
         </div>
-        <button type="button" onClick={showNext} aria-label="次の画像を見る">
+        <button type="button" onClick={showNext} aria-label={t("次の画像を見る")}>
           →
         </button>
       </div>

@@ -15,7 +15,7 @@ export function LocalizedShell({ language, children }) {
   const htmlLang = localeConfig[language]?.htmlLang || "ja";
 
   return (
-    <I18nProvider initialLanguage={language} initialDictionary={dictionaries[language] || {}}>
+    <I18nProvider key={language} initialLanguage={language} initialDictionary={dictionaries[language] || {}}>
       <div className="localized-shell" lang={htmlLang}>
         {children}
       </div>

@@ -1,3 +1,12 @@
+const uiDictionaries = {
+  "en": require("../public/locales/en.json"),
+  "zh": require("../public/locales/zh.json"),
+  "zh-Hant": require("../public/locales/zh-Hant.json"),
+  "ko": require("../public/locales/ko.json"),
+  "vi": require("../public/locales/vi.json"),
+  "ne": require("../public/locales/ne.json")
+};
+
 const osBaseUrl =
   process.env.FOUNDR1_OS_PUBLIC_BASE_URL ||
   process.env.NEXT_PUBLIC_FOUNDR1_OS_PUBLIC_BASE_URL ||
@@ -13,14 +22,16 @@ const localHeroImages = {
 const localizeSection = (section, language = "ja") => {
   if (!section || language === "ja") return section;
   const tagDisplayNames = section.tagDisplayNames || {};
+  const dictionary = uiDictionaries[language] || {};
+  const text = (field, names) => dictionary[section[field]] || section[names]?.[language] || section[names]?.en || section[field];
   return {
     ...section,
-    title: section.titleDisplayNames?.[language] || section.title,
-    subtitle: section.subtitleDisplayNames?.[language] || section.subtitle,
-    body: section.bodyDisplayNames?.[language] || section.body,
-    actionLabel: section.actionLabelDisplayNames?.[language] || section.actionLabel,
+    title: text("title", "titleDisplayNames"),
+    subtitle: text("subtitle", "subtitleDisplayNames"),
+    body: text("body", "bodyDisplayNames"),
+    actionLabel: text("actionLabel", "actionLabelDisplayNames"),
     tags: Array.isArray(section.tags)
-      ? section.tags.map((tag, index) => tagDisplayNames[index]?.[language] || tag)
+      ? section.tags.map((tag, index) => dictionary[tag] || tagDisplayNames[index]?.[language] || tagDisplayNames[index]?.en || tag)
       : section.tags,
   };
 };
@@ -74,7 +85,7 @@ function mergeNanachaHomepage(homepage, sections = []) {
     },
     slides: homepage.slides.map((slide) => {
       const section = sectionByKey.get(
-        slide.id === "hero-01" ? "hero-slide-signature" : slide.id === "hero-02" ? "hero-slide-tapioca" : "",
+        slide.id === "hero-01" ? "hero-slide-tapioca" : slide.id === "hero-02" ? "hero-slide-matcha" : "hero-slide-tea",
       );
       if (!section) return slide;
       return {

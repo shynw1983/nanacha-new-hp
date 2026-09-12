@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "./i18n-provider";
 
 import { useEffect, useState } from "react";
 
@@ -41,6 +42,7 @@ export function OrderStatusCard({
   total,
   initialOrder,
 }) {
+  const { t } = useI18n();
   const [order, setOrder] = useState(initialOrder || null);
   const [resolvedOrderId, setResolvedOrderId] = useState(orderId || initialOrder?.orderId || "");
   const [connection, setConnection] = useState("loading");
@@ -197,63 +199,59 @@ export function OrderStatusCard({
         <div className="order-status-heading">
           <div>
             <p className="eyebrow">order status</p>
-            <h2>ご注文の状況</h2>
+            <h2>{t("ご注文の状況")}</h2>
           </div>
           <span className={`order-status-badge ${isProblem ? "is-alert" : ""}`}>
-            {order ? statusLabels[status] || status : "確認中"}
+            {order ? t(statusLabels[status] || status) : t("確認中")}
           </span>
         </div>
 
         <ol className="order-status-steps">
           {statusSteps.map((step, index) => (
-            <li className={index <= activeIndex ? "is-active" : ""} key={step.id}>{step.label}</li>
+            <li className={index <= activeIndex ? "is-active" : ""} key={step.id}>{t(step.label)}</li>
           ))}
         </ol>
 
-        {isProblem ? <p className="order-status-note">ご注文状況については、店舗スタッフへお問い合わせください。</p> : null}
-        {!order && !error ? <p className="order-status-note">注文状況を確認しています。</p> : null}
-        {error ? <p className="order-status-note">{error}</p> : null}
+        {isProblem ? <p className="order-status-note">{t("ご注文状況については、店舗スタッフへお問い合わせください。")}</p> : null}
+        {!order && !error ? <p className="order-status-note">{t("注文状況を確認しています。")}</p> : null}
+        {error ? <p className="order-status-note">{t(error)}</p> : null}
         <div className="order-status-footer">
           <p className="order-status-sync">
-            {connection === "connected" ? "状態は自動で更新されます。" : "状態を確認しています。"}
-            {lastCheckedAt ? <span>最終確認 {lastCheckedAt}</span> : null}
+            {connection === "connected" ? t("状態は自動で更新されます。") : t("状態を確認しています。")}
+            {lastCheckedAt ? <span>{t("最終確認")}{lastCheckedAt}</span> : null}
           </p>
           <div className="order-status-actions">
             {isPaid && receiptPreviewUrl ? (
-              <a href={receiptPreviewUrl} target="_blank" rel="noreferrer">
-                領収書プレビュー
-              </a>
+              <a href={receiptPreviewUrl} target="_blank" rel="noreferrer">{t("領収書プレビュー")}</a>
             ) : null}
             {isPaid && current.squareReceiptUrl ? (
-              <a href={current.squareReceiptUrl} target="_blank" rel="noreferrer">
-                Square レシートを見る
-              </a>
+              <a href={current.squareReceiptUrl} target="_blank" rel="noreferrer">{t("Square レシートを見る")}</a>
             ) : null}
             <button type="button" onClick={loadOrder} disabled={isRefreshing}>
-              {isRefreshing ? "更新中..." : "注文状況を更新"}
+              {isRefreshing ? t("更新中...") : t("注文状況を更新")}
             </button>
           </div>
         </div>
       </section>
 
       <section className="order-summary-card">
-        <h2>ご注文内容</h2>
+        <h2>{t("ご注文内容")}</h2>
         <dl>
-          <dt>商品</dt>
+          <dt>{t("商品")}</dt>
           <dd>{current.drink || "—"}</dd>
-          <dt>サイズ</dt>
+          <dt>{t("サイズ")}</dt>
           <dd>{current.size || "—"}</dd>
-          <dt>カスタム</dt>
+          <dt>{t("カスタム")}</dt>
           <dd>
-            {[current.temperature, formatLabeledValue("甘さ", current.sweetness), formatLabeledValue("氷", current.ice)]
+            {[current.temperature, formatLabeledValue(t("甘さ"), current.sweetness), formatLabeledValue(t("氷"), current.ice)]
               .filter(Boolean)
               .join(" / ") || "—"}
           </dd>
-          <dt>オプション</dt>
+          <dt>{t("オプション")}</dt>
           <dd>{current.option || "—"}</dd>
-          <dt>トッピング</dt>
-          <dd>{current.toppings || "トッピングなし"}</dd>
-          <dt>合計</dt>
+          <dt>{t("トッピング")}</dt>
+          <dd>{current.toppings || t("トッピングなし")}</dd>
+          <dt>{t("合計")}</dt>
           <dd>{current.total ? `¥${Number(current.total).toLocaleString("ja-JP")}` : "—"}</dd>
         </dl>
       </section>

@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const LANGUAGE_STORAGE_KEY = "nanacha-language";
-const LOCALE_CACHE_VERSION = "20260608-zh-hant-i18n";
+const LOCALE_CACHE_VERSION = "20260912-catalog-fields";
 const LANGUAGE_META = {
   ja: { htmlLang: "ja" },
   en: { htmlLang: "en" },
@@ -24,20 +24,12 @@ const translateText = (value, dictionary) => {
     return value;
   }
 
-  const exact = dictionary[value];
+  const exact = dictionary[value] || dictionary[value.replace(/\s+/g, " ").trim()];
   if (exact) {
     return exact;
   }
 
-  let translated = value;
-  Object.entries(dictionary)
-    .filter(([source, target]) => source.length > 3 && target && translated.includes(source))
-    .sort((a, b) => b[0].length - a[0].length)
-    .forEach(([source, target]) => {
-      translated = translated.split(source).join(target);
-    });
-
-  return translated;
+  return value;
 };
 
 export function I18nProvider({ children, initialLanguage = "ja", initialDictionary = {} }) {

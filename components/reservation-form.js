@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "./i18n-provider";
-import { buildMemberHandoffUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
+import { displayText, usesProductCustomizations, isOrderable } from "../data/menu-display";
+import { buildMemberHandoffUrl, consumeMemberHandoff } from "./member-session";
 
 const formatPrice = (price) => `¥${price.toLocaleString("ja-JP")}`;
 const formatDelta = (price) => (price === 0 ? "¥0" : `${price > 0 ? "+" : "-"}${formatPrice(Math.abs(price))}`);
@@ -48,8 +49,8 @@ const filterAllowedOptions = (items, drink) => {
   return items.filter((item) => item.id === "none" || !allowed || allowed.has(item.id));
 };
 const customizationGroupsForDrink = (drink) =>
-  drink?.usesStructuredCustomizations && Array.isArray(drink.customizationGroups)
-    ? drink.customizationGroups.filter((group) => Array.isArray(group.options) && group.options.length)
+  usesProductCustomizations(drink) && Array.isArray(drink.customizationGroups)
+    ? drink.customizationGroups.filter((group) => Array.isArray(group.options))
     : [];
 const selectionCount = (selections, groupId) =>
   Array.isArray(selections?.[groupId]) ? selections[groupId].length : 0;
@@ -91,12 +92,12 @@ const buildCustomizations = (groups, selections) =>
       };
     })
     .filter(Boolean);
-const structuredCustomizationFields = (customizations = []) => {
-  const findGroup = (name) => customizations.find((group) => group.groupName === name);
+const structuredCustomizationFields = (customizations = [], productType = "drink") => {
+  const findGroup = (name) => productType === "food" ? undefined : customizations.find((group) => group.groupName === name);
   const size = findGroup("サイズ");
   const temperature = findGroup("温度");
   const sweetness = findGroup("甘さ");
-  const otherGroups = customizations.filter((group) => !["サイズ", "温度", "甘さ"].includes(group.groupName));
+  const otherGroups = customizations.filter((group) => productType === "food" || !["サイズ", "温度", "甘さ"].includes(group.groupName));
   return {
     size: size?.optionKeys?.[0] || size?.optionIds?.[0] || "",
     sizeLabel: size?.optionLabels?.[0] || "",
@@ -118,6 +119,7 @@ const DEFAULT_MINIMUM_PICKUP_MINUTES = 5;
 const unsafeCheckoutErrorPattern = /(FOUNDR1|Foundr1|Square|configured|configuration|Invalid|Missing|Unknown|checkout|failed|required|Selected coupon)/i;
 const unavailableCheckoutErrorMessages = new Set([
   "Unknown drink",
+  "Product is not ready for ordering",
   "Invalid customization",
   "Invalid temperature",
   "Invalid ice amount",
@@ -290,23 +292,9 @@ function StructuredCustomizationFields({ groups, selections, onChange, menuText,
 }
 
 export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", catalogMode = false }) {
-  const { language, setLanguage, t } = useI18n();
-  const menuText = (item, fallback = "") => {
-    const source = item && typeof item === "object" ? item : {};
-    const original = fallback || source.label || source.name || "";
-    if (language === "ja") {
-      return source.displayNames?.ja || original || source.displayNames?.en || "";
-    }
-    return source.displayNames?.[language] || t(original) || source.displayNames?.en || "";
-  };
-  const menuDescription = (item) => {
-    const source = item && typeof item === "object" ? item : {};
-    const original = source.description || "";
-    if (language === "ja") {
-      return source.descriptionDisplayNames?.ja || original || source.descriptionDisplayNames?.en || "";
-    }
-    return source.descriptionDisplayNames?.[language] || t(original) || source.descriptionDisplayNames?.en || "";
-  };
+  const { language, t } = useI18n();
+  const menuText = (item, fallback = "") => displayText({ ...item, name: fallback || item?.label || item?.name }, language);
+  const menuDescription = (item) => displayText(item, language, "description", "descriptionDisplayNames");
   const promotionPrefixText = (item) => {
     const original = String(item?.promotionPrefix || "").trim();
     if (!original) return "";
@@ -314,7 +302,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     if (language === "ja") return displayNames.ja || original;
     return displayNames[language] || displayNames.en || original;
   };
-  const rawText = (value) => t(value);
+  const rawText = (value) => value === menu.hotIce ? t("HOTは氷なし") : displayText({ name: value, displayNames: menu.valueDisplayNames?.[value] }, language);
   const initialStoreId = fixedStoreId || initialMenu.selectedStoreId || initialMenu.stores?.[0]?.id || "kiyokawa";
   const initialStore = stores.find((item) => item.id === initialStoreId);
   const initialMinimumPickupMinutes = normalizeMinimumPickupMinutes(initialMenu.storeOperation?.minimumPickupMinutes);
@@ -353,18 +341,16 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     : "現在予約受付を停止しています。店頭での受付状況は店舗へご確認ください。";
 
   useEffect(() => {
-    setMemberHref(buildMemberHandoffUrl());
+    setMemberHref(buildMemberHandoffUrl(language));
     consumeMemberHandoff()
       .then((profile) => {
         if (!profile) return;
-        const nextLanguage = memberPreferredLanguage(profile);
-        if (nextLanguage && nextLanguage !== language) setLanguage(nextLanguage);
         setMemberProfile(profile);
         setCustomerName((current) => current || profile.displayName || "");
         setCustomerPhone((current) => current || profile.phone || "");
       })
       .catch(() => {});
-  }, [language, setLanguage]);
+  }, [language]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -519,9 +505,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
 
   const drinks = useMemo(
     () =>
-      menu.drinks.filter(
-        (drink) => drink.category === category && drink.isAvailable !== false && drink.websiteEnabled !== false,
-      ),
+      menu.drinks.filter((drink) => drink.category === category && isOrderable(drink)),
     [category, menu.drinks],
   );
   const selectedDrink =
@@ -553,14 +537,12 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     .filter(Boolean);
   const total =
     (selectedDrink?.price || 0) +
-    (structuredGroups.length
+    (usesProductCustomizations(selectedDrink)
       ? customizationPrice(selectedCustomizations)
       : (selectedSize?.price || 0) +
         (selectedOption?.price || 0) +
         selectedToppings.reduce((sum, item) => sum + item.price, 0));
-  const hasAvailableDrinks = menu.drinks.some(
-    (drink) => drink.isAvailable !== false && drink.websiteEnabled !== false,
-  );
+  const hasAvailableDrinks = menu.drinks.some(isOrderable);
   const catalogCategories = menu.categories
     .map((item) => ({
       ...item,
@@ -587,7 +569,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
   const normalizeReservationItem = (item) => {
     const drink = getReservationDrink(item);
     const itemStructuredGroups = customizationGroupsForDrink(drink);
-    if (itemStructuredGroups.length) {
+    if (usesProductCustomizations(drink)) {
       const selections = Object.fromEntries(
         (Array.isArray(item.customizations) ? item.customizations : []).map((customization) => [
           customization.groupId,
@@ -596,7 +578,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
       );
       const normalizedSelections = normalizeCustomizationSelections(itemStructuredGroups, selections);
       const customizations = buildCustomizations(itemStructuredGroups, normalizedSelections);
-      const fields = structuredCustomizationFields(customizations);
+      const fields = structuredCustomizationFields(customizations, drink?.productType);
       return {
         ...item,
         drinkId: drink?.id || item.drinkId || "",
@@ -663,7 +645,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     customizations = null,
   }) => {
     const itemStructuredGroups = customizationGroupsForDrink(drink);
-    const usesStructuredCustomizations = itemStructuredGroups.length > 0;
+    const usesStructuredCustomizations = usesProductCustomizations(drink);
     const effectiveCustomizations = Array.isArray(customizations)
       ? customizations
       : drink?.id === selectedDrink?.id
@@ -673,7 +655,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
       effectiveCustomizations.map((customization) => [customization.groupId, customization.optionIds || []]),
     );
     const fields = usesStructuredCustomizations
-      ? structuredCustomizationFields(effectiveCustomizations)
+      ? structuredCustomizationFields(effectiveCustomizations, drink?.productType)
       : {
           size: size?.id || "",
           sizeLabel: size?.label || "",
@@ -848,7 +830,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
     };
 
     setNote(
-      `${order.pickupDate} ${order.pickup} 受け取り：${order.labels.drink}、合計${formatPrice(order.total)}でSquare決済を作成しています。`,
+      t("決済画面を作成中..."),
     );
     setIsSubmitting(true);
 
@@ -871,7 +853,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
       const publicErrorMessage = error?.message && !unsafeCheckoutErrorPattern.test(error.message) ? error.message : "";
       const checkoutErrorMessage =
         error.code === "SQUARE_NOT_CONFIGURED"
-          ? "Square設定が未完了です。店舗側でVercelの環境変数を設定してください。"
+          ? "決済画面を作成できませんでした。時間をおいて再度お試しください。"
           : unavailableCheckoutErrorMessages.has(error.message)
             ? unavailableCheckoutMessage
           : error.message === "Pickup time is outside store hours"
@@ -944,7 +926,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
         {catalogMode ? (
           <>
             <p className="catalog-order-lead">
-              {t("カテゴリーから商品を選び、サイズ・甘さ・氷・トッピングをカスタマイズしてカートに追加してください。")}
+              {t("カテゴリーから商品を選び、商品ごとのオプションを選択してカートに追加してください。")}
             </p>
             <div className="catalog-menu-layout">
               <div className="catalog-menu-toolbar">
@@ -965,7 +947,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                     </div>
                     <div className="catalog-product-grid">
                       {item.drinks.map((drink) => {
-                        const unavailable = drink.isAvailable === false;
+                        const unavailable = !isOrderable(drink);
                         return (
                           <button
                             className={`catalog-product-card${unavailable ? " is-unavailable" : ""}`}
@@ -988,7 +970,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                               ) : null}
                               <strong>{menuText(drink, drink.name)}</strong>
                               {drink.description ? <small>{menuDescription(drink)}</small> : null}
-                              <span>{formatPrice(drink.price)}〜{unavailable ? ` / ${t("売切")}` : ""}</span>
+                              <span>{drink.priceConfigured === false ? t("準備中") : `${t("基本価格")} ${formatPrice(drink.price)}${unavailable ? ` / ${t("売切")}` : ""}`}</span>
                             </span>
                           </button>
                         );
@@ -1041,7 +1023,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                       )}
                     </span>
                     <h3 id="catalog-product-dialog-title">{menuText(detailDrink, detailDrink.name)}</h3>
-                    <strong className="catalog-product-dialog-price">{formatPrice(detailDrink.price)}〜</strong>
+                    <strong className="catalog-product-dialog-price">{t("基本価格")} {formatPrice(detailDrink.price)}</strong>
                     <div className="catalog-product-dialog-description-scroll">
                       {detailDrink.description ? (
                         <p className="catalog-product-dialog-description">{menuDescription(detailDrink)}</p>
@@ -1126,7 +1108,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
               </div>
             </div>
           ) : null}
-          {structuredGroups.length ? (
+          {usesProductCustomizations(selectedDrink) ? (
             <StructuredCustomizationFields
               groups={structuredGroups}
               selections={normalizedCustomizationSelections}
@@ -1323,12 +1305,12 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                           <span>
                             {index + 1}. {menuText(drink, item.drink)}
                           </span>
-                          <small>{t("この1杯のカスタマイズ")}</small>
+                          <small>{t("この商品のカスタマイズ")}</small>
                         </div>
                         <strong>{formatPrice(item.total)}</strong>
                         <button
                           type="button"
-                          aria-label={`${item.drink}を予約リストから削除`}
+                          aria-label={`${t("カートから削除")}: ${menuText(drink, item.drink)}`}
                           onClick={() =>
                             setReservationItems((current) => current.filter((currentItem) => currentItem.id !== item.id))
                           }
@@ -1336,7 +1318,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                           ×
                         </button>
                       </div>
-                      {customizationGroupsForDrink(drink).length ? (
+                      {usesProductCustomizations(drink) ? (
                         <div className="reservation-item-customizations">
                           {item.customizations.map((customization) => (
                             <div key={customization.groupId}>
@@ -1494,7 +1476,7 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
           <a
             className="catalog-floating-cart"
             href="#cart"
-            aria-label={`${t("カート")} ${preparedReservationItems.length}点 ${formatPrice(reservationTotal)}`}
+            aria-label={`${t("カート")} ${preparedReservationItems.length} ${t("点")} ${formatPrice(reservationTotal)}`}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20 8H7" />

@@ -4,6 +4,7 @@ import { HeroCarousel } from "./hero-carousel";
 import { localizeValue, useI18n } from "./i18n-provider";
 import { RevealOnScroll } from "./reveal-on-scroll";
 import { localizedPath } from "./localized-path";
+import { localizeMenu, isOrderable } from "../data/menu-display";
 
 const normalizeAssetUrl = (url = "") =>
   url.startsWith("http") || url.startsWith("/") || url.startsWith("#") ? url : `/${url}`;
@@ -21,11 +22,14 @@ const storyImageByCardId = {
 export function HomeContent({ homepage, menu }) {
   const { language, t } = useI18n();
   const localizedHomepage = localizeValue(homepage, t);
-  const localizedMenu = localizeValue(menu, t);
+  const localizedMenu = localizeMenu(menu, language);
   const { settings } = localizedHomepage;
-  const recommended = localizedMenu.drinks.filter((drink) => drink.isRecommended);
-  const picks = (recommended.length ? recommended : localizedMenu.drinks).slice(0, 4);
+  const recommended = localizedMenu.drinks.filter((drink) => drink.isRecommended && isOrderable(drink));
+  const picks = (recommended.length ? recommended : localizedMenu.drinks.filter(isOrderable)).slice(0, 4);
   const slidesById = new Map(localizedHomepage.slides.map((slide) => [slide.id, slide]));
+  const actionHref = (url = "") => url === "#reserve"
+    ? localizedPath(language, "/shops")
+    : url.startsWith("/") ? localizedPath(language, url) : normalizeAssetUrl(url);
 
   return (
     <>
@@ -44,23 +48,17 @@ export function HomeContent({ homepage, menu }) {
           <div className="hero-actions">
             <a
               className="primary-button"
-              href={
-                settings.primaryButtonUrl === "#reserve"
-                  ? localizedPath(language, "/shops")
-                  : settings.primaryButtonUrl.startsWith("/")
-                  ? localizedPath(language, settings.primaryButtonUrl)
-                  : normalizeAssetUrl(settings.primaryButtonUrl)
-              }
+              href={actionHref(settings.primaryButtonUrl)}
             >
               {settings.primaryButtonLabel}
             </a>
-            <a className="ghost-button" href={settings.secondaryButtonUrl}>
+            <a className="ghost-button" href={actionHref(settings.secondaryButtonUrl)}>
               {settings.secondaryButtonLabel}
             </a>
           </div>
-          <div className="hero-metrics" aria-label="店舗情報">
+          <div className="hero-metrics" aria-label={t("店舗情報")}>
             <span>
-              <strong data-menu-count>{menu.drinks.length}</strong> menu drinks
+              <strong data-menu-count>{menu.drinks.filter((item) => item.productType !== "food").length}</strong> {t("ドリンク")}
             </span>
             <span>
               <strong>0%</strong> {t("甘さゼロ対応")}
@@ -95,9 +93,9 @@ export function HomeContent({ homepage, menu }) {
               <div>
                 <p className="drink-tag">{localizedMenu.categories.find((category) => category.id === drink.category)?.label}</p>
                 <h3>{drink.name}</h3>
-                {drink.description ? <p>{drink.description}</p> : null}
+                {drink.description ? <p className="menu-description-preview">{drink.description}</p> : null}
               </div>
-              <span>{formatPrice(drink.price)}</span>
+              <div className="drink-card-price"><small>{t("基本価格")}</small><span>{formatPrice(drink.price)}</span></div>
             </article>
           ))}
         </div>

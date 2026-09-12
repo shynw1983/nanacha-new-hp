@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { localizedPath } from "./localized-path";
-import { buildMemberCardUrl, consumeMemberHandoff, memberPreferredLanguage } from "./member-session";
+import { buildMemberCardUrl, consumeMemberHandoff } from "./member-session";
 
 const languagePrefixes = ["/en", "/zh", "/zh-Hant", "/ko", "/vi", "/ne"];
 const compactLanguageLabels = {
@@ -18,7 +18,7 @@ const compactLanguageLabels = {
 };
 
 export function SiteHeader({ menu = false, shops = false, reservationHref = "" }) {
-  const { language, setLanguage, t } = useI18n();
+  const { language, t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const isInteriorPage = menu || shops;
@@ -60,12 +60,10 @@ export function SiteHeader({ menu = false, shops = false, reservationHref = "" }
   const [memberHref, setMemberHref] = useState("https://foundr1.jp/member");
 
   useEffect(() => {
-    setMemberHref(buildMemberCardUrl());
-  }, [pathname]);
+    setMemberHref(buildMemberCardUrl(language));
+  }, [pathname, language]);
 
   const changeLanguage = (nextLanguage) => {
-    setLanguage(nextLanguage);
-
     const currentLanguagePrefix = languagePrefixes.find(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
     );
@@ -76,12 +74,7 @@ export function SiteHeader({ menu = false, shops = false, reservationHref = "" }
   };
 
   useEffect(() => {
-    consumeMemberHandoff()
-      .then((profile) => {
-        const nextLanguage = memberPreferredLanguage(profile);
-        if (nextLanguage && nextLanguage !== language) changeLanguage(nextLanguage);
-      })
-      .catch(() => {});
+    consumeMemberHandoff().catch(() => {});
   }, [pathname]);
 
   return (
@@ -127,9 +120,12 @@ export function SiteHeader({ menu = false, shops = false, reservationHref = "" }
             <option value="ne">नेपाली</option>
           </select>
         </label>
-        <a className="header-action" href={reserveHref}>
+        <a className="header-action" href={reserveHref} aria-label={t("受け取り予約")}>
           <span className="header-action-full">{t("受け取り予約")}</span>
-          <span className="header-action-short">{t("予約")}</span>
+          <svg className="header-action-short" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="5" width="16" height="16" rx="3" />
+            <path d="M8 3v4m8-4v4M4 11h16m-12 5 3 3 5-5" />
+          </svg>
         </a>
       </div>
     </header>

@@ -19,7 +19,7 @@ export function SiteFooter({ sections = [] }) {
           <small>A Foundr1 Brand</small>
         </div>
       </div>
-      <div className="footer-links" aria-label="外部リンク">
+      <div className="footer-links" aria-label={t("外部リンク")}>
         <a href={localizedPath(language, footer.actionUrl || "/shops")}>{t(footer.actionLabel || "店舗一覧を見る")}</a>
         <a href={siteLinks.instagram} target="_blank" rel="noreferrer">
           Instagram

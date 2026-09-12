@@ -1,3 +1,5 @@
+"use client";
+import { useI18n } from "./i18n-provider";
 import Link from "next/link";
 import { OrderStatusCard } from "./order-status-card";
 
@@ -17,6 +19,7 @@ export function OrderCompleteContent({
   initialOrder,
   homeHref = "/",
 }) {
+  const { t } = useI18n();
   const displayPickupCode = initialOrder?.pickupCode || pickupCode || "";
   const displayPickupDate = initialOrder?.pickupDate || pickupDate || "";
   const displayPickupTime = initialOrder?.pickupTime || pickupTime || "";
@@ -30,40 +33,32 @@ export function OrderCompleteContent({
   return (
     <main className="order-complete-page">
       <section className="order-complete-card">
-        <p className="eyebrow">payment complete</p>
-        <h1>お支払いが完了しました</h1>
-        <p>ご注文ありがとうございます。受け取りの際は、以下の番号と Square の決済画面をご提示ください。</p>
-        <p className="order-screenshot-note">この画面をスクリーンショットして保存してください。</p>
+        <p className="eyebrow">{t("ご注文内容")}</p>
+        <h1>{t(paymentSettled ? "お支払いが完了しました" : "決済確認中")}</h1>
+        <p>{t(paymentSettled ? "ご注文ありがとうございます。受け取りの際は、以下の番号と Square の決済画面をご提示ください。" : "ご注文内容をご確認ください")}</p>
+        <p className="order-screenshot-note">{t("この画面をスクリーンショットして保存してください。")}</p>
 
         <div className="pickup-code-panel">
-          <span>受け取り番号</span>
+          <span>{t("受け取り番号")}</span>
           <strong>{displayPickupCode || "—"}</strong>
         </div>
 
         <dl>
-          <dt>受け取り日時</dt>
-          <dd>{displayPickupDate && displayPickupTime ? `${displayPickupDate} ${displayPickupTime}` : "ご注文内容をご確認ください"}</dd>
-          <dt>受け取り場所</dt>
-          <dd>店頭 pickup desk</dd>
+          <dt>{t("受け取り日時")}</dt>
+          <dd>{displayPickupDate && displayPickupTime ? `${displayPickupDate} ${displayPickupTime}` : t("ご注文内容をご確認ください")}</dd>
+          <dt>{t("受け取り場所")}</dt>
+          <dd>{t("店頭 pickup desk")}</dd>
         </dl>
 
         <div className="order-complete-actions">
-          <Link className="primary-button" href={homeHref}>
-            ホームへ戻る
-          </Link>
+          <Link className="primary-button" href={homeHref}>{t("ホームへ戻る")}</Link>
           {receiptPreviewUrl ? (
-            <a className="ghost-button" href={receiptPreviewUrl} target="_blank" rel="noreferrer">
-              領収書プレビュー
-            </a>
+            <a className="ghost-button" href={receiptPreviewUrl} target="_blank" rel="noreferrer">{t("領収書プレビュー")}</a>
           ) : null}
           {receiptUrl ? (
-            <a className="ghost-button" href={receiptUrl} target="_blank" rel="noreferrer">
-              Square レシートを見る
-            </a>
+            <a className="ghost-button" href={receiptUrl} target="_blank" rel="noreferrer">{t("Square レシートを見る")}</a>
           ) : null}
-          <a className="ghost-button" href="#pickup-guide">
-            受け取り方法を確認
-          </a>
+          <a className="ghost-button" href="#pickup-guide">{t("受け取り方法を確認")}</a>
         </div>
       </section>
 
@@ -84,12 +79,12 @@ export function OrderCompleteContent({
       />
 
       <section className="order-complete-guide" id="pickup-guide">
-        <h2>受け取り時のお願い</h2>
+        <h2>{t("受け取り時のお願い")}</h2>
         <ol>
-          <li>指定時刻に店舗へお越しください。</li>
-          <li>受け取り番号をスタッフへお伝えください。</li>
-          <li>Square の決済画面もあわせてご提示ください。</li>
-          <li>このURLを開き直すと、注文状況を再確認できます。</li>
+          <li>{t("指定時刻に店舗へお越しください。")}</li>
+          <li>{t("受け取り番号をスタッフへお伝えください。")}</li>
+          <li>{t("Square の決済画面もあわせてご提示ください。")}</li>
+          <li>{t("このURLを開き直すと、注文状況を再確認できます。")}</li>
         </ol>
       </section>
     </main>

@@ -1,8 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const localMenu = require("../menu-data.js");
-const localDescriptions = require("../data/menu-descriptions.js");
-const localCategoryNotes = require("../data/category-notes.js");
 const { getHomepageData } = require("../server/homepage-source");
 
 const root = path.resolve(__dirname, "..");
@@ -48,11 +45,17 @@ const languages = {
   en: "en",
   zh: "zh",
   ko: "ko",
+  "zh-Hant": "zh-Hant",
+  vi: "vi",
+  ne: "ne",
 };
 const openAiLanguages = {
   en: "English",
   zh: "Simplified Chinese",
   ko: "Korean",
+  "zh-Hant": "Traditional Chinese",
+  vi: "Vietnamese",
+  ne: "Nepali",
 };
 const openAiEndpoint = "https://api.openai.com/v1/responses";
 const openAiModel = process.env.OPENAI_TRANSLATION_MODEL || "gpt-4.1-mini";
@@ -158,44 +161,6 @@ const shouldTranslate = (text) => {
   return /[A-Za-z\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(value);
 };
 
-const collectMenuTexts = async () => {
-  const texts = [];
-  const push = (text) => {
-    if (shouldTranslate(text)) {
-      texts.push(normalize(text));
-    }
-  };
-  const menuData = {
-    ...localMenu,
-    categories: localMenu.categories.map((category) => ({
-      ...category,
-      note: localCategoryNotes[category.id] || "",
-    })),
-    drinks: localMenu.drinks.map((drink) => ({
-      ...drink,
-      description: localDescriptions[drink.name] || "",
-    })),
-  };
-
-  menuData.categories.forEach((category) => {
-    push(category.label);
-    push(category.note || "");
-  });
-  menuData.drinks.forEach((drink) => {
-    push(drink.name);
-    push(drink.description || "");
-  });
-  menuData.sizes.forEach((size) => push(size.label));
-  menuData.sweetness.forEach(push);
-  menuData.ice.forEach(push);
-  push(menuData.hotIce);
-  menuData.options.forEach((option) => push(option.label));
-  menuData.toppings.forEach((topping) => push(topping.label));
-  extraTexts.forEach(push);
-
-  return texts;
-};
-
 const collectHomepageTexts = (homepageData) => {
   const texts = [];
   const push = (text) => {
@@ -228,7 +193,14 @@ const collectHomepageTexts = (homepageData) => {
 
 const getSourceTexts = async () => {
   const homepageData = await getHomepageData();
-  return Array.from(new Set([...extraTexts, ...collectHomepageTexts(homepageData), ...(await collectMenuTexts())])).sort();
+  // Only website UI belongs here. Catalog translations are maintained in Foundr1 OS.
+  const componentTexts = fs.readdirSync(path.join(root, "components"))
+    .filter((file) => file.endsWith(".js") && !file.startsWith("admin-"))
+    .flatMap((file) => {
+      const source = fs.readFileSync(path.join(root, "components", file), "utf8");
+      return [...source.matchAll(/\bt\(\s*(["'])(.*?)\1\s*\)/g)].map((match) => normalize(match[2]));
+    });
+  return Array.from(new Set([...extraTexts, ...collectHomepageTexts(homepageData), ...componentTexts])).sort();
 };
 
 const readJson = (file, fallback = {}) => {
@@ -253,7 +225,7 @@ const extract = async () => {
   Object.keys(languages).forEach((language) => {
     const file = path.join(localeDir, `${language}.json`);
     const current = readJson(file);
-    const next = {};
+    const next = { ...current };
 
     texts.forEach((text) => {
       next[text] = current[text] || "";
