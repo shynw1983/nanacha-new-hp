@@ -346,8 +346,27 @@
   line-height: 1.35;
 }
 
+.catalog-product-price,
 .catalog-product-dialog-price {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+}
+
+.catalog-product-price .catalog-price-label,
+.catalog-product-dialog-price .catalog-price-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.catalog-price-value {
+  white-space: nowrap;
+}
+
+.catalog-product-dialog-price {
   margin-top: 14px;
   color: var(--price);
   font-size: 20px;

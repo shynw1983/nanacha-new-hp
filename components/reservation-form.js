@@ -970,7 +970,14 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                               ) : null}
                               <strong>{menuText(drink, drink.name)}</strong>
                               {drink.description ? <small>{menuDescription(drink)}</small> : null}
-                              <span>{drink.priceConfigured === false ? t("準備中") : `${t("基本価格")} ${formatPrice(drink.price)}${unavailable ? ` / ${t("売切")}` : ""}`}</span>
+                              <span className="catalog-product-price">
+                                {drink.priceConfigured === false ? t("準備中") : (
+                                  <>
+                                    <span className="catalog-price-label">{t("基本価格")}</span>
+                                    <span className="catalog-price-value">{formatPrice(drink.price)}{unavailable ? ` / ${t("売切")}` : ""}</span>
+                                  </>
+                                )}
+                              </span>
                             </span>
                           </button>
                         );
@@ -1023,7 +1030,10 @@ export function ReservationForm({ initialMenu, stores = [], fixedStoreId = "", c
                       )}
                     </span>
                     <h3 id="catalog-product-dialog-title">{menuText(detailDrink, detailDrink.name)}</h3>
-                    <strong className="catalog-product-dialog-price">{t("基本価格")} {formatPrice(detailDrink.price)}</strong>
+                    <strong className="catalog-product-dialog-price">
+                      <span className="catalog-price-label">{t("基本価格")}</span>
+                      <span className="catalog-price-value">{formatPrice(detailDrink.price)}</span>
+                    </strong>
                     <div className="catalog-product-dialog-description-scroll">
                       {detailDrink.description ? (
                         <p className="catalog-product-dialog-description">{menuDescription(detailDrink)}</p>
