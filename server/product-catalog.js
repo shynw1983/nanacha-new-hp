@@ -268,7 +268,8 @@ const fetchOsMenu = async (storeId = "", options = {}) => {
 
     const fetchOptions = {
       headers,
-      next: { revalidate: storeId ? storeMenuRevalidateSeconds : brandMenuRevalidateSeconds },
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
     };
     if (options.noStore) {
       delete fetchOptions.next;
@@ -287,7 +288,15 @@ const fetchOsMenu = async (storeId = "", options = {}) => {
   }
 };
 
-const getProductCatalogMenu = async (storeId = "", options = {}) => (await fetchOsMenu(storeId, options)) || fallbackMenu();
+const getProductCatalogMenu = async (storeId = "", options = {}) => {
+  const menu = await fetchOsMenu(storeId, options);
+  if (menu) return menu;
+  // Bundled prices are seeds, not a second price authority during an outage.
+  const fallback = fallbackMenu();
+  return { ...fallback, drinks: [], toppings: [], source: "unavailable",
+    storeOperation: { ...fallback.storeOperation, reservationsEnabled: false,
+      statusNote: "最新メニューを取得できません。時間をおいて再読み込みしてください。" } };
+};
 
 module.exports = {
   getProductCatalogMenu,

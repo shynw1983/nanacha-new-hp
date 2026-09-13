@@ -34,7 +34,7 @@ const getMenuData = async (storeId = "", options = {}) => {
     };
   }
 
-  return publishedMenu.storeMenus?.[storeId] || {
+  return {
     ...menu,
     selectedStoreId: storeId,
     drinks: [],
