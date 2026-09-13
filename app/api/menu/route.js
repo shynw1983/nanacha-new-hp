@@ -1,6 +1,6 @@
 const { getMenuData } = require("../../../server/menu-source");
 
-const brandMenuCacheHeader = "no-store, max-age=0";
+const brandMenuCacheHeader = "s-maxage=300, stale-while-revalidate=3600";
 const storeMenuCacheHeader = "no-store, max-age=0";
 
 export async function GET(request) {
